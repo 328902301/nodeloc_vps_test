@@ -70,15 +70,23 @@ run_and_capture() {
     echo "$output"
 }
 
-# 函数：检测VPS地理位置
+# 检测VPS地理位置
 detect_region() {
     local country
     country=$(curl -s ipinfo.io/country)
     case $country in
-        "US") echo "na" ;; # 北美
-        "CA") echo "na" ;;
-        # 添加更多国家和地区的映射
-        *) echo "default" ;;
+        "TW") echo "1" ;;          # 台湾
+        "HK") echo "2" ;;          # 香港
+        "JP") echo "3" ;;          # 日本
+        "US" | "CA") echo "4" ;;   # 北美
+        "BR" | "AR" | "CL") echo "5" ;;  # 南美
+        "GB" | "DE" | "FR" | "NL" | "SE" | "NO" | "FI" | "DK" | "IT" | "ES" | "CH" | "AT" | "BE" | "IE" | "PT" | "GR" | "PL" | "CZ" | "HU" | "RO" | "BG" | "HR" | "SI" | "SK" | "LT" | "LV" | "EE") echo "6" ;;  # 欧洲
+        "AU" | "NZ") echo "7" ;;   # 大洋洲
+        "KR") echo "8" ;;          # 韩国
+        "SG" | "MY" | "TH" | "ID" | "PH" | "VN") echo "9" ;;  # 东南亚
+        "IN") echo "10" ;;         # 印度
+        "ZA" | "NG" | "EG" | "KE" | "MA" | "TN" | "GH" | "CI" | "SN" | "UG" | "ET" | "MZ" | "ZM" | "ZW" | "BW" | "MW" | "NA" | "RW" | "SD" | "DJ" | "CM" | "AO") echo "11" ;;  # 非洲
+        *) echo "0" ;;             # 跨国平台
     esac
 }
 
@@ -154,6 +162,7 @@ run_all_tests() {
 
     # 流媒体解锁
     echo "运行${YELLOW}流媒体解锁测试...${NC}"
+    local region
     region=$(detect_region)
     streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
 
@@ -175,6 +184,7 @@ run_all_tests() {
 }
 
 # 格式化结果为 Markdown
+echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
 format_results() {
 result="[tabs]
 [tab=\"YABS\"]
