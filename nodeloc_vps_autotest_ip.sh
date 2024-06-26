@@ -143,30 +143,47 @@ chmod 777 /root/results.md
 #获取IP输出结果
 extract_ip_report() {
     echo "开始执行 IP 质量检测..." >&2
+    
+    # 检查 curl 是否可用
+    if ! command -v curl &> /dev/null; then
+        echo "错误: curl 命令不可用" >&2
+        return 1
+    fi
+    
+    # 尝试下载脚本
     local curl_output
     curl_output=$(curl -Ls IP.Check.Place)
     local curl_exit_code=$?
-    
+
     echo "curl 退出码: $curl_exit_code" >&2
     echo "curl 输出长度: $(echo "$curl_output" | wc -c) 字节" >&2
     
     if [ $curl_exit_code -ne 0 ] || [ -z "$curl_output" ]; then
-        echo "curl 命令失败或返回空输出" >&2
+        echo "错误: curl 命令失败或返回空输出" >&2
         return 1
     fi
     
+    # 将下载的脚本保存到临时文件
+    local temp_script=$(mktemp)
+    echo "$curl_output" > "$temp_script"
+    
+    # 执行下载的脚本
     local bash_output
-    bash_output=$(echo "$curl_output" | bash)
+    bash_output=$(bash "$temp_script")
     local bash_exit_code=$?
     
     echo "bash 退出码: $bash_exit_code" >&2
     echo "bash 输出长度: $(echo "$bash_output" | wc -l) 行" >&2
     
+    # 清理临时文件
+    rm -f "$temp_script"
+    
     if [ $bash_exit_code -ne 0 ] || [ -z "$bash_output" ]; then
-        echo "bash 执行失败或返回空输出" >&2
+        echo "错误: bash 执行失败或返回空输出" >&2
         return 1
     fi
     
+    # 处理输出
     echo "$bash_output" | awk '
         BEGIN {flag=0; lines=0}
         /^########################################################################$/ {flag=1}
