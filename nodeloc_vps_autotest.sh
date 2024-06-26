@@ -182,18 +182,6 @@ copy_to_clipboard() {
     fi
 }
 
-# 主函数
-main() {
-    install_dependencies
-    show_welcome
-    run_all_tests
-    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
-    read -n 1 -s
-    copy_to_clipboard
-}
-
-main
-
 # 统计使用次数
 sum_run_times() {
     local COUNT
@@ -207,9 +195,6 @@ sum_run_times() {
         total_count=0
     fi
 }
-
-# 调用函数获取统计数据
-sum_run_times
 
 # 输出欢迎信息
 show_welcome() {
@@ -280,29 +265,12 @@ run_all_tests() {
     # AutoTrace三网回程路由
     echo -e "运行${YELLOW}AutoTrace三网回程路由...${NC}"
     autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && echo '1' | bash AutoTrace.sh)
-
-}
-
-# 复制结果到剪贴板
-copy_to_clipboard() {
-    if [ -f results.md ]; then
-        if command -v xclip > /dev/null; then
-            xclip -selection clipboard < results.md
-            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
-        elif command -v pbcopy > /dev/null; then
-            pbcopy < results.md
-            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
-        else
-            echo -e "${RED}无法复制到剪贴板。请手动复制 results.md 文件内容。${NC}"
-        fi
-    else
-        echo -e "${RED}results.md 文件不存在。${NC}"
-    fi
 }
 
 # 主函数
 main() {
     install_dependencies
+    sum_run_times
     show_welcome
     run_all_tests
     format_results
