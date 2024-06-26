@@ -63,14 +63,21 @@ install_dependencies() {
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
 }
 
-# 函数：运行命令并捕获输出
-run_and_capture() {
-    local output
-    output=$(eval "$1" 2>&1)
-    echo "$output"
+# 统计使用次数
+sum_run_times() {
+    local COUNT
+    COUNT=$(wget --no-check-certificate -qO- --tries=2 --timeout=2 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/everett7623/nodeloc_vps_test/blob/main/nodeloc_vps_autotest.sh" 2>&1 | grep -m1 -oE "[0-9]+[ ]+/[ ]+[0-9]+")
+    if [[ -n "$COUNT" ]]; then
+        daily_count=$(cut -d " " -f1 <<< "$COUNT")
+        total_count=$(cut -d " " -f3 <<< "$COUNT")
+    else
+        echo "Failed to fetch usage counts."
+        daily_count=0
+        total_count=0
+    fi
 }
 
-# 函数：检测VPS地理位置
+# 检测VPS地理位置
 detect_region() {
     local country
     country=$(curl -s ipinfo.io/country)
@@ -90,18 +97,18 @@ detect_region() {
     esac
 }
 
-# 流媒体解锁测试函数
-run_streaming_test() {
-    local region
-    region=$(detect_region)
-    echo "运行${YELLOW}流媒体解锁测试...${NC}"
-    streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
+# 函数：运行命令并捕获输出
+run_and_capture() {
+    local output
+    output=$(eval "$1" 2>&1)
+    echo "$output"
 }
 
-# 格式化结果为 Markdown
-format_results() {
-    echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
-    result="[tabs]
+# Markdown输出结果
+format_results() 
+{
+echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
+result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
 $yabs_result
@@ -185,19 +192,7 @@ copy_to_clipboard() {
     fi
 }
 
-# 统计使用次数
-sum_run_times() {
-    local COUNT
-    COUNT=$(wget --no-check-certificate -qO- --tries=2 --timeout=2 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/everett7623/nodeloc_vps_test/blob/main/nodeloc_vps_autotest.sh" 2>&1 | grep -m1 -oE "[0-9]+[ ]+/[ ]+[0-9]+")
-    if [[ -n "$COUNT" ]]; then
-        daily_count=$(cut -d " " -f1 <<< "$COUNT")
-        total_count=$(cut -d " " -f3 <<< "$COUNT")
-    else
-        echo "Failed to fetch usage counts."
-        daily_count=0
-        total_count=0
-    fi
-}
+
 
 # 输出欢迎信息
 show_welcome() {
@@ -254,7 +249,9 @@ run_all_tests() {
 
     # 流媒体解锁
     echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
-    run_streaming_test
+    local region
+    region=$(detect_region)
+    streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
     
     # 响应测试
     echo -e "运行${YELLOW}响应测试...${NC}"
