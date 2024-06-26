@@ -30,7 +30,7 @@ fi
 
 # 检查并安装依赖
 install_dependencies() {
-    echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}"
+    echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}" 
     
     # 更新包列表
     if ! sudo apt-get update; then
@@ -62,7 +62,6 @@ install_dependencies() {
     
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
 }
-
 # 统计使用次数
 sum_run_times() {
     local COUNT
@@ -76,7 +75,6 @@ sum_run_times() {
         total_count=0
     fi
 }
-
 # 检测VPS地理位置
 detect_region() {
     local country
@@ -96,14 +94,12 @@ detect_region() {
         *) echo "0" ;;             # 跨国平台
     esac
 }
-
 # 函数：运行命令并捕获输出
 run_and_capture() {
     local output
     output=$(eval "$1" 2>&1)
     echo "$output"
 }
-
 # Markdown输出结果
 format_results() 
 {
@@ -170,11 +166,9 @@ $autotrace_result
 \`\`\`
 [/tab]
 [/tabs]"
-
     echo "$result" > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
-
 # 复制结果到剪贴板
 copy_to_clipboard() {
     if [ -f results.md ]; then
@@ -191,9 +185,6 @@ copy_to_clipboard() {
         echo -e "${RED}results.md 文件不存在。${NC}"
     fi
 }
-
-
-
 # 输出欢迎信息
 show_welcome() {
     echo ""
@@ -230,7 +221,6 @@ show_welcome() {
     read -n 1 -s
     clear
 }
-
 # 运行所有测试
 run_all_tests() {
     echo "开始运行测试..."
@@ -266,7 +256,6 @@ run_all_tests() {
     echo -e "运行${YELLOW}AutoTrace三网回程路由...${NC}"
     autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && echo '1' | bash AutoTrace.sh)
 }
-
 # 主函数
 main() {
     install_dependencies
