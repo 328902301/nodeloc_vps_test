@@ -142,11 +142,17 @@ run_all_tests() {
 	
 	# IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
-    ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
+	ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)" | extract_ip_report)
 
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
     format_results
+}
+
+# 提取IP质量报告
+extract_ip_report() {
+    awk '/^########################################################################$/,/按回车键返回主菜单.../' |
+    sed '/按回车键返回主菜单.../d' |  # 移除"按回车键返回主菜单..."行
 }
 
 # 格式化结果为 Markdown
