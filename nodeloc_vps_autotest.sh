@@ -146,7 +146,7 @@ show_welcome() {
 
 # 运行所有测试
 run_all_tests() {
-   echo -e "${PURPLE}开始运行测试..."${NC}"
+    echo -e "${PURPLE}开始运行测试...${NC}"
 
     # YABS
     echo -e "运行${YELLOW}YABS...${NC}"
