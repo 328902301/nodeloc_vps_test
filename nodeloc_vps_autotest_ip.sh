@@ -139,33 +139,25 @@ show_welcome() {
 # 运行所有测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
-	
-	# IP质量
+    
+    # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
-	ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)" | extract_ip_report)
-
+    ip_quality_result=$(bash <(curl -Ls IP.Check.Place) | tee /dev/tty | extract_ip_report)
+    
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
     format_results
 }
 
-# 提取IP质量报告
-extract_ip_report() {
-    awk '/^########################################################################$/,/^IP质量体检报告$/' |
-    sed '/按回车键返回主菜单.../d'  # 移除"按回车键返回主菜单..."行
-}
-
 # 格式化结果为 Markdown
 format_results() {
     result="[tabs]
-
 [tab=\"IP质量\"]
 \`\`\`
 $ip_quality_result
 \`\`\`
 [/tab]
 [/tabs]"
-
     echo "$result" > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
