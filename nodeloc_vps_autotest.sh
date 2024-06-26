@@ -102,7 +102,7 @@ sum_run_times
 # 输出欢迎信息
 show_welcome() {
     echo ""
-    echo -e "${YELLOW}---------------------------------By'Jensfrank---------------------------------${NC}"
+    echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
     echo "Nodeloc_VPS_自动脚本测试 $VERSION"
     echo "GitHub地址: https://github.com/everett7623/nodeloc_vps_test"
@@ -117,9 +117,9 @@ show_welcome() {
     echo ""
     echo "支持Ubuntu/Debian"
     echo ""
-    echo -e "今日运行次数: ${YELLOW}$daily_count${NC} 次，累计运行次数: ${YELLOW}$total_count${NC} 次"
+    echo -e "今日运行次数: ${RED}$daily_count${NC} 次，累计运行次数: ${RED}$total_count${NC} 次"
     echo ""
-    echo -e "${YELLOW}---------------------------------By'Jensfrank---------------------------------${NC}"
+    echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
     echo "一键脚本将测试以下项目："
     echo "1. Yabs"
@@ -131,14 +131,14 @@ show_welcome() {
     echo "7. 单线程测试"
     echo "8. 回程路由"
     echo ""
-    echo -e "${YELLOW}按任意键开始测试，测试时间较长，请耐心等待...${NC}"
+    echo -e "${RED}按任意键开始测试，测试时间较长，请耐心等待...${NC}"
     read -n 1 -s
     clear
 }
 
 # 运行所有测试
 run_all_tests() {
-    echo -e "${GREEN}开始运行测试...${NC}"
+    echo -e "${RED}开始运行测试...${NC}"
 
     # YABS
     echo -e "运行${YELLOW}YABS...${NC}"
