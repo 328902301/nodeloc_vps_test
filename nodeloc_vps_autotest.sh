@@ -9,15 +9,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# 定义渐变颜色数组
-colors=(
-    '\033[38;2;255;0;0m'    # 红色
-    '\033[38;2;255;127;0m'  # 橙色
-    '\033[38;2;255;255;0m'  # 黄色
-    '\033[38;2;0;255;0m'    # 绿色
-    '\033[38;2;0;0;255m'    # 蓝色
-)
-
 # 检查 root 权限并获取 sudo 权限
 if [ "$(id -u)" != "0" ]; then
     echo "此脚本需要 root 权限运行。"
@@ -117,12 +108,12 @@ show_welcome() {
     echo "GitHub地址: https://github.com/everett7623/nodeloc_vps_test"
     echo "VPS选购: https://www.nodeloc.com/vps"
     echo ""
-    echo -e "${colors[0]}#     #  #####  ####  ###### #       ####   ####    #    # ####   ####  ${NC}"
-    echo -e "${colors[1]}##    # #     # #   # #      #      #    # #    #   #    # #   # #     #  ${NC}"
-    echo -e "${colors[2]}# #   # #     # #   # #####  #      #    # #        #    # ####   ####  ${NC}"
-    echo -e "${colors[3]}#  #  # #     # #   # #      #      #    # #        #    # #          #  ${NC}"
-    echo -e "${colors[4]}#   # # #     # #   # #      #      #    # #    #   #    # #     #    # ${NC}"
-    echo -e "${colors[0]}#    ##  #####  ####  ###### ######  ####   ####     ####  #      ####  ${NC}"
+    echo -e "${GREEN}#     #  #####  ####  ###### #       ####   ####${NC}    ${YELLOW}#    # ####   ####${NC}"
+    echo -e "${GREEN}##    # #     # #   # #      #      #    # #    #${NC}   ${YELLOW}#    # #   # #     #${NC}"
+    echo -e "${GREEN}# #   # #     # #   # #####  #      #    # #${NC}        ${YELLOW}#    # ####   ####${NC}"
+    echo -e "${GREEN}#  #  # #     # #   # #      #      #    # #${NC}        ${YELLOW}#    # #          #${NC}"
+    echo -e "${GREEN}#   # # #     # #   # #      #      #    # #    #${NC}   ${YELLOW}#    # #     #    #${NC}"
+    echo -e "${GREEN}#    ##  #####  ####  ###### ######  ####   ####${NC}     ${YELLOW}####  #      ####${NC}"
     echo ""
     echo "支持Ubuntu/Debian"
     echo ""
