@@ -305,7 +305,7 @@ main() {
     install_dependencies
     show_welcome
     run_all_tests
-	format_results
+    format_results
     echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
     read -n 1 -s
     copy_to_clipboard
