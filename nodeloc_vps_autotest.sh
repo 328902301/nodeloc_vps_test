@@ -125,11 +125,11 @@ show_welcome() {
     echo ""
     echo "支持Ubuntu/Debian"
     echo ""
-    echo -e "今日运行次数: ${PURPLE}$daily_count${NC} 次，累计运行次数: ${PURPLE}$total_count${NC} 次"
+    echo -e "今日运行次数: ${YELLOW}$daily_count${NC} 次，累计运行次数: ${YELLOW}$total_count${NC} 次"
     echo ""
     echo -e "${YELLOW}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo "本一键脚本将测试以下项目："
+    echo "一键脚本将测试以下项目："
     echo "1. Yabs"
     echo "2. 融合怪"
     echo "3. IP质量"
@@ -146,7 +146,7 @@ show_welcome() {
 
 # 运行所有测试
 run_all_tests() {
-    echo -e "${PURPLE}开始运行测试...${NC}"
+    echo -e "${GREEN}开始运行测试...${NC}"
 
     # YABS
     echo -e "运行${YELLOW}YABS...${NC}"
