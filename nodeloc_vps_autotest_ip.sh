@@ -138,7 +138,7 @@ show_welcome() {
 
 # 创建results.md
 touch /root/results.md
-chmod 666 /root/results.md
+chmod 777 /root/results.md
 
 # 提取IP质量报告
 extract_ip_report() {
