@@ -61,6 +61,7 @@ install_dependencies() {
     done
     
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
+    clear
 }
 
 # 函数：运行命令并捕获输出
