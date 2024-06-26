@@ -145,9 +145,10 @@ extract_ip_report() {
     # 执行原始脚本并捕获输出
     local full_output=$(bash <(curl -Ls IP.Check.Place))
     
-    # 从输出中提取我们需要的部分
-    echo "$full_output" | awk '/########################################################################/,/按回车键返回主菜单.../' | sed '/按回车键返回主菜单.../d'
+    # 从输出中提取我们需要的部分，保留ANSI颜色代码
+    echo "$full_output" | sed -n '/^########################################################################$/,/按回车键返回主菜单.../{/按回车键返回主菜单.../!p}'
 }
+
 #运行测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
@@ -167,9 +168,6 @@ run_all_tests() {
 format_results() {
     echo "Debug: IP质量结果长度: ${#ip_quality_result}" >> /root/debug.log
     echo "Debug: IP质量结果前300字符: ${ip_quality_result:0:300}" >> /root/debug.log
-
-    # 移除ANSI颜色代码
-    ip_quality_result=$(echo "$ip_quality_result" | sed 's/\x1b\[[0-9;]*m//g')
 
     result="[tabs]
 [tab=\"IP质量\"]
