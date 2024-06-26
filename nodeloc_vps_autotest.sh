@@ -127,11 +127,11 @@ show_welcome() {
     echo "VPS选购: https://www.nodeloc.com/vps"
     echo ""
     echo -e "${colors[0]}#     #  #####  ####  ###### #       ####   ####    #    # ####   ####  ${NC}"
-    echo -e "${colors[1]}##    # #     # #   # #      #      #    # #    #   #    # #   # #      ${NC}"
+    echo -e "${colors[1]}##    # #     # #   # #      #      #    # #    #   #    # #   # #     #  ${NC}"
     echo -e "${colors[2]}# #   # #     # #   # #####  #      #    # #        #    # ####   ####  ${NC}"
-    echo -e "${colors[3]}#  #  # #     # #   # #      #      #    # #        #    # #         #  ${NC}"
-    echo -e "${colors[4]}#   # # #     # #   # #      #      #    # #    #   #    # #    # #   # ${NC}"
-    echo -e "${colors[0]}#    ##  #####  ####  ###### ######  ####   ####     ####  #####   ####  ${NC}"
+    echo -e "${colors[3]}#  #  # #     # #   # #      #      #    # #        #    # #          #  ${NC}"
+    echo -e "${colors[4]}#   # # #     # #   # #      #      #    # #    #   #    # #     #    # ${NC}"
+    echo -e "${colors[0]}#    ##  #####  ####  ###### ######  ####   ####     ####  #      ####  ${NC}"
     echo ""
     echo "支持Ubuntu/Debian"
     echo ""
@@ -159,33 +159,33 @@ run_all_tests() {
     echo "开始运行测试..."
 
     # YABS
-    echo "运行 YABS..."
+    echo "运行${YELLOW}YABS...${NC}"
     yabs_result=$(run_and_capture "wget -qO- yabs.sh | bash")
 
     # 融合怪
-    echo "运行融合怪..."
+    echo "运行${YELLOW}融合怪...${NC}"
     fusion_result=$(run_and_capture "curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && echo '1' | bash ecs.sh")
 
     # IP质量
-    echo "运行 IP 质量测试..."
+    echo "运行${YELLOW}IP质量测试...${NC}"
     ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
 
     # 流媒体解锁
-    echo "运行流媒体解锁测试..."
+    echo "运行${YELLOW}流媒体解锁测试...${NC}"
     region=$(detect_region)
     streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
 
     # 响应测试
-    echo "运行响应测试..."
+    echo "运行${YELLOW}响应测试...${NC}"
     response_result=$(run_and_capture "bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh)")
 
     # 三网测速
-    echo "运行三网测速..."
+    echo "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
     speedtest_multi_result=$(run_and_capture "echo '1' | bash <(curl -sL bash.icu/speedtest)")
     speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
 
     # AutoTrace三网回程路由
-    echo "运行 AutoTrace 三网回程路由..."
+    echo "运行${YELLOW}AutoTrace三网回程路由...${NC}"
     autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh")
 
     # 格式化结果
@@ -194,7 +194,7 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    result="[tabs]
+result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
 $yabs_result
