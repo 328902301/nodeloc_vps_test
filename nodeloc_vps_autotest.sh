@@ -6,6 +6,16 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# 检查 root 权限并获取 sudo 权限
+if [ "$(id -u)" != "0" ]; then
+    echo "此脚本需要 root 权限运行。"
+    if ! sudo -v; then
+        echo "无法获取 sudo 权限，退出脚本。"
+        exit 1
+    fi
+    echo "已获取 sudo 权限。"
+fi
+
 #更新系统
 update_system() {
         if command -v apt &>/dev/null; then
