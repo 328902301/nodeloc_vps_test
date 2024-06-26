@@ -235,23 +235,6 @@ $ip_quality_result
     echo -e "${GREEN}结果已保存到 /root/results.md 文件中。${NC}"
 }
 
-# 复制结果到剪贴板
-copy_to_clipboard() {
-    if [ -f /root/results.md ]; then
-        if command -v xclip > /dev/null; then
-            xclip -selection clipboard < /root/results.md
-            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
-        elif command -v pbcopy > /dev/null; then
-            pbcopy < /root/results.md
-            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
-        else
-            echo -e "${RED}无法复制到剪贴板。请手动复制 /root/results.md 文件内容。${NC}"
-        }
-    else
-        echo -e "${RED}/root/results.md 文件不存在。${NC}"
-    fi
-}
-
 # 主函数
 main() {
     install_dependencies
@@ -261,7 +244,6 @@ main() {
     echo "最终结果文件内容:" >&2
     cat /root/results.md >&2
     read -n 1 -s
-    copy_to_clipboard
 }
 
 main
