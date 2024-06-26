@@ -157,7 +157,7 @@ extract_ip_report() {
 
 # 格式化结果为 Markdown
 format_results() {
-result="[tabs]
+    result="[tabs]
 
 [tab=\"IP质量\"]
 \`\`\`
