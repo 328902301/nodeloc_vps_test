@@ -146,46 +146,46 @@ show_welcome() {
 
 # 运行所有测试
 run_all_tests() {
-    echo "开始运行测试..."
+   echo -e "${PURPLE}开始运行测试..."${NC}"
 
     # YABS
-    echo "运行${YELLOW}YABS...${NC}"
+    echo -e "运行${YELLOW}YABS...${NC}"
     yabs_result=$(run_and_capture "wget -qO- yabs.sh | bash")
 
     # 融合怪
-    echo "运行${YELLOW}融合怪...${NC}"
+    echo -e "运行${YELLOW}融合怪...${NC}"
     fusion_result=$(run_and_capture "curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && echo '1' | bash ecs.sh")
 
     # IP质量
-    echo "运行${YELLOW}IP质量测试...${NC}"
+    echo -e "运行${YELLOW}IP质量测试...${NC}"
     ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
 
     # 流媒体解锁
-    echo "运行${YELLOW}流媒体解锁测试...${NC}"
+    echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
     local region
     region=$(detect_region)
     streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
 
     # 响应测试
-    echo "运行${YELLOW}响应测试...${NC}"
+    echo -e "运行${YELLOW}响应测试...${NC}"
     response_result=$(run_and_capture "bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh)")
 
     # 三网测速
-    echo "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
+    echo -e "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
     speedtest_multi_result=$(run_and_capture "echo '1' | bash <(curl -sL bash.icu/speedtest)")
     speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
 
     # AutoTrace三网回程路由
-    echo "运行${YELLOW}AutoTrace三网回程路由...${NC}"
+    echo -e "运行${YELLOW}AutoTrace三网回程路由...${NC}"
     autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh")
 
     # 格式化结果
+    echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
     format_results
 }
 
 # 格式化结果为 Markdown
 format_results() {
-echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
 result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
