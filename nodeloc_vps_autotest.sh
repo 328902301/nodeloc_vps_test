@@ -93,11 +93,27 @@ detect_region() {
     local country
     country=$(curl -s ipinfo.io/country)
     case $country in
-        "US") echo "na" ;; # 北美
-        "CA") echo "na" ;;
-        # 添加更多国家和地区的映射
-        *) echo "default" ;;
+        "TW") echo "1" ;;          # 台湾
+        "HK") echo "2" ;;          # 香港
+        "JP") echo "3" ;;          # 日本
+        "US" | "CA") echo "4" ;;   # 北美
+        "BR" | "AR" | "CL") echo "5" ;;  # 南美
+        "GB" | "DE" | "FR" | "NL" | "SE" | "NO" | "FI" | "DK" | "IT" | "ES" | "CH" | "AT" | "BE") echo "6" ;;  # 欧洲
+        "AU" | "NZ") echo "7" ;;   # 大洋洲
+        "KR") echo "8" ;;          # 韩国
+        "SG" | "MY" | "TH" | "ID" | "PH" | "VN") echo "9" ;;  # 东南亚
+        "IN") echo "10" ;;         # 印度
+        "ZA" | "NG" | "EG") echo "11" ;;  # 非洲
+        *) echo "0" ;;             # 跨国平台
     esac
+}
+
+# 流媒体解锁测试函数
+run_streaming_test() {
+    local region
+    region=$(detect_region)
+    echo "运行${YELLOW}流媒体解锁测试...${NC}"
+    streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
 }
 
 # 统计使用次数
@@ -172,9 +188,8 @@ run_all_tests() {
 
     # 流媒体解锁
     echo "运行${YELLOW}流媒体解锁测试...${NC}"
-    region=$(detect_region)
-    streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
-
+    run_streaming_test
+    
     # 响应测试
     echo "运行${YELLOW}响应测试...${NC}"
     response_result=$(run_and_capture "bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh)")
