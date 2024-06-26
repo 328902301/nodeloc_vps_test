@@ -60,6 +60,23 @@ detect_region() {
     esac
 }
 
+# 统计使用次数
+sum_run_times() {
+    local COUNT
+    COUNT=$(wget --no-check-certificate -qO- --tries=2 --timeout=2 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Feverett7623%2Fvps_scripts%2Fblob%2Fmain%2Fvps_scripts.sh" 2>&1 | grep -m1 -oE "[0-9]+[ ]+/[ ]+[0-9]+")
+    if [[ -n "$COUNT" ]]; then
+        daily_count=$(cut -d " " -f1 <<< "$COUNT")
+        total_count=$(cut -d " " -f3 <<< "$COUNT")
+    else
+        echo "Failed to fetch usage counts."
+        daily_count=0
+        total_count=0
+    fi
+}
+
+# 调用函数获取统计数据
+sum_run_times
+
 # 运行所有测试
 run_all_tests() {
     echo "开始运行测试..."
@@ -186,6 +203,8 @@ main() {
     install_dependencies
     run_all_tests
     echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    echo ""
+    echo -e "今日运行次数: ${YELLOW}$daily_count${NC} 次，累计运行次数: ${YELLOW}$total_count${NC} 次"
     read -n 1 -s
     copy_to_clipboard
 }
