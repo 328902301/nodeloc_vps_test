@@ -142,11 +142,7 @@ chmod 777 /root/results.md
 
 #获取IP输出结果
 extract_ip_report() {
-    # 执行原始脚本并捕获输出
-    local full_output=$(bash <(curl -Ls IP.Check.Place))
-    
-    # 从输出中提取我们需要的部分，保留ANSI颜色代码和分隔符
-    echo "$full_output" | awk '
+    bash <(curl -Ls IP.Check.Place) | awk '
         /^########################################################################$/ {flag=1}
         flag && !/按回车键返回主菜单.../ {print}
         /按回车键返回主菜单.../ {flag=0}
@@ -163,10 +159,16 @@ run_all_tests() {
     
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
-    format_results
+    format_results "$ip_quality_result"
 }
 
+#格式化输出结果
 format_results() {
+    local ip_quality_result="$1"
+    # 检查 ip_quality_result 是否为空
+    if [ -z "$ip_quality_result" ]; then
+        ip_quality_result="无法获取 IP 质量报告。请检查网络连接或脚本执行权限。"
+    fi
     result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
@@ -180,18 +182,18 @@ $ip_quality_result
 
 # 复制结果到剪贴板
 copy_to_clipboard() {
-    if [ -f results.md ]; then
+    if [ -f /root/results.md ]; then
         if command -v xclip > /dev/null; then
-            xclip -selection clipboard < results.md
+            xclip -selection clipboard < /root/results.md
             echo -e "${GREEN}结果已复制到剪贴板。${NC}"
         elif command -v pbcopy > /dev/null; then
-            pbcopy < results.md
+            pbcopy < /root/results.md
             echo -e "${GREEN}结果已复制到剪贴板。${NC}"
         else
-            echo -e "${RED}无法复制到剪贴板。请手动复制 results.md 文件内容。${NC}"
+            echo -e "${RED}无法复制到剪贴板。请手动复制 /root/results.md 文件内容。${NC}"
         fi
     else
-        echo -e "${RED}results.md 文件不存在。${NC}"
+        echo -e "${RED}/root/results.md 文件不存在。${NC}"
     fi
 }
 
