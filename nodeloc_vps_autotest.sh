@@ -98,12 +98,12 @@ detect_region() {
         "JP") echo "3" ;;          # 日本
         "US" | "CA") echo "4" ;;   # 北美
         "BR" | "AR" | "CL") echo "5" ;;  # 南美
-        "GB" | "DE" | "FR" | "NL" | "SE" | "NO" | "FI" | "DK" | "IT" | "ES" | "CH" | "AT" | "BE") echo "6" ;;  # 欧洲
+        "GB" | "DE" | "FR" | "NL" | "SE" | "NO" | "FI" | "DK" | "IT" | "ES" | "CH" | "AT" | "BE" | "IE" | "PT" | "GR" | "PL" | "CZ" | "HU" | "RO" | "BG" | "HR" | "SI" | "SK" | "LT" | "LV" | "EE") echo "6" ;;  # 欧洲
         "AU" | "NZ") echo "7" ;;   # 大洋洲
         "KR") echo "8" ;;          # 韩国
         "SG" | "MY" | "TH" | "ID" | "PH" | "VN") echo "9" ;;  # 东南亚
         "IN") echo "10" ;;         # 印度
-        "ZA" | "NG" | "EG") echo "11" ;;  # 非洲
+        "ZA" | "NG" | "EG" | "KE" | "MA" | "TN" | "GH" | "CI" | "SN" | "UG" | "ET" | "MZ" | "ZM" | "ZW" | "BW" | "MW" | "NA" | "RW" | "SD" | "DJ" | "CM" | "AO") echo "11" ;;  # 非洲
         *) echo "0" ;;             # 跨国平台
     esac
 }
