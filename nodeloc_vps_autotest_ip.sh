@@ -158,7 +158,7 @@ extract_ip_report() {
     echo "curl 退出码: $curl_exit_code" >&2
     echo "curl 输出长度: $(echo "$curl_output" | wc -c) 字节" >&2
     
-    if [ $curl_exit_code -ne 0 ] || [ -z "$curl_output" ]; then
+    if [ $curl_exit_code -ne 0 ] || [ -z "$curl_output" ];then
         echo "错误: curl 命令失败或返回空输出" >&2
         return 1
     fi
@@ -169,7 +169,7 @@ extract_ip_report() {
     
     # 执行下载的脚本
     local bash_output
-    bash_output=$(bash "$temp_script")
+    bash_output=$(bash "$temp_script" 2>&1)
     local bash_exit_code=$?
     
     echo "bash 退出码: $bash_exit_code" >&2
@@ -178,7 +178,7 @@ extract_ip_report() {
     # 清理临时文件
     rm -f "$temp_script"
     
-    if [ $bash_exit_code -ne 0 ] || [ -z "$bash_output" ]; then
+    if [ $bash_exit_code -ne 0 ] || [ -z "$bash_output" ];then
         echo "错误: bash 执行失败或返回空输出" >&2
         return 1
     fi
@@ -189,7 +189,7 @@ extract_ip_report() {
         /^########################################################################$/ {flag=1}
         flag && !/按回车键返回主菜单.../ {print; lines++}
         /按回车键返回主菜单.../ {flag=0}
-        END {print "awk 处理后的行数: " lines > "/dev/stderr"}
+        END {print "共输出 " lines " 行" > "/dev/stderr"}
     '
 }
 
@@ -220,7 +220,7 @@ format_results() {
     local ip_quality_result="$1"
     echo "格式化结果，输入长度: $(echo "$ip_quality_result" | wc -l) 行" >&2
     # 检查 ip_quality_result 是否为空
-    if [ -z "$ip_quality_result" ]; then
+    if [ -z "$ip_quality_result" ];then
         echo "警告：IP 质量结果为空" >&2
         ip_quality_result="无法获取 IP 质量报告。请检查网络连接或脚本执行权限。"
     fi
@@ -233,7 +233,6 @@ $ip_quality_result
 [/tabs]"
     echo "$result" > /root/results.md
     echo -e "${GREEN}结果已保存到 /root/results.md 文件中。${NC}"
-    echo "保存的结果长度: $(wc -l < /root/results.md) 行" >&2
 }
 
 # 复制结果到剪贴板
@@ -247,7 +246,7 @@ copy_to_clipboard() {
             echo -e "${GREEN}结果已复制到剪贴板。${NC}"
         else
             echo -e "${RED}无法复制到剪贴板。请手动复制 /root/results.md 文件内容。${NC}"
-        fi
+        }
     else
         echo -e "${RED}/root/results.md 文件不存在。${NC}"
     fi
