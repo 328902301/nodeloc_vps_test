@@ -184,8 +184,8 @@ run_all_tests() {
 }
 
 # 格式化结果为 Markdown
-echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
 format_results() {
+echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
 result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
