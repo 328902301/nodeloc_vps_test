@@ -137,8 +137,8 @@ show_welcome() {
 }
 
 # 创建results.md
-touch /root/results.md
-chmod 777 /root/results.md
+touch /results.md
+chmod 777 /results.md
 
 # 运行测试
 run_all_tests() {
@@ -162,14 +162,14 @@ format_results() {
         echo "警告：IP 质量结果为空" >&2
         ip_quality_result="无法获取 IP 质量报告。请检查网络连接或脚本执行权限。"
     fi
-    result="[tabs]
+result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
 $ip_quality_result
 \`\`\`
 [/tab]
 [/tabs]"
-    echo "$result" > /root/results.md
+    echo "$result" > /results.md
     echo -e "${GREEN}结果已保存到 /root/results.md 文件中。${NC}"
 }
 
