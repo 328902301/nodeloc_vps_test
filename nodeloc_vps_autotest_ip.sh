@@ -136,32 +136,21 @@ show_welcome() {
     clear
 }
 
-# 创建results.md
-touch /results.md
-chmod 777 /results.md
-
-# 运行测试
+# 运行所有测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
     
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
     ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
-
+    
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
     format_results
 }
 
-# 格式化输出结果
+# 格式化结果为 Markdown
 format_results() {
-    local ip_quality_result="$1"
-    echo "格式化结果，输入长度: $(echo "$ip_quality_result" | wc -l) 行" >&2
-    # 检查 ip_quality_result 是否为空
-    if [ -z "$ip_quality_result" ];then
-        echo "警告：IP 质量结果为空" >&2
-        ip_quality_result="无法获取 IP 质量报告。请检查网络连接或脚本执行权限。"
-    fi
 result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
@@ -169,17 +158,38 @@ $ip_quality_result
 \`\`\`
 [/tab]
 [/tabs]"
-    echo "$result" > /results.md
-    echo -e "${GREEN}结果已保存到 /root/results.md 文件中。${NC}"
+
+    echo "$result" > results.md
+    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
+}
+
+# 复制结果到剪贴板
+copy_to_clipboard() {
+    if [ -f results.md ]; then
+        if command -v xclip > /dev/null; then
+            xclip -selection clipboard < results.md
+            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
+        elif command -v pbcopy > /dev/null; then
+            pbcopy < results.md
+            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
+        else
+            echo -e "${RED}无法复制到剪贴板。请手动复制 results.md 文件内容。${NC}"
+        fi
+    else
+        echo -e "${RED}results.md 文件不存在。${NC}"
+    fi
 }
 
 # 主函数
 main() {
+    install_dependencies
+    show_welcome
     run_all_tests
     echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
     echo "最终结果文件内容:" >&2
     cat /root/results.md >&2
     read -n 1 -s
+    copy_to_clipboard
 }
 
 main
