@@ -28,24 +28,6 @@ if [ "$(id -u)" != "0" ]; then
     echo "已获取 sudo 权限。"
 fi
 
-# 更新系统
-update_system() {
-    if command -v apt &>/dev/null; then
-        apt-get update && apt-get upgrade -y
-    elif command -v dnf &>/dev/null; then
-        dnf check-update && dnf upgrade -y
-    elif command -v yum &>/dev/null; then
-        yum check-update && yum upgrade -y
-    elif command -v apk &>/dev/null; then
-        apk update && apk upgrade
-    else
-        echo -e "${RED}不支持的Linux发行版${NC}"
-        return 1
-    fi
-    return 0
-}
-update_system
-
 # 检查并安装依赖
 install_dependencies() {
     echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}"
@@ -203,57 +185,54 @@ run_all_tests() {
     echo "运行${YELLOW}AutoTrace三网回程路由...${NC}"
     autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && echo '1' | bash AutoTrace.sh)
     
-    # 生成Markdown结果
-    echo "生成${YELLOW}Markdown${NC}结果..."
-    result="
-# 测试报告
-*此报告由Nodeloc_VPS_自动脚本测试生成*
-
-[tabs]
+# 测试报告Markdown
+echo "运行${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成${NC}"
+format_results() {
+    result="[tabs]
 [tab=\"YABS\"]
-\\\
+\`\`\`
 $yabs_result
-\\\
+\`\`\`
 [/tab]
 [tab=\"融合怪\"]
-\\\
+\`\`\`
 $fusion_result
-\\\
+\`\`\`
 [/tab]
 [tab=\"IP质量\"]
-\\\
+\`\`\`
 $ip_quality_result
-\\\
+\`\`\`
 [/tab]
 [tab=\"流媒体\"]
-\\\
+\`\`\`
 $streaming_result
-\\\
+\`\`\`
 [/tab]
 [tab=\"响应\"]
-\\\
+\`\`\`
 $response_result
-\\\
+\`\`\`
 [/tab]
 [tab=\"多线程测速\"]
-\\\
+\`\`\`
 $speedtest_multi_result
-\\\
+\`\`\`
 [/tab]
 [tab=\"单线程测速\"]
-\\\
+\`\`\`
 $speedtest_single_result
-\\\
+\`\`\`
 [/tab]
 [tab=\"iperf3\"]
-\\\
+\`\`\`
 
-\\\
+\`\`\`
 [/tab]
 [tab=\"回程路由\"]
-\\\
+\`\`\`
 $autotrace_result
-\\\
+\`\`\`
 [/tab]
 [tab=\"去程路由\"]
 
