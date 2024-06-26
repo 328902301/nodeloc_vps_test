@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # 定义版本
@@ -27,6 +28,24 @@ if [ "$(id -u)" != "0" ]; then
     fi
     echo "已获取 sudo 权限。"
 fi
+
+# 更新系统
+update_system() {
+    if command -v apt &>/dev/null; then
+        apt-get update && apt-get upgrade -y
+    elif command -v dnf &>/dev/null; then
+        dnf check-update && dnf upgrade -y
+    elif command -v yum &>/dev/null; then
+        yum check-update && yum upgrade -y
+    elif command -v apk &>/dev/null; then
+        apk update && apk upgrade
+    else
+        echo -e "${RED}不支持的Linux发行版${NC}"
+        return 1
+    fi
+    return 0
+}
+update_system
 
 # 检查并安装依赖
 install_dependencies() {
@@ -75,11 +94,27 @@ detect_region() {
     local country
     country=$(curl -s ipinfo.io/country)
     case $country in
-        "US") echo "na" ;; # 北美
-        "CA") echo "na" ;;
-        # 添加更多国家和地区的映射
-        *) echo "default" ;;
+        "TW") echo "1" ;;          # 台湾
+        "HK") echo "2" ;;          # 香港
+        "JP") echo "3" ;;          # 日本
+        "US" | "CA") echo "4" ;;   # 北美
+        "BR" | "AR" | "CL") echo "5" ;;  # 南美
+        "GB" | "DE" | "FR" | "NL" | "SE" | "NO" | "FI" | "DK" | "IT" | "ES" | "CH" | "AT" | "BE" | "IE" | "PT" | "GR" | "PL" | "CZ" | "HU" | "RO" | "BG" | "HR" | "SI" | "SK" | "LT" | "LV" | "EE") echo "6" ;;  # 欧洲
+        "AU" | "NZ") echo "7" ;;   # 大洋洲
+        "KR") echo "8" ;;          # 韩国
+        "SG" | "MY" | "TH" | "ID" | "PH" | "VN") echo "9" ;;  # 东南亚
+        "IN") echo "10" ;;         # 印度
+        "ZA" | "NG" | "EG" | "KE" | "MA" | "TN" | "GH" | "CI" | "SN" | "UG" | "ET" | "MZ" | "ZM" | "ZW" | "BW" | "MW" | "NA" | "RW" | "SD" | "DJ" | "CM" | "AO") echo "11" ;;  # 非洲
+        *) echo "0" ;;             # 跨国平台
     esac
+}
+
+# 流媒体解锁测试函数
+run_streaming_test() {
+    local region
+    region=$(detect_region)
+    echo "运行${YELLOW}流媒体解锁测试...${NC}"
+    streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
 }
 
 # 统计使用次数
@@ -154,9 +189,8 @@ run_all_tests() {
 
     # 流媒体解锁
     echo "运行${YELLOW}流媒体解锁测试...${NC}"
-    region=$(detect_region)
-    streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
-
+    run_streaming_test
+    
     # 响应测试
     echo "运行${YELLOW}响应测试...${NC}"
     response_result=$(run_and_capture "bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh)")
