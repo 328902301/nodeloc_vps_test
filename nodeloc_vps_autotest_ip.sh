@@ -140,38 +140,12 @@ show_welcome() {
 touch /root/results.md
 chmod 777 /root/results.md
 
-# 提取IP质量报告
-extract_ip_report() {
-    local script_content=$(curl -sL IP.Check.Place)
-    local extracted_content=""
-
-    # 提取并定义 calc_padding 函数
-    eval "$(echo "$script_content" | sed -n '/^calc_padding()/,/^}/p')"
-
-    # 定义可能需要的变量
-    eval "$(echo "$script_content" | grep '^[A-Z_]\+=.*$')"
-
-    # 提取并执行 show_head 函数
-    eval "$(echo "$script_content" | sed -n '/^show_head()/,/^}/p')"
-    extracted_content+="$(show_head)"
-
-    # 提取并执行 show_basic 函数
-    eval "$(echo "$script_content" | sed -n '/^show_basic()/,/^}/p')"
-    extracted_content+="$(show_basic)"
-
-    # 提取并执行 show_type 函数
-    eval "$(echo "$script_content" | sed -n '/^show_type()/,/^}/p')"
-    extracted_content+="$(show_type)"
-
-    echo "$extracted_content"
-}
-
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
     
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
-    ip_quality_result=$(extract_ip_report 2>&1)
+    ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
     if [ $? -ne 0 ]; then
         echo "Error occurred during IP quality test:" >> /root/debug.log
         echo "$ip_quality_result" >> /root/debug.log
@@ -180,15 +154,12 @@ run_all_tests() {
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
     format_results
-
-    echo "Debug: IP质量结果长度: ${#ip_quality_result}" >> /root/debug.log
-    echo "Debug: IP质量结果前300字符: ${ip_quality_result:0:300}" >> /root/debug.log
 }
 
 # 格式化结果为 Markdown
 format_results() {
     echo "Debug: IP质量结果长度: ${#ip_quality_result}" >> /root/debug.log
-    echo "Debug: IP质量结果前100字符: ${ip_quality_result:0:100}" >> /root/debug.log
+    echo "Debug: IP质量结果前100字符: ${ip_quality_result:0:300}" >> /root/debug.log
 
     result="[tabs]
 [tab=\"IP质量\"]
