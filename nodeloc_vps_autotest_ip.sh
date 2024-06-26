@@ -143,15 +143,36 @@ chmod 777 /root/results.md
 #获取IP输出结果
 extract_ip_report() {
     echo "开始执行 IP 质量检测..." >&2
-    local output
-    output=$(bash <(curl -Ls IP.Check.Place))
-    echo "原始输出长度: $(echo "$output" | wc -l) 行" >&2
-    echo "$output" | awk '
+    local curl_output
+    curl_output=$(curl -Ls IP.Check.Place)
+    local curl_exit_code=$?
+    
+    echo "curl 退出码: $curl_exit_code" >&2
+    echo "curl 输出长度: $(echo "$curl_output" | wc -c) 字节" >&2
+    
+    if [ $curl_exit_code -ne 0 ] || [ -z "$curl_output" ]; then
+        echo "curl 命令失败或返回空输出" >&2
+        return 1
+    fi
+    
+    local bash_output
+    bash_output=$(echo "$curl_output" | bash)
+    local bash_exit_code=$?
+    
+    echo "bash 退出码: $bash_exit_code" >&2
+    echo "bash 输出长度: $(echo "$bash_output" | wc -l) 行" >&2
+    
+    if [ $bash_exit_code -ne 0 ] || [ -z "$bash_output" ]; then
+        echo "bash 执行失败或返回空输出" >&2
+        return 1
+    fi
+    
+    echo "$bash_output" | awk '
         BEGIN {flag=0; lines=0}
         /^########################################################################$/ {flag=1}
         flag && !/按回车键返回主菜单.../ {print; lines++}
         /按回车键返回主菜单.../ {flag=0}
-        END {print "提取的行数: " lines > "/dev/stderr"}
+        END {print "awk 处理后的行数: " lines > "/dev/stderr"}
     '
 }
 
@@ -161,8 +182,16 @@ run_all_tests() {
     
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
-    ip_quality_result=$(extract_ip_report)
+    ip_quality_result=$(extract_ip_report 2>&1)
+    extract_exit_code=$?
+    
+    echo "extract_ip_report 退出码: $extract_exit_code" >&2
     echo "IP质量结果长度: $(echo "$ip_quality_result" | wc -l) 行" >&2
+    
+    if [ $extract_exit_code -ne 0 ] || [ -z "$ip_quality_result" ]; then
+        echo "extract_ip_report 函数失败或返回空结果" >&2
+        ip_quality_result="无法获取 IP 质量报告。请检查网络连接或脚本执行权限。"
+    fi
     
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
