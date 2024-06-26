@@ -146,11 +146,7 @@ run_all_tests() {
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
     ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
-    if [ $? -ne 0 ]; then
-        echo "Error occurred during IP quality test:" >> /root/debug.log
-        echo "$ip_quality_result" >> /root/debug.log
-    fi
-    
+
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
     format_results
@@ -158,10 +154,7 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    echo "Debug: IP质量结果长度: ${#ip_quality_result}" >> /root/debug.log
-    echo "Debug: IP质量结果前100字符: ${ip_quality_result:0:300}" >> /root/debug.log
-
-    result="[tabs]
+result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
 $ip_quality_result
