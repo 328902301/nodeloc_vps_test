@@ -140,7 +140,7 @@ show_welcome() {
 touch /root/results.md
 chmod 777 /root/results.md
 
-#获取IP输出结果
+# 获取IP输出结果
 extract_ip_report() {
     echo "开始执行 IP 质量检测..." >&2
     
@@ -158,7 +158,7 @@ extract_ip_report() {
     echo "curl 退出码: $curl_exit_code" >&2
     echo "curl 输出长度: $(echo "$curl_output" | wc -c) 字节" >&2
     
-    if [ $curl_exit_code -ne 0 ] || [ -z "$curl_output" ];then
+    if [ $curl_exit_code -ne 0 ] || [ -z "$curl_output" ]; then
         echo "错误: curl 命令失败或返回空输出" >&2
         return 1
     fi
@@ -178,7 +178,7 @@ extract_ip_report() {
     # 清理临时文件
     rm -f "$temp_script"
     
-    if [ $bash_exit_code -ne 0 ] || [ -z "$bash_output" ];then
+    if [ $bash_exit_code -ne 0 ] || [ -z "$bash_output" ]; then
         echo "错误: bash 执行失败或返回空输出" >&2
         return 1
     fi
@@ -193,7 +193,7 @@ extract_ip_report() {
     '
 }
 
-#运行测试
+# 运行测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
     
@@ -215,7 +215,7 @@ run_all_tests() {
     format_results "$ip_quality_result"
 }
 
-#格式化输出结果
+# 格式化输出结果
 format_results() {
     local ip_quality_result="$1"
     echo "格式化结果，输入长度: $(echo "$ip_quality_result" | wc -l) 行" >&2
@@ -237,8 +237,6 @@ $ip_quality_result
 
 # 主函数
 main() {
-    install_dependencies
-    show_welcome
     run_all_tests
     echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
     echo "最终结果文件内容:" >&2
