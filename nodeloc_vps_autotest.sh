@@ -6,6 +6,24 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+#更新系统
+update_system() {
+        if command -v apt &>/dev/null; then
+          apt-get update && apt-get upgrade -y
+        elif command -v dnf &>/dev/null; then
+          dnf check-update && dnf upgrade -y
+        elif command -v yum &>/dev/null; then
+          yum check-update && yum upgrade -y
+        elif command -v apk &>/dev/null; then
+          apk update && apk upgrade
+        else
+          echo -e "${RED}不支持的Linux发行版${NC}"
+          return 1
+        fi
+        return 0
+}
+update_system
+
 # 检查并安装依赖
 install_dependencies() {
     echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}"
