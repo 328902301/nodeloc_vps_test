@@ -100,8 +100,8 @@ run_streaming_test() {
 
 # 格式化结果为 Markdown
 format_results() {
-echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
-result="[tabs]
+    echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
+    result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
 $yabs_result
@@ -139,7 +139,6 @@ $speedtest_single_result
 [/tab]
 [tab=\"iperf3\"]
 \`\`\`
-
 \`\`\`
 [/tab]
 [tab=\"回程路由\"]
@@ -148,16 +147,20 @@ $autotrace_result
 \`\`\`
 [/tab]
 [tab=\"去程路由\"]
-
+\`\`\`
+\`\`\`
 [/tab]
 [tab=\"Ping.pe\"]
-
+\`\`\`
+\`\`\`
 [/tab]
 [tab=\"哪吒 ICMP\"]
-
+\`\`\`
+\`\`\`
 [/tab]
 [tab=\"其他\"]
-
+\`\`\`
+\`\`\`
 [/tab]
 [/tabs]"
 
@@ -209,7 +212,7 @@ show_welcome() {
     echo -e "${colors[1]}##    # #     # #   # #      #      #    # #    #   #    # #   # #     #  ${NC}"
     echo -e "${colors[2]}# #   # #     # #   # #####  #      #    # #        #    # ####   ####  ${NC}"
     echo -e "${colors[3]}#  #  # #     # #   # #      #      #    # #        #    # #          #  ${NC}"
-    echo -e "${colors[4]}#   # # #     # #   # #      #      #    # #    #   #    # #     #    # ${NC}"
+    echo -e "${colors[4]}#   # # #     # #   # #      #      #    # #    #    #  #  #      #    #  ${NC}"
     echo -e "${colors[0]}#    ##  #####  ####  ###### ######  ####   ####     ####  #      ####  ${NC}"
     echo ""
     echo "支持Ubuntu/Debian"
