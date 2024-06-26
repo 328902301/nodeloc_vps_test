@@ -239,7 +239,7 @@ show_welcome() {
 # 运行所有测试
 run_all_tests() {
     echo "开始运行测试..."
-
+    
     # YABS
     echo -e "运行${YELLOW}YABS...${NC}"
     yabs_result=$(run_and_capture "wget -qO- yabs.sh | bash")
