@@ -131,14 +131,14 @@ show_welcome() {
     echo "7. 单线程测试"
     echo "8. 回程路由"
     echo ""
-    echo -e "${RED}按任意键开始测试，测试时间较长，请耐心等待...${NC}"
+    echo -e "${RED}按任意键开始测试...${NC}"
     read -n 1 -s
     clear
 }
 
 # 运行所有测试
 run_all_tests() {
-    echo -e "${RED}开始运行测试...${NC}"
+    echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
 
     # YABS
     echo -e "运行${YELLOW}YABS...${NC}"
