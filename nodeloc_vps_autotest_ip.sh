@@ -142,10 +142,16 @@ chmod 777 /root/results.md
 
 #获取IP输出结果
 extract_ip_report() {
-    bash <(curl -Ls IP.Check.Place) | awk '
+    echo "开始执行 IP 质量检测..." >&2
+    local output
+    output=$(bash <(curl -Ls IP.Check.Place))
+    echo "原始输出长度: $(echo "$output" | wc -l) 行" >&2
+    echo "$output" | awk '
+        BEGIN {flag=0; lines=0}
         /^########################################################################$/ {flag=1}
-        flag && !/按回车键返回主菜单.../ {print}
+        flag && !/按回车键返回主菜单.../ {print; lines++}
         /按回车键返回主菜单.../ {flag=0}
+        END {print "提取的行数: " lines > "/dev/stderr"}
     '
 }
 
@@ -156,6 +162,7 @@ run_all_tests() {
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
     ip_quality_result=$(extract_ip_report)
+    echo "IP质量结果长度: $(echo "$ip_quality_result" | wc -l) 行" >&2
     
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
@@ -165,8 +172,10 @@ run_all_tests() {
 #格式化输出结果
 format_results() {
     local ip_quality_result="$1"
+    echo "格式化结果，输入长度: $(echo "$ip_quality_result" | wc -l) 行" >&2
     # 检查 ip_quality_result 是否为空
     if [ -z "$ip_quality_result" ]; then
+        echo "警告：IP 质量结果为空" >&2
         ip_quality_result="无法获取 IP 质量报告。请检查网络连接或脚本执行权限。"
     fi
     result="[tabs]
@@ -178,6 +187,7 @@ $ip_quality_result
 [/tabs]"
     echo "$result" > /root/results.md
     echo -e "${GREEN}结果已保存到 /root/results.md 文件中。${NC}"
+    echo "保存的结果长度: $(wc -l < /root/results.md) 行" >&2
 }
 
 # 复制结果到剪贴板
@@ -203,6 +213,8 @@ main() {
     show_welcome
     run_all_tests
     echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    echo "最终结果文件内容:" >&2
+    cat /root/results.md >&2
     read -n 1 -s
     copy_to_clipboard
 }
