@@ -165,7 +165,7 @@ run_all_tests() {
 format_results() {
     # 处理流媒体解锁结果
     local processed_streaming_result
-    processed_streaming_result=$(process_output "$streaming_result")
+    processed_streaming_result=$(media_process_output "$streaming_result")
 
     result="[tabs]
 [tab=\"流媒体\"]
