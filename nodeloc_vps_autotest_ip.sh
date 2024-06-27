@@ -160,8 +160,8 @@ run_all_tests() {
 format_results() {
 result="[tabs]
 [tab=\"IP质量\"]
-\`\`\`ansi
-$escaped_result
+\`\`\`
+$ip_quality_result
 \`\`\`
 [/tab]
 [/tabs]
