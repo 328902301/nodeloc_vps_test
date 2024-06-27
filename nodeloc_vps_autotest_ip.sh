@@ -158,10 +158,9 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    # 转义特殊字符
-    escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
-    
-    result="[tabs]
+# 转义特殊字符
+escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
+result="[tabs]
 [tabs]
 [tab="IP质量"]
 \`\`\`
@@ -169,8 +168,8 @@ $escaped_result
 \`\`\`
 [/tab]
 [/tabs]
-
-    echo "$result" > results.md
+"
+    echo "$result" | iconv -f UTF-8 -t UTF-8//IGNORE > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
