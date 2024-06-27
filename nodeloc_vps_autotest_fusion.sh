@@ -135,7 +135,7 @@ declare -a test_results
 # 去除融合怪板块板块ANSI转义码
 fusion_process_output() {
     local input="$1"
-    echo "$input" | sed 's/\x1b\[[0-9;]*m//g' | awk '/--------------------- A Bench Script/{f=1} f; /短链/{f=0}'
+    echo "$input" | sed 's/\x1b\[[0-9;]*m//g' | awk '/A Bench Script/{f=1} f; /时间/{f=0}'
 }
 
 # 在每个命令执行后保存结果
