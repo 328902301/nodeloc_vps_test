@@ -137,10 +137,13 @@ run_all_tests() {
 }
 
 format_results() {
+# 清理和格式化输出
+cleaned_output=$(echo "$ip_quality_result" | sed 's/.*\[<span data-type="inline-math" data-value="W15dXSo="></span>\]# \([^[]*\)\[3m\([^[]*\)............... \([^%]*\)% \(.*\)/\1 - \3 - \4/g')   
+
 result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
-$ip_quality_result
+$cleaned_output
 \`\`\`
 [/tab]
 [/tabs]
