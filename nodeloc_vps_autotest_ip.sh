@@ -116,11 +116,10 @@ declare -a test_results
 ip_process_output() {
     local input="$1"
     local start_line=$(echo "$input" | grep -n '正在检测黑名单数据库' | tail -n 1 | cut -d ':' -f 1)
-    start_line=$((start_line + 1))  # 移动到下一行
     local end_line=$(echo "$input" | grep -n '按回车键返回主菜单' | head -n 1 | cut -d ':' -f 1)
     
     if [ -n "$start_line" ] && [ -n "$end_line" ]; then
-        tail -n +"$start_line" <<< "$input" | head -n $(($end_line - $start_line)) | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+        tail -n +"$start_line" <<< "$input" | head -n $(($end_line - $start_line + 1)) | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
     elif [ -n "$start_line" ]; then
         tail -n +"$start_line" <<< "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
     else
