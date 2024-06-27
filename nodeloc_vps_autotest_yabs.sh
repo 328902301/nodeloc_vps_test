@@ -55,13 +55,6 @@ install_dependencies() {
     clear
 }
 
-# 函数：运行命令并捕获输出
-run_and_capture() {
-    local output
-    output=$(eval "$1" 2>&1)
-    echo "$output"
-}
-
 # 检测VPS地理位置
 detect_region() {
     local country
@@ -136,9 +129,16 @@ show_welcome() {
     clear
 }
 
-# 创建results.md
-touch /root/results.md
-chmod 777 /root/results.md
+# 定义一个数组来存储每个命令的输出
+declare -a test_results
+
+# 在每个命令执行后保存结果
+run_and_capture() {
+    local command_output
+    command_output=$(eval "$1" 2>&1)
+    test_results+=("$command_output")
+    echo "$command_output"
+}
 
 # 运行所有测试
 run_all_tests() {
@@ -163,8 +163,8 @@ $yabs_result
 [/tab]
 [/tabs]"
 
-    echo "$result" > /root/results.md
-    echo -e "${GREEN}结果已保存到 /root/results.md 文件中。${NC}"
+    echo "$result" > results.md
+    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 复制结果到剪贴板
