@@ -95,14 +95,8 @@ show_welcome() {
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
     echo "一键脚本将测试以下项目："
-    echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. 回程路由"
+    echo "多线程测试（调试中）"
+    echo "单线程测试（调试中）"
     echo ""
     echo -e "${RED}按任意键开始测试...${NC}"
     read -n 1 -s
@@ -112,19 +106,26 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 去除三网测速板块板块ANSI转义码
-speedtest_process_output() {
-    local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
-}
-
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
     command_output=$(eval "$1" 2>&1)
     test_results+=("$command_output")
     echo "$command_output"
+}
+
+# 去除三网测速板块板块ANSI转义码并截取（多线程）
+speedtest_multi_process_output() {
+    local input="$1"
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/大陆三网+教育网 IPv4 多线程测速，v/{f=1} f; /北京时间: /{f=0}'
+}
+
+# 去除三网测速板块板块ANSI转义码并截取（单线程）
+speedtest_single_process_output() {
+    local input="$1"
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/大陆三网+教育网 IPv4 单线程测速，v/{f=1} f; /北京时间: /{f=0}'
 }
 
 # 运行所有测试
@@ -143,13 +144,14 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    # 处理三网测速结果
-	local processed_speedtest_multi_result
-	local processed_speedtest_single_result
-    processed_speedtest_multi_result=$(speedtest_process_output "$speedtest_multi_result")
-	processed_speedtest_single_result=$(speedtest_process_output "$speedtest_single_result")
 
-    result="[tabs]
+# 处理三网测速结果
+local processed_speedtest_multi_result
+local processed_speedtest_single_result
+processed_speedtest_multi_result=$(speedtest_multi_process_output "$speedtest_multi_result")
+processed_speedtest_single_result=$(speedtest_single_process_output "$speedtest_single_result")
+
+result="[tabs]
 [tab=\"多线程测速\"]
 \`\`\`
 $processed_speedtest_multi_result
