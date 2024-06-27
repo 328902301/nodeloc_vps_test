@@ -188,7 +188,7 @@ main() {
     install_dependencies
     show_welcome
     run_all_tests
-    echo -e "${GREEN}所有测试完成。结果已保存到 results.md 文件中。${NC}"
+    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
     echo "最终结果文件内容:" >&2
     cat results.md >&2
     read -n 1 -s
