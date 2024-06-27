@@ -55,13 +55,6 @@ install_dependencies() {
     clear
 }
 
-# 函数：运行命令并捕获输出
-run_and_capture() {
-    local output
-    output=$(eval "$1" 2>&1)
-    echo "$output"
-}
-
 # 检测VPS地理位置
 detect_region() {
     local country
@@ -134,6 +127,13 @@ show_welcome() {
     echo -e "${RED}按任意键开始测试...${NC}"
     read -n 1 -s
     clear
+}
+
+# 运行命令并捕获输出
+run_and_capture() {
+    local output
+    output=$(eval "$1" 2>&1)
+    echo "$output"
 }
 
 # 运行所有测试
