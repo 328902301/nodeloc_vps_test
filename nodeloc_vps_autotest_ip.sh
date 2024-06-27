@@ -146,7 +146,7 @@ run_all_tests() {
     
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
-    run_and_capture "bash <(curl -Ls IP.Check.Place)"
+    ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
     
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
@@ -155,16 +155,13 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    result="[tabs]\n"
-    
-    # IP质量测试结果
-    result+="[tab=\"IP质量\"]\n\`\`\`\n${test_results[0]}\n\`\`\`\n[/tab]\n"
-    
-    # 添加其他测试结果
-    # 例如：
-    # result+="[tab=\"Yabs\"]\n\`\`\`\n${test_results[1]}\n\`\`\`\n[/tab]\n"
-    
-    result+="[/tabs]"
+result="[tabs]
+[tab=\"IP质量\"]
+\`\`\`
+$ip_quality_result
+\`\`\`
+[/tab]
+[/tabs]"
 
     echo "$result" > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
