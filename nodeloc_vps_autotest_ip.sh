@@ -158,22 +158,29 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-result="[tabs]
+    # 转义特殊字符，但保留颜色代码
+    escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
+    
+    result="[tabs]
 [tab=\"IP质量\"]
-\`\`\`
-$ip_quality_result
+\`\`\`ansi
+$escaped_result
 \`\`\`
 [/tab]
 [/tabs]
 "
-    echo "$result" | iconv -f UTF-8 -t UTF-8//IGNORE > results.md
+    echo "$result" > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 主函数
 main() {
-    install_dependencies
-    show_welcome
+    if type install_dependencies &>/dev/null; then
+        install_dependencies
+    fi
+    if type show_welcome &>/dev/null; then
+        show_welcome
+    fi
     run_all_tests
     echo -e "${GREEN}所有测试完成。结果已保存到 results.md 文件中。${NC}"
     echo "最终结果文件内容:" >&2
