@@ -161,7 +161,6 @@ format_results() {
 # 转义特殊字符
 escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
 result="[tabs]
-[tabs]
 [tab="IP质量"]
 \`\`\`
 $escaped_result
