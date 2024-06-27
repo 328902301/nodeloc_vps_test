@@ -136,7 +136,7 @@ declare -a test_results
 fusion_process_output() {
     local input="$1"
     # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/A Bench Script/{f=1} f; /时间/{f=0}'
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/A Bench Script/{f=1} f; /短链/{f=0}'
 }
 
 # 在每个命令执行后保存结果
