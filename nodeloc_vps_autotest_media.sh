@@ -132,6 +132,12 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
+# 去除流媒体板块ANSI转义码并截取需要的部分
+media_process_output() {
+    local input="$1"
+    echo "$input" | sed 's/\x1b\[[0-9;]*m//g' | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}'
+}
+
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
@@ -157,10 +163,14 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-result="[tabs]
+    # 处理流媒体解锁结果
+    local processed_streaming_result
+    processed_streaming_result=$(process_output "$streaming_result")
+
+    result="[tabs]
 [tab=\"流媒体\"]
 \`\`\`
-$streaming_result
+$processed_streaming_result
 \`\`\`
 [/tab]
 [/tabs]"
