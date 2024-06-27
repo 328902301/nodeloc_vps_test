@@ -55,26 +55,6 @@ install_dependencies() {
     clear
 }
 
-# 检测VPS地理位置
-detect_region() {
-    local country
-    country=$(curl -s ipinfo.io/country)
-    case $country in
-        "TW") echo "1" ;;          # 台湾
-        "HK") echo "2" ;;          # 香港
-        "JP") echo "3" ;;          # 日本
-        "US" | "CA") echo "4" ;;   # 北美
-        "BR" | "AR" | "CL") echo "5" ;;  # 南美
-        "GB" | "DE" | "FR" | "NL" | "SE" | "NO" | "FI" | "DK" | "IT" | "ES" | "CH" | "AT" | "BE" | "IE" | "PT" | "GR" | "PL" | "CZ" | "HU" | "RO" | "BG" | "HR" | "SI" | "SK" | "LT" | "LV" | "EE") echo "6" ;;  # 欧洲
-        "AU" | "NZ") echo "7" ;;   # 大洋洲
-        "KR") echo "8" ;;          # 韩国
-        "SG" | "MY" | "TH" | "ID" | "PH" | "VN") echo "9" ;;  # 东南亚
-        "IN") echo "10" ;;         # 印度
-        "ZA" | "NG" | "EG" | "KE" | "MA" | "TN" | "GH" | "CI" | "SN" | "UG" | "ET" | "MZ" | "ZM" | "ZW" | "BW" | "MW" | "NA" | "RW" | "SD" | "DJ" | "CM" | "AO") echo "11" ;;  # 非洲
-        *) echo "0" ;;             # 跨国平台
-    esac
-}
-
 # 统计使用次数
 sum_run_times() {
     local COUNT
@@ -132,19 +112,19 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 去除融合怪板块板块ANSI转义码
-fusion_process_output() {
-    local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/A Bench Script/{f=1} f; /短链/{f=0}'
-}
-
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
     command_output=$(eval "$1" 2>&1)
     test_results+=("$command_output")
     echo "$command_output"
+}
+
+# 去除融合怪板块板块ANSI转义码
+fusion_process_output() {
+    local input="$1"
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/A Bench Script/{f=1} f; /短链/{f=0}'
 }
 
 # 运行所有测试
@@ -162,11 +142,12 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    # 处理融合怪结果
-    local processed_fusion_result
-    processed_fusion_result=$(fusion_process_output "$fusion_result")
 
-    result="[tabs]
+# 处理融合怪结果
+local processed_fusion_result
+processed_fusion_result=$(fusion_process_output "$fusion_result")
+
+result="[tabs]
 [tab=\"融合怪\"]
 \`\`\`
 $processed_fusion_result
@@ -175,7 +156,7 @@ $processed_fusion_result
 [/tabs]"
 
     echo "$result" > results.md
-    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
+    echo -e "${YELLOW}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 主函数
@@ -183,9 +164,9 @@ main() {
     install_dependencies
     show_welcome
     run_all_tests
-    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    echo -e "${YELLOW}所有测试完成，可到results.md复制到Nodeloc使用。${NC}"
     read -n 1 -s
-    echo "最终结果文件内容:" >&2
+    echo "最终测试结果如下:" >&2
     cat results.md >&2
 }
 
