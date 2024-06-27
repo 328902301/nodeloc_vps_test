@@ -122,7 +122,7 @@ show_welcome() {
     echo "5. 响应测试"
     echo "6. 多线程测试"
     echo "7. 单线程测试"
-#    echo "8. 回程路由（调试中）"
+    echo "8. 回程路由（调试中）"
     echo ""
     echo -e "${RED}按任意键开始测试...${NC}"
     read -n 1 -s
@@ -189,6 +189,13 @@ speedtest_single_process_output() {
     echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | grep -v "测试进行中" | awk '/大陆三网+教育网 IPv4 单线程测速，v/{f=1} f; /北京时间: /{f=0}'
 }
 
+# 去除回程路由板块板块ANSI转义码并截取
+autotrace_process_output() {
+    local input="$1"
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1/9 Traceroute/{f=1} f; /[信息] 已删除 Nexttrace 文件/{f=0}'
+}
+
 # 运行所有测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
@@ -221,9 +228,9 @@ run_all_tests() {
     speedtest_multi_result=$(run_and_capture "echo '1' | bash <(curl -sL bash.icu/speedtest)")
     speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
 
-#    # AutoTrace三网回程路由
-#    echo -e "运行${YELLOW}AutoTrace三网回程路由...${NC}"
-#    autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh")
+    # AutoTrace三网回程路由
+    echo -e "运行${YELLOW}AutoTrace三网回程路由...${NC}"
+    autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && echo '1' | bash AutoTrace.sh")
 
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
@@ -254,6 +261,10 @@ local processed_speedtest_multi_result
 local processed_speedtest_single_result
 processed_speedtest_multi_result=$(speedtest_multi_process_output "$speedtest_multi_result")
 processed_speedtest_single_result=$(speedtest_single_process_output "$speedtest_single_result")
+
+# 处理回程路由结果
+local processed_autotrace_result
+processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
 
 # Tabs分栏输出结果，用于复制到Nodeloc论坛
 result="[tabs]
@@ -293,18 +304,18 @@ $processed_speedtest_multi_result
 $processed_speedtest_single_result
 \`\`\`
 [/tab]
-[tab=\"iperf3\"]
-\`\`\`
-
-\`\`\`
-[/tab]
 [tab=\"回程路由\"]
 \`\`\`
-$autotrace_result
+$processed_autotrace_result
 \`\`\`
 [/tab]
 [tab=\"去程路由\"]
 
+[/tab]
+[tab=\"iperf3\"]
+\`\`\`
+
+\`\`\`
 [/tab]
 [tab=\"Ping.pe\"]
 
