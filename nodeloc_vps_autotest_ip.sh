@@ -3,6 +3,9 @@
 # 定义版本
 VERSION="1.0.0"
 
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
 # 定义颜色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -135,7 +138,7 @@ declare -a test_results
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
-    command_output=$(eval "$1" 2>&1)
+    command_output=$(eval "$1" 2>&1 | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
     test_results+=("$command_output")
     echo "$command_output"
 }
@@ -155,15 +158,18 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-result="[tabs]
-[tab=\"IP质量\"]
+    # 转义特殊字符
+    escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
+    
+    cat << EOF | iconv -f UTF-8 -t UTF-8//IGNORE > results.md
+[tabs]
+[tab="IP质量"]
 \`\`\`
-$ip_quality_result
+$escaped_result
 \`\`\`
 [/tab]
-[/tabs]"
-
-    echo "$result" > results.md
+[/tabs]
+EOF
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
@@ -188,8 +194,13 @@ copy_to_clipboard() {
 main() {
     install_dependencies
     show_welcome
-    run_all_tests
+    if ! run_all_tests; then
+        echo -e "${RED}测试过程中发生错误。${NC}"
+        exit 1
+    fi
     echo -e "${GREEN}所有测试完成。结果已保存到 results.md 文件中。${NC}"
+    echo "文件内容预览："
+    head -n 10 results.md
     echo "最终结果文件内容:" >&2
     cat results.md >&2
     copy_to_clipboard
