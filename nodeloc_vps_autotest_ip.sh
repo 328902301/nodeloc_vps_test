@@ -153,12 +153,6 @@ $processed_ip_result
 [/tab]
 [/tabs]"
 
-[tab=\"IP质量\"]
-\`\`\`
-$ip_quality_result
-\`\`\`
-[/tab]
-
     echo "$result" > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
