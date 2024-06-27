@@ -112,10 +112,19 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 去除流媒体板块ANSI转义码并截取需要的部分
+# 去除IP质量板块ANSI转义码并截取需要的部分
 ip_process_output() {
     local input="$1"
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/########################################################################/{f=1} f; /按回车键返回主菜单/{f=0}'
+    local start_line=$(echo "$input" | grep -n '正在检测黑名单数据库' | tail -n 1 | cut -d ':' -f 1)
+    local end_line=$(echo "$input" | grep -n '按回车键返回主菜单' | head -n 1 | cut -d ':' -f 1)
+    
+    if [ -n "$start_line" ] && [ -n "$end_line" ]; then
+        tail -n +"$start_line" <<< "$input" | head -n $(($end_line - $start_line)) | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+    elif [ -n "$start_line" ]; then
+        tail -n +"$start_line" <<< "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+    else
+        echo "未找到合适的日志内容。"
+    fi
 }
 
 # 在每个命令执行后保存结果
