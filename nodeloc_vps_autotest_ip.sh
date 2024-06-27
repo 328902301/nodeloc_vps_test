@@ -161,12 +161,11 @@ format_results() {
     # 转义特殊字符
     escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
     
-    # 使用 heredoc 并保持转义
-    cat << 'EOF' | sed "s/ESCAPED_RESULT/$escaped_result/" | iconv -f UTF-8 -t UTF-8//IGNORE > results.md
+    cat << EOF | iconv -f UTF-8 -t UTF-8//IGNORE > results.md
 [tabs]
 [tab="IP质量"]
 \`\`\`
-ESCAPED_RESULT
+$escaped_result
 \`\`\`
 [/tab]
 [/tabs]
