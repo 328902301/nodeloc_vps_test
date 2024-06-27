@@ -158,12 +158,10 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-# 转义特殊字符
-escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
 result="[tabs]
-[tab="IP质量"]
+[tab=\"IP质量\"]
 \`\`\`
-$escaped_result
+$ip_quality_result
 \`\`\`
 [/tab]
 [/tabs]
@@ -172,37 +170,14 @@ $escaped_result
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
-# 复制结果到剪贴板
-copy_to_clipboard() {
-    if [ -f results.md ]; then
-        if command -v xclip > /dev/null; then
-            xclip -selection clipboard < results.md
-            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
-        elif command -v pbcopy > /dev/null; then
-            pbcopy < results.md
-            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
-        else
-            echo -e "${RED}无法复制到剪贴板。请手动复制 results.md 文件内容。${NC}"
-        fi
-    else
-        echo -e "${RED}results.md 文件不存在。${NC}"
-    fi
-}
-
 # 主函数
 main() {
     install_dependencies
     show_welcome
-    if ! run_all_tests; then
-        echo -e "${RED}测试过程中发生错误。${NC}"
-        exit 1
-    fi
+    run_all_tests
     echo -e "${GREEN}所有测试完成。结果已保存到 results.md 文件中。${NC}"
-    echo "文件内容预览："
-    head -n 10 results.md
     echo "最终结果文件内容:" >&2
     cat results.md >&2
-    copy_to_clipboard
 }
 
 main
