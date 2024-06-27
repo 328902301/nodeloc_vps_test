@@ -167,23 +167,6 @@ $yabs_result
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
-# 复制结果到剪贴板
-copy_to_clipboard() {
-    if [ -f results.md ]; then
-        if command -v xclip > /dev/null; then
-            xclip -selection clipboard < results.md
-            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
-        elif command -v pbcopy > /dev/null; then
-            pbcopy < results.md
-            echo -e "${GREEN}结果已复制到剪贴板。${NC}"
-        else
-            echo -e "${RED}无法复制到剪贴板。请手动复制 results.md 文件内容。${NC}"
-        fi
-    else
-        echo -e "${RED}results.md 文件不存在。${NC}"
-    fi
-}
-
 # 主函数
 main() {
     install_dependencies
@@ -191,7 +174,8 @@ main() {
     run_all_tests
     echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
     read -n 1 -s
-    copy_to_clipboard
+    echo "最终结果文件内容:" >&2
+    cat results.md >&2
 }
 
 main
