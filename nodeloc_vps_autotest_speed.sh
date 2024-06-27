@@ -117,15 +117,15 @@ run_and_capture() {
 # 去除三网测速板块板块ANSI转义码并截取（多线程）
 speedtest_multi_process_output() {
     local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/大陆三网+教育网 IPv4 多线程测速，v/{f=1} f; /北京时间: /{f=0}'
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码，并过滤掉包含 "测试进行中" 的行
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | grep -v "测试进行中" | awk '/大陆三网+教育网 IPv4 多线程测速，v/{f=1} f; /北京时间: /{f=0}'
 }
 
 # 去除三网测速板块板块ANSI转义码并截取（单线程）
 speedtest_single_process_output() {
     local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/大陆三网+教育网 IPv4 单线程测速，v/{f=1} f; /北京时间: /{f=0}'
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码，并过滤掉包含 "测试进行中" 的行
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | grep -v "测试进行中" | awk '/大陆三网+教育网 IPv4 单线程测速，v/{f=1} f; /北京时间: /{f=0}'
 }
 
 # 运行所有测试
@@ -134,6 +134,7 @@ run_all_tests() {
 
     # 三网测速
     echo -e "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
+    echo -e "目前仅进行${YELLOW}大陆三网+教育网 IPv4（多线程/单线程）...${NC}"
     speedtest_multi_result=$(run_and_capture "echo '1' | bash <(curl -sL bash.icu/speedtest)")
     speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
 
@@ -165,7 +166,7 @@ $processed_speedtest_single_result
 [/tabs]"
 
     echo "$result" > results.md
-    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
+    echo -e "${YELLOW}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 主函数
@@ -173,9 +174,9 @@ main() {
     install_dependencies
     show_welcome
     run_all_tests
-    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    echo -e "${YELLOW}所有测试完成，可到results.md复制到Nodeloc使用。${NC}"
     read -n 1 -s
-    echo "最终结果文件内容:" >&2
+    echo "最终测试结果如下:" >&2
     cat results.md >&2
 }
 
