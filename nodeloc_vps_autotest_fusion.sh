@@ -132,7 +132,7 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 去除流媒体板块ANSI转义码并截取需要的部分
+# 去除融合怪板块板块ANSI转义码
 fusion_process_output() {
     local input="$1"
     echo "$input" | sed 's/\x1b\[[0-9;]*m//g'
@@ -187,3 +187,5 @@ main() {
     echo "最终结果文件内容:" >&2
     cat results.md >&2
 }
+
+main
