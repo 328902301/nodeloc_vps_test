@@ -55,13 +55,6 @@ install_dependencies() {
     clear
 }
 
-# 函数：运行命令并捕获输出
-run_and_capture() {
-    local output
-    output=$(eval "$1" 2>&1)
-    echo "$output"
-}
-
 # 检测VPS地理位置
 detect_region() {
     local country
@@ -136,6 +129,17 @@ show_welcome() {
     clear
 }
 
+# 定义一个数组来存储每个命令的输出
+declare -a ip_quality_result_outputs
+
+# 在每个命令执行后保存结果
+run_and_capture() {
+    local ip_quality_result
+    ip_quality_result=$(eval "$1" 2>&1)
+    ip_quality_result_outputs+=("$ip_quality_result")  # 保存命令输出
+    echo "$ip_quality_result"  # 打印命令输出
+}
+
 # 运行所有测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
@@ -151,10 +155,12 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
+    local formatted_output
+    formatted_output=$(printf '%s\n' "${ip_quality_result_outputs[@]}")
 result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
-$ip_quality_result
+$formatted_output
 \`\`\`
 [/tab]
 [/tabs]"
