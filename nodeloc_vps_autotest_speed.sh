@@ -117,15 +117,39 @@ run_and_capture() {
 # 去除三网测速板块板块ANSI转义码并截取（多线程）
 speedtest_multi_process_output() {
     local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码，并过滤掉包含 "测试进行中" 的行
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | grep -v "测试进行中" | awk '/大陆三网+教育网 IPv4 多线程测速，v/{f=1} f; /北京时间: /{f=0}'
+    # Step 1: 去除 ANSI 转义码
+    local no_ansi
+    no_ansi=$(echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
+    echo "去除 ANSI 转义码后的输出: $no_ansi" >&2
+
+    # Step 2: 过滤掉包含 "测试进行中" 的行
+    local no_progress
+    no_progress=$(echo "$no_ansi" | grep -v "^ *测试进行中")
+    echo "过滤掉包含 '测试进行中' 的行后的输出: $no_progress" >&2
+
+    # Step 3: 截取所需的测试结果
+    local speedtest_multi_process_output_result
+    speedtest_multi_process_output_result=$(echo "$no_progress" | awk '/大陆三网+教育网 IPv4 多线程测速/{f=1} f; /北京时间/{f=0}')
+    echo "$speedtest_multi_process_output_result"
 }
 
 # 去除三网测速板块板块ANSI转义码并截取（单线程）
 speedtest_single_process_output() {
     local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码，并过滤掉包含 "测试进行中" 的行
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | grep -v "测试进行中" | awk '/大陆三网+教育网 IPv4 单线程测速，v/{f=1} f; /北京时间: /{f=0}'
+    # Step 1: 去除 ANSI 转义码
+    local no_ansi
+    no_ansi=$(echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
+    echo "去除 ANSI 转义码后的输出: $no_ansi" >&2
+
+    # Step 2: 过滤掉包含 "测试进行中" 的行
+    local no_progress
+    no_progress=$(echo "$no_ansi" | grep -v "^ *测试进行中")
+    echo "过滤掉包含 '测试进行中' 的行后的输出: $no_progress" >&2
+
+    # Step 3: 截取所需的测试结果
+    local speedtest_single_process_output_result
+    speedtest_single_process_output_result=$(echo "$no_progress" | awk '/大陆三网+教育网 IPv4 多线程测速/{f=1} f; /北京时间/{f=0}')
+    echo "$speedtest_single_process_output_result"
 }
 
 # 运行所有测试
