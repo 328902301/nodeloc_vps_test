@@ -161,7 +161,7 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    # 处理流媒体解锁结果
+    # 处理融合怪结果
     local processed_fusion_result
     processed_fusion_result=$(fusion_process_output "$fusion_result")
 
