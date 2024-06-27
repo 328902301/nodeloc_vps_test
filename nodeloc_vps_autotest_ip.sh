@@ -161,7 +161,7 @@ format_results() {
     # 转义特殊字符
     escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
     
-    cat << EOF | iconv -f UTF-8 -t UTF-8//IGNORE > results.md
+    result="[tabs]
 [tabs]
 [tab="IP质量"]
 \`\`\`
@@ -169,8 +169,8 @@ $escaped_result
 \`\`\`
 [/tab]
 [/tabs]
-EOF
 
+    echo "$result" > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
