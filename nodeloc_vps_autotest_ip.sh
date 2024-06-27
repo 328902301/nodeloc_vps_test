@@ -130,14 +130,14 @@ show_welcome() {
 }
 
 # 定义一个数组来存储每个命令的输出
-declare -a command_outputs
+declare -a test_results
 
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
     command_output=$(eval "$1" 2>&1)
-    command_outputs+=("$command_output")  # 保存命令输出
-    echo "$command_output"  # 打印命令输出
+    test_results+=("$command_output")
+    echo "$command_output"
 }
 
 # 运行所有测试
@@ -146,7 +146,7 @@ run_all_tests() {
     
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
-    ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
+    run_and_capture "bash <(curl -Ls IP.Check.Place)"
     
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
@@ -155,13 +155,20 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-result="[tabs]
-[tab=\"IP质量\"]
-\`\`\`
-$ip_quality_result
-\`\`\`
-[/tab]
-[/tabs]"
+    result="[tabs]\n"
+    
+    # IP质量测试结果
+    result+="[tab=\"IP质量\"]\n\`\`\`\n${test_results[0]}\n\`\`\`\n[/tab]\n"
+    
+    # 添加其他测试结果
+    # 例如：
+    # result+="[tab=\"Yabs\"]\n\`\`\`\n${test_results[1]}\n\`\`\`\n[/tab]\n"
+    
+    result+="[/tabs]"
+
+    echo "$result" > results.md
+    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
+}
 
     echo "$result" > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
@@ -189,9 +196,9 @@ main() {
     install_dependencies
     show_welcome
     run_all_tests
-    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    echo -e "${GREEN}所有测试完成。结果已保存到 results.md 文件中。${NC}"
     echo "最终结果文件内容:" >&2
-    cat /root/results.md >&2
+    cat results.md >&2
     read -n 1 -s
     copy_to_clipboard
 }
