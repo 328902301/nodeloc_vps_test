@@ -95,14 +95,7 @@ show_welcome() {
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
     echo "一键脚本将测试以下项目："
-    echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. 回程路由"
+    echo "IP质量"
     echo ""
     echo -e "${RED}按任意键开始测试...${NC}"
     read -n 1 -s
@@ -112,7 +105,15 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 去除IP质量板块ANSI转义码并截取需要的部分
+# 在每个命令执行后保存结果
+run_and_capture() {
+    local command_output
+    command_output=$(eval "$1" 2>&1)
+    test_results+=("$command_output")
+    echo "$command_output"
+}
+
+# 去除IP质量板块ANSI转义码并截取
 ip_process_output() {
     local input="$1"
     local start_line=$(echo "$input" | grep -n '正在检测黑名单数据库' | tail -n 1 | cut -d ':' -f 1)
@@ -126,14 +127,6 @@ ip_process_output() {
     else
         echo "未找到合适的日志内容。"
     fi
-}
-
-# 在每个命令执行后保存结果
-run_and_capture() {
-    local command_output
-    command_output=$(eval "$1" 2>&1)
-    test_results+=("$command_output")
-    echo "$command_output"
 }
 
 # 运行所有测试
@@ -151,11 +144,11 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    # 处理流媒体解锁结果
-    local processed_ip_result
-    processed_ip_result=$(ip_process_output "$ip_quality_result")
+# 处理流媒体解锁结果
+local processed_ip_result
+processed_ip_result=$(ip_process_output "$ip_quality_result")
 
-    result="[tabs]
+result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
 ########################################################################
@@ -165,7 +158,7 @@ $processed_ip_result
 [/tabs]"
 
     echo "$result" > results.md
-    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
+    echo -e "${YELLOW}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 主函数
@@ -173,9 +166,9 @@ main() {
     install_dependencies
     show_welcome
     run_all_tests
-    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    echo -e "${YELLOW}所有测试完成，可到results.md复制到Nodeloc使用。${NC}"
     read -n 1 -s
-    echo "最终结果文件内容:" >&2
+    echo "最终测试结果如下:" >&2
     cat results.md >&2
 }
 
