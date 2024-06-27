@@ -3,9 +3,6 @@
 # 定义版本
 VERSION="1.0.0"
 
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-
 # 定义颜色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -125,7 +122,7 @@ show_welcome() {
     echo "5. 响应测试"
     echo "6. 多线程测试"
     echo "7. 单线程测试"
-    echo "8. 回程路由"
+#    echo "8. 回程路由（调试中）"
     echo ""
     echo -e "${RED}按任意键开始测试...${NC}"
     read -n 1 -s
@@ -141,6 +138,55 @@ run_and_capture() {
     command_output=$(eval "$1" 2>&1)
     test_results+=("$command_output")
     echo "$command_output"
+}
+
+# 去除融合怪板块ANSI转义码并截取
+fusion_process_output() {
+    local input="$1"
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/A Bench Script/{f=1} f; /短链/{f=0}'
+}
+
+# 去除IP质量板块ANSI转义码并截取
+ip_process_output() {
+    local input="$1"
+    local start_line=$(echo "$input" | grep -n '正在检测黑名单数据库' | tail -n 1 | cut -d ':' -f 1)
+    start_line=$((start_line + 1))  # 移动到下一行
+    local end_line=$(echo "$input" | grep -n '按回车键返回主菜单' | head -n 1 | cut -d ':' -f 1)
+    
+    if [ -n "$start_line" ] && [ -n "$end_line" ]; then
+        tail -n +"$start_line" <<< "$input" | head -n $(($end_line - $start_line)) | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+    elif [ -n "$start_line" ]; then
+        tail -n +"$start_line" <<< "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+    else
+        echo "未找到合适的日志内容。"
+    fi
+}
+
+# 去除流媒体板块ANSI转义码并截取
+streaming_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}'
+}
+
+# 去除响应板块ANSI转义码
+response_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+}
+
+# 去除三网测速板块板块ANSI转义码并截取（多线程）
+speedtest_multi_process_output() {
+    local input="$1"
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码，并过滤掉包含 "测试进行中" 的行
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | grep -v "测试进行中" | awk '/大陆三网+教育网 IPv4 多线程测速，v/{f=1} f; /北京时间: /{f=0}'
+}
+
+# 去除三网测速板块板块ANSI转义码并截取（单线程）
+speedtest_single_process_output() {
+    local input="$1"
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码，并过滤掉包含 "测试进行中" 的行
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | grep -v "测试进行中" | awk '/大陆三网+教育网 IPv4 单线程测速，v/{f=1} f; /北京时间: /{f=0}'
 }
 
 # 运行所有测试
@@ -171,12 +217,13 @@ run_all_tests() {
 
     # 三网测速
     echo -e "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
+    echo -e "目前默认选择${YELLOW}大陆三网+教育网 IPv4（多线程/单线程）测试...${NC}"
     speedtest_multi_result=$(run_and_capture "echo '1' | bash <(curl -sL bash.icu/speedtest)")
     speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
 
-    # AutoTrace三网回程路由
-    echo -e "运行${YELLOW}AutoTrace三网回程路由...${NC}"
-    autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh")
+#    # AutoTrace三网回程路由
+#    echo -e "运行${YELLOW}AutoTrace三网回程路由...${NC}"
+#    autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh")
 
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
@@ -185,6 +232,30 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
+
+# 处理融合怪结果
+local processed_fusion_result
+processed_fusion_result=$(fusion_process_output "$fusion_result")
+
+# 处理IP质量结果
+local processed_ip_result
+processed_ip_result=$(ip_process_output "$ip_quality_result")
+
+# 处理流媒体解锁结果
+local processed_streaming_result
+processed_streaming_result=$(streaming_process_output "$streaming_result")
+
+# 处理响应测试结果
+local processed_response_result
+processed_response_result=$(response_process_output "$response_result")
+
+# 处理三网测速结果
+local processed_speedtest_multi_result
+local processed_speedtest_single_result
+processed_speedtest_multi_result=$(speedtest_multi_process_output "$speedtest_multi_result")
+processed_speedtest_single_result=$(speedtest_single_process_output "$speedtest_single_result")
+
+# Tabs分栏输出结果，用于复制到Nodeloc论坛
 result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
@@ -193,32 +264,33 @@ $yabs_result
 [/tab]
 [tab=\"融合怪\"]
 \`\`\`
-$fusion_result
+$processed_fusion_result
 \`\`\`
 [/tab]
 [tab=\"IP质量\"]
 \`\`\`
-$ip_quality_result
+########################################################################
+$processed_ip_result
 \`\`\`
 [/tab]
 [tab=\"流媒体\"]
 \`\`\`
-$streaming_result
+$processed_streaming_result
 \`\`\`
 [/tab]
 [tab=\"响应\"]
 \`\`\`
-$response_result
+$processed_response_result
 \`\`\`
 [/tab]
 [tab=\"多线程测速\"]
 \`\`\`
-$speedtest_multi_result
+$processed_speedtest_multi_result
 \`\`\`
 [/tab]
 [tab=\"单线程测速\"]
 \`\`\`
-$speedtest_single_result
+$processed_speedtest_single_result
 \`\`\`
 [/tab]
 [tab=\"iperf3\"]
@@ -246,7 +318,7 @@ $autotrace_result
 [/tabs]"
 
     echo "$result" > results.md
-    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
+    echo -e "${YELLOW}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 主函数
@@ -254,8 +326,10 @@ main() {
     install_dependencies
     show_welcome
     run_all_tests
-    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    echo -e "${YELLOW}所有测试完成，可到results.md复制到Nodeloc使用。${NC}"
     read -n 1 -s
+    echo "最终测试结果如下:" >&2
+    cat results.md >&2
 }
 
 main
