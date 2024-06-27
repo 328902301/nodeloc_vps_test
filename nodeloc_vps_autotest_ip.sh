@@ -3,9 +3,6 @@
 # 定义版本
 VERSION="1.0.0"
 
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-
 # 定义颜色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -115,6 +112,12 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
+# 去除流媒体板块ANSI转义码并截取需要的部分
+ip_process_output() {
+    local input="$1"
+    echo "$input" | sed 's/\x1b\[[0-9;]*m//g' | awk '/#######################/{f=1} f; /按回车键返回主菜单/{f=0}'
+}
+
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
@@ -126,43 +129,47 @@ run_and_capture() {
 # 运行所有测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
-    
+
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
     ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
-    
+
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
     format_results
 }
 
+# 格式化结果为 Markdown
 format_results() {
-# 清理和格式化输出
-cleaned_output=$(echo "$ip_quality_result" | sed 's/.*\[<span data-type="inline-math" data-value="W15dXSo="></span>\]# \([^[]*\)\[3m\([^[]*\)............... \([^%]*\)% \(.*\)/\1 - \3 - \4/g')   
+    # 处理流媒体解锁结果
+    local processed_ip_result
+    processed_ip_result=$(ip_process_output "ip_quality_result")
 
-result="[tabs]
+    result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
-$cleaned_output
+$processed_ip_result
 \`\`\`
 [/tab]
-[/tabs]
-"
-    # 使用 UTF-8 编码写入文件
-    echo "$result" | iconv -f UTF-8 -t UTF-8 -c > results.md
+[/tabs]"
+
+[tab=\"IP质量\"]
+\`\`\`
+$ip_quality_result
+\`\`\`
+[/tab]
+
+    echo "$result" > results.md
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 主函数
 main() {
-    if type install_dependencies &>/dev/null; then
-        install_dependencies
-    fi
-    if type show_welcome &>/dev/null; then
-        show_welcome
-    fi
+    install_dependencies
+    show_welcome
     run_all_tests
-    echo -e "${GREEN}所有测试完成。结果已保存到 results.md 文件中。${NC}"
+    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    read -n 1 -s
     echo "最终结果文件内容:" >&2
     cat results.md >&2
 }
