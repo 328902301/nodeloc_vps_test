@@ -138,7 +138,7 @@ declare -a test_results
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
-    command_output=$(eval "$1" 2>&1 | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g")
+    command_output=$(eval "$1" 2>&1)
     test_results+=("$command_output")
     echo "$command_output"
 }
@@ -161,15 +161,17 @@ format_results() {
     # 转义特殊字符
     escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
     
-    cat << EOF | iconv -f UTF-8 -t UTF-8//IGNORE > results.md
+    # 使用 heredoc 并保持转义
+    cat << 'EOF' | sed "s/ESCAPED_RESULT/$escaped_result/" | iconv -f UTF-8 -t UTF-8//IGNORE > results.md
 [tabs]
 [tab="IP质量"]
 \`\`\`
-$escaped_result
+ESCAPED_RESULT
 \`\`\`
 [/tab]
 [/tabs]
 EOF
+
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
