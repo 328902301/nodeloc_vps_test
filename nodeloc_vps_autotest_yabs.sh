@@ -55,26 +55,6 @@ install_dependencies() {
     clear
 }
 
-# 检测VPS地理位置
-detect_region() {
-    local country
-    country=$(curl -s ipinfo.io/country)
-    case $country in
-        "TW") echo "1" ;;          # 台湾
-        "HK") echo "2" ;;          # 香港
-        "JP") echo "3" ;;          # 日本
-        "US" | "CA") echo "4" ;;   # 北美
-        "BR" | "AR" | "CL") echo "5" ;;  # 南美
-        "GB" | "DE" | "FR" | "NL" | "SE" | "NO" | "FI" | "DK" | "IT" | "ES" | "CH" | "AT" | "BE" | "IE" | "PT" | "GR" | "PL" | "CZ" | "HU" | "RO" | "BG" | "HR" | "SI" | "SK" | "LT" | "LV" | "EE") echo "6" ;;  # 欧洲
-        "AU" | "NZ") echo "7" ;;   # 大洋洲
-        "KR") echo "8" ;;          # 韩国
-        "SG" | "MY" | "TH" | "ID" | "PH" | "VN") echo "9" ;;  # 东南亚
-        "IN") echo "10" ;;         # 印度
-        "ZA" | "NG" | "EG" | "KE" | "MA" | "TN" | "GH" | "CI" | "SN" | "UG" | "ET" | "MZ" | "ZM" | "ZW" | "BW" | "MW" | "NA" | "RW" | "SD" | "DJ" | "CM" | "AO") echo "11" ;;  # 非洲
-        *) echo "0" ;;             # 跨国平台
-    esac
-}
-
 # 统计使用次数
 sum_run_times() {
     local COUNT
@@ -114,15 +94,8 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo "一键脚本将测试以下项目："
-    echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. 回程路由"
+    echo "脚本将测试以下项目："
+    echo "Yabs"
     echo ""
     echo -e "${RED}按任意键开始测试...${NC}"
     read -n 1 -s
