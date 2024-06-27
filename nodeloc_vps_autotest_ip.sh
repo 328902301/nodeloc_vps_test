@@ -130,14 +130,14 @@ show_welcome() {
 }
 
 # 定义一个数组来存储每个命令的输出
-declare -a ip_quality_result_outputs
+declare -a command_outputs
 
 # 在每个命令执行后保存结果
 run_and_capture() {
-    local ip_quality_result
-    ip_quality_result=$(eval "$1" 2>&1)
-    ip_quality_result_outputs+=("$ip_quality_result")  # 保存命令输出
-    echo "$ip_quality_result"  # 打印命令输出
+    local command_output
+    command_output=$(eval "$1" 2>&1)
+    command_outputs+=("$command_output")  # 保存命令输出
+    echo "$command_output"  # 打印命令输出
 }
 
 # 运行所有测试
@@ -155,12 +155,10 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    local formatted_output
-    formatted_output=$(printf '%s\n' "${ip_quality_result_outputs[@]}")
 result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
-$formatted_output
+$ip_quality_result
 \`\`\`
 [/tab]
 [/tabs]"
