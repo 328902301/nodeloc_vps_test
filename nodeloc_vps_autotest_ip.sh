@@ -170,10 +170,6 @@ format_results() {
     echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
 }
 
-    echo "$result" > results.md
-    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
-}
-
 # 复制结果到剪贴板
 copy_to_clipboard() {
     if [ -f results.md ]; then
