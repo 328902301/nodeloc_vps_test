@@ -132,6 +132,12 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
+# 去除流媒体板块ANSI转义码并截取需要的部分
+fusion_process_output() {
+    local input="$1"
+    echo "$input" | sed 's/\x1b\[[0-9;]*m//g'
+}
+
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
@@ -155,10 +161,14 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-result="[tabs]
+    # 处理流媒体解锁结果
+    local processed_fusion_result
+    processed_fusion_result=$(fusion_process_output "$fusion_result")
+
+    result="[tabs]
 [tab=\"融合怪\"]
 \`\`\`
-$fusion_result
+$processed_fusion_result
 \`\`\`
 [/tab]
 [/tabs]"
@@ -177,5 +187,3 @@ main() {
     echo "最终结果文件内容:" >&2
     cat results.md >&2
 }
-
-main
