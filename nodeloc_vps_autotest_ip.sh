@@ -123,6 +123,11 @@ run_and_capture() {
     echo "$command_output"
 }
 
+# 清理控制字符的函数
+clean_output() {
+    echo "$1" | sed 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+}
+
 # 运行所有测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
@@ -130,6 +135,7 @@ run_all_tests() {
     # IP质量
     echo -e "运行${YELLOW}IP质量测试...${NC}"
     ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
+    cleaned_result=$(clean_output "$ip_quality_result")
     
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
