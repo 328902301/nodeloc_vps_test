@@ -131,7 +131,7 @@ run_and_capture() {
 # 去除流媒体板块ANSI转义码并截取
 streaming_process_output() {
     local input="$1"
-    echo "$input" | sed 's/\x1b\[[0-9;]*m//g' | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}'
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}'
 }
 
 # 运行所有测试
