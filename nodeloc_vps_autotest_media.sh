@@ -110,14 +110,7 @@ show_welcome() {
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
     echo "一键脚本将测试以下项目："
-    echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. 回程路由"
+    echo "流媒体解锁"
     echo ""
     echo -e "${RED}按任意键开始测试...${NC}"
     read -n 1 -s
@@ -127,18 +120,18 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 去除流媒体板块ANSI转义码并截取需要的部分
-streaming_process_output() {
-    local input="$1"
-    echo "$input" | sed 's/\x1b\[[0-9;]*m//g' | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}'
-}
-
 # 在每个命令执行后保存结果
 run_and_capture() {
     local command_output
     command_output=$(eval "$1" 2>&1)
     test_results+=("$command_output")
     echo "$command_output"
+}
+
+# 去除流媒体板块ANSI转义码并截取
+streaming_process_output() {
+    local input="$1"
+    echo "$input" | sed 's/\x1b\[[0-9;]*m//g' | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}'
 }
 
 # 运行所有测试
@@ -158,11 +151,12 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    # 处理流媒体解锁结果
-    local processed_streaming_result
-    processed_streaming_result=$(streaming_process_output "$streaming_result")
 
-    result="[tabs]
+# 处理流媒体解锁结果
+local processed_streaming_result
+processed_streaming_result=$(streaming_process_output "$streaming_result")
+
+result="[tabs]
 [tab=\"流媒体\"]
 \`\`\`
 $processed_streaming_result
@@ -171,7 +165,7 @@ $processed_streaming_result
 [/tabs]"
 
     echo "$result" > results.md
-    echo -e "${GREEN}结果已保存到 results.md 文件中。${NC}"
+    echo -e "${YELLOW}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 主函数
@@ -179,9 +173,9 @@ main() {
     install_dependencies
     show_welcome
     run_all_tests
-    echo -e "${GREEN}所有测试完成。点击屏幕任意位置复制结果。${NC}"
+    echo -e "${YELLOW}所有测试完成，可到results.md复制到Nodeloc使用。${NC}"
     read -n 1 -s
-    echo "最终结果文件内容:" >&2
+    echo "最终测试结果如下:" >&2
     cat results.md >&2
 }
 
