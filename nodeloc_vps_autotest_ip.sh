@@ -158,10 +158,7 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-    # 转义特殊字符，但保留颜色代码
-    escaped_result=$(echo "$ip_quality_result" | sed 's/\\/\\\\/g; s/`/\\`/g; s/\$/\\$/g; s/\*/\\*/g; s/_/\\_/g')
-    
-    result="[tabs]
+result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`ansi
 $escaped_result
