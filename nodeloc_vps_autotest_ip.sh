@@ -144,7 +144,8 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
-# 处理流媒体解锁结果
+
+# 处理IP质量结果
 local processed_ip_result
 processed_ip_result=$(ip_process_output "$ip_quality_result")
 
