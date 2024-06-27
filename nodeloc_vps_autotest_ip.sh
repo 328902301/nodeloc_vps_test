@@ -157,10 +157,7 @@ run_all_tests() {
 }
 
 format_results() {
-    # 预处理 IP 质量结果,去除可能导致问题的字符
-    cleaned_result=$(echo "$ip_quality_result" | sed 's/[[:cntrl:]]//g' | iconv -f UTF-8 -t UTF-8 -c)
-    
-    result="[tabs]
+result="[tabs]
 [tab=\"IP质量\"]
 \`\`\`
 $cleaned_result
