@@ -143,7 +143,7 @@ run_all_tests() {
 format_results() {
     # 处理流媒体解锁结果
     local processed_ip_result
-    processed_ip_result=$(ip_process_output "ip_quality_result")
+    processed_ip_result=$(ip_process_output "$ip_quality_result")
 
     result="[tabs]
 [tab=\"IP质量\"]
