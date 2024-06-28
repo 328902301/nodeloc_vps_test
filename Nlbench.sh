@@ -261,7 +261,7 @@ run_all_tests() {
 format_results() {
 
 # 处理yabs测试结果
-local processed_yabs_result=$(response_yabs_output "$yabs_result")
+local processed_yabs_result=$(yabs_process_output "$yabs_result")
 
 # 处理融合怪结果
 local processed_fusion_result=$(fusion_process_output "$fusion_result")
