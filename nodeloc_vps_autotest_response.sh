@@ -33,7 +33,6 @@ install_dependencies() {
     local dependencies=(
         "curl"
         "wget"
-        "speedtest-cli"
     )
     
     for dep in "${dependencies[@]}"; do
