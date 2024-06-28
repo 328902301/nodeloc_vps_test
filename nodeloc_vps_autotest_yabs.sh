@@ -102,10 +102,15 @@ declare -a test_results
 
 # 在每个命令执行后保存结果
 run_and_capture() {
-    local command_output
-    command_output=$(eval "$1" 2>&1)
+    local command_output=$(eval "$1" 2>&1)
     test_results+=("$command_output")
     echo "$command_output"
+}
+
+# 去除Yabs板块ANSI转义码
+yabs_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
 }
 
 # 运行所有测试
@@ -123,10 +128,14 @@ run_all_tests() {
 
 # 格式化结果为 Markdown
 format_results() {
+
+# 处理yabs测试结果
+local processed_yabs_result=$(response_yabs_output "$yabs_result")
+
 result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
-$yabs_result
+$processed_yabs_result
 \`\`\`
 [/tab]
 [/tabs]"
