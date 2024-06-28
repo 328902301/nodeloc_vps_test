@@ -109,8 +109,26 @@ run_and_capture() {
 
 # 去除Yabs板块ANSI转义码
 yabs_process_output() {
-    local input="$1"
-    echo "$input" | sed -E 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g'
+    sed -E 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g' | awk '
+    BEGIN { print_flag = 0; network_flag = 0 }
+    /^# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #/ { print_flag = 1 }
+    /^YABS completed/ { print_flag = 0 }
+    /^Preparing system for disk tests/ { print_flag = 0 }
+    /^fio Disk Speed Tests/ { print_flag = 1 }
+    /^iperf3 Network Speed Tests/ { network_flag = 1 }
+    /Geekbench test failed/ { print; exit }
+    print_flag == 1 { 
+        if (network_flag == 1 && $0 ~ /^Performing IPv4 iperf3/) {
+            next
+        }
+        if (network_flag == 1 && NF == 5) {
+            print
+        } else if (network_flag == 0) {
+            print
+        }
+    }
+    /^Geekbench 6 Benchmark Test:/, /^YABS completed/ { print }
+    '
 }
 
 # 运行所有测试
