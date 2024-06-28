@@ -135,6 +135,12 @@ run_and_capture() {
     echo "$command_output"
 }
 
+# 去除Yabs板块ANSI转义码
+yabs_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+}
+
 # 去除融合怪板块ANSI转义码并截取
 fusion_process_output() {
     local input="$1"
@@ -259,6 +265,9 @@ run_all_tests() {
 # 格式化结果为 Markdown
 format_results() {
 
+# 处理yabs测试结果
+local processed_yabs_result=$(response_yabs_output "$yabs_result")
+
 # 处理融合怪结果
 local processed_fusion_result
 processed_fusion_result=$(fusion_process_output "$fusion_result")
@@ -289,7 +298,7 @@ processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
 result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
-$yabs_result
+$processed_yabs_result
 \`\`\`
 [/tab]
 [tab=\"融合怪\"]
