@@ -107,27 +107,10 @@ run_and_capture() {
     echo "$command_output"
 }
 
-# 去除Yabs板块ANSI转义码并过滤特定输出
+# 去除Yabs板块ANSI转义码
 yabs_process_output() {
     local input="$1"
-    # 去除ANSI转义码
-    local processed_input=$(echo "$input" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
-    
-    # 使用 awk 过滤不需要的行，并保留合适的格式
-    echo "$processed_input" | awk '
-        BEGIN { in_block = 0; block_start = ""; }
-        /^Basic System Information:/ { in_block = 1; block_start = ""; }
-        /^iperf3 Network Speed Tests \(IPv4\):/ { in_block = 0; print block_start; }
-        in_block == 1 {
-            if (!/^(Preparing|Generating|Running|Performing)/ || /result/) {
-                if (block_start == "") {
-                    block_start = $0;
-                } else {
-                    block_start = block_start "\n" $0;
-                }
-            }
-        }
-    '
+    echo "$input" | sed -E 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g'
 }
 
 # 运行所有测试
