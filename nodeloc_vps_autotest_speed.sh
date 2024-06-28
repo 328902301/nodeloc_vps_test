@@ -115,16 +115,23 @@ speedtest_multi_process_output() {
     # Step 1: 去除 ANSI 转义码
     local no_ansi
     no_ansi=$(echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
-    echo "去除 ANSI 转义码后的输出: $no_ansi" >&2
-
-    # Step 2: 过滤掉包含 "测试进行中" 的行
-    local no_progress
-    no_progress=$(echo "$no_ansi" | grep -v "^ *测试进行中")
-    echo "过滤掉包含 '测试进行中' 的行后的输出: $no_progress" >&2
-
-    # Step 3: 截取所需的测试结果
+    
+    # Step 2: 计算关键字出现的次数
+    local count
+    count=$(echo "$no_ansi" | grep -c "大陆三网+教育网 IPv4 多线程测速")
+    
+    # Step 3: 提取所需的测试结果并过滤进度条
     local speedtest_multi_process_output_result
-    speedtest_multi_process_output_result=$(echo "$no_progress" | awk '/大陆三网\+教育网 IPv4 多线程测速/{f=1} f; /北京时间/{f=0}')
+    speedtest_multi_process_output_result=$(echo "$no_ansi" | awk -v count="$count" '
+        /大陆三网\+教育网 IPv4 多线程测速/ {
+            if (--count == 0) {
+                f=1; next
+            }
+        }
+        f && !/测试进行中/ && !/^\s*$/; 
+        /系统时间：/ {exit}
+    ')
+    
     echo "$speedtest_multi_process_output_result"
 }
 
@@ -134,16 +141,23 @@ speedtest_single_process_output() {
     # Step 1: 去除 ANSI 转义码
     local no_ansi
     no_ansi=$(echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
-    echo "去除 ANSI 转义码后的输出: $no_ansi" >&2
-
-    # Step 2: 过滤掉包含 "测试进行中" 的行
-    local no_progress
-    no_progress=$(echo "$no_ansi" | grep -v "^ *测试进行中")
-    echo "过滤掉包含 '测试进行中' 的行后的输出: $no_progress" >&2
-
-    # Step 3: 截取所需的测试结果
+    
+    # Step 2: 计算关键字出现的次数
+    local count
+    count=$(echo "$no_ansi" | grep -c "大陆三网+教育网 IPv4 单线程测速")
+    
+    # Step 3: 提取所需的测试结果并过滤进度条
     local speedtest_single_process_output_result
-    speedtest_single_process_output_result=$(echo "$no_progress" | awk '/大陆三网\+教育网 IPv4 单线程测速/{f=1} f; /北京时间/{f=0}')
+    speedtest_single_process_output_result=$(echo "$no_ansi" | awk -v count="$count" '
+        /大陆三网\+教育网 IPv4 单线程测速/ {
+            if (--count == 0) {
+                f=1; next
+            }
+        }
+        f && !/测试进行中/ && !/^\s*$/; 
+        /系统时间：/ {exit}
+    ')
+    
     echo "$speedtest_single_process_output_result"
 }
 
