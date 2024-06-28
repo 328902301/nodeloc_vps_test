@@ -215,7 +215,6 @@ autotrace_process_output() {
     echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1/9 Traceroute/{f=1} f; /[信息] 已删除 Nexttrace 文件/{f=0}'
 }
 
-
 # 根据编号执行特定测试
 perform_test() {
     case $1 in
