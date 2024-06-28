@@ -112,7 +112,7 @@ run_and_capture() {
 autotrace_process_output() {
     local input="$1"
     # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1/9 Traceroute/{f=1} f; /[信息] 已删除 Nexttrace 文件/{f=0}'
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1\/9 Traceroute/{f=1} f; /\[信息\] 已删除 Nexttrace 文件/{f=0}'
 }
 
 # 运行所有测试
