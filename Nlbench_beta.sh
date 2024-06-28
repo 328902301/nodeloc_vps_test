@@ -264,6 +264,14 @@ run_all_tests() {
     echo -e "${RED}请选择测试模式：${NC}"
     echo "1. 全部测试"
     echo "2. 选择性测试（输入数字，用英文逗号分隔，如：1,2,3）"
+    echo "    [1] Yabs"
+    echo "    [2] 融合怪"
+    echo "    [3] IP质量"
+    echo "    [4] 流媒体解锁"
+    echo "    [5] 响应测试"
+    echo "    [6] 多线程测试"
+    echo "    [7] 单线程测试"
+    echo "    [8] 回程路由"
     read -r test_choice
 
     case "$test_choice" in
@@ -282,9 +290,9 @@ run_all_tests() {
             ;;
         2)
             echo "请输入要测试的编号，用逗号分隔（如：1,2,3）："
-            echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
             read -r test_numbers
             IFS=',' read -ra selected_tests <<< "$test_numbers"
+            echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
             for test_num in "${selected_tests[@]}"; do
                 perform_test "$test_num"
             done
@@ -294,7 +302,7 @@ run_all_tests() {
             format_results
             ;;
         *)
-            echo -e "${RED}无效的选项：$choice${NC}"
+            echo -e "${RED}无效的选项：$test_choice${NC}"
             ;;
     esac
 }
