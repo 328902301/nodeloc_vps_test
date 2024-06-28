@@ -148,7 +148,7 @@ speedtest_single_process_output() {
 
     # Step 3: 截取所需的测试结果
     local speedtest_single_process_output_result
-    speedtest_single_process_output_result=$(echo "$no_progress" | awk '/大陆三网+教育网 IPv4 多线程测速/{f=1} f; /北京时间/{f=0}')
+    speedtest_single_process_output_result=$(echo "$no_progress" | awk '/大陆三网+教育网 IPv4 单线程测速/{f=1} f; /北京时间/{f=0}')
     echo "$speedtest_single_process_output_result"
 }
 
