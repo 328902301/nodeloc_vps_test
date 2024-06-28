@@ -169,7 +169,7 @@ run_all_tests() {
     echo -e "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
     echo -e "目前默认选择${YELLOW}大陆三网+教育网 IPv4（多线程/单线程）测试...${NC}"
     speedtest_multi_result=$(run_and_capture "echo '1' | bash <(curl -sL bash.icu/speedtest)")
-    speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
+#   speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
 
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
@@ -181,7 +181,7 @@ format_results() {
 
 # 处理三网测速结果
 local processed_speedtest_multi_result=$(speedtest_process_output "$speedtest_multi_result")
-local processed_speedtest_single_result=$(speedtest_process_output "$speedtest_single_result")
+#   local processed_speedtest_single_result=$(speedtest_process_output "$speedtest_single_result")
 
 result="[tabs]
 [tab=\"多线程测速\"]
@@ -191,7 +191,7 @@ $processed_speedtest_multi_result
 [/tab]
 [tab=\"单线程测速\"]
 \`\`\`
-$processed_speedtest_single_result
+
 \`\`\`
 [/tab]
 [/tabs]"
