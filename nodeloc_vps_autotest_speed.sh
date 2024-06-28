@@ -109,6 +109,7 @@ run_and_capture() {
     echo "$command_output"
 }
 
+# 去除三网测速板块板块ANSI转义码并截取
 process_speedtest_output() {
     local input="$1"
     local keyword="$2"
@@ -132,19 +133,18 @@ process_speedtest_output() {
     local result
     result=$(echo "$no_ansi" | awk -v count="$count" -v key="$keyword" '
         BEGIN { found = 0 }
-        $0 == key {
+        $0 ~ key {
             print "Debug: Found keyword, remaining count: " count > "/dev/stderr"
             if (--count == 0) {
                 found = 1
                 print "Debug: Starting to capture output" > "/dev/stderr"
-                next
             }
         }
         found && !/测试进行中/ && NF { 
             print "Debug: Capturing line: " $0 > "/dev/stderr"
             print 
         }
-        /系统时间：/ {
+        /------------------------ 多功能 自更新 测速脚本 ------------------------/ && count == 0 {
             print "Debug: Reached end marker" > "/dev/stderr"
             exit
         }
@@ -156,14 +156,9 @@ process_speedtest_output() {
     echo "$result"
 }
 
-speedtest_multi_process_output() {
-    echo "Debug: Calling multi-thread process" >&2
-    process_speedtest_output "$1" "大陆三网+教育网 IPv4 多线程测速"
-}
-
-speedtest_single_process_output() {
-    echo "Debug: Calling single-thread process" >&2
-    process_speedtest_output "$1" "大陆三网+教育网 IPv4 单线程测速"
+speedtest_process_output() {
+    echo "Debug: Calling speedtest process" >&2
+    process_speedtest_output "$1" "多功能 自更新 测速脚本"
 }
 
 # 运行所有测试
@@ -185,8 +180,8 @@ run_all_tests() {
 format_results() {
 
 # 处理三网测速结果
-local processed_speedtest_multi_result=$(speedtest_multi_process_output "$speedtest_multi_result")
-local processed_speedtest_single_result=$(speedtest_single_process_output "$speedtest_single_result")
+local processed_speedtest_multi_result=$(speedtest_process_output "$speedtest_multi_result")
+local processed_speedtest_single_result=$(speedtest_process_output "$speedtest_single_result")
 
 result="[tabs]
 [tab=\"多线程测速\"]
