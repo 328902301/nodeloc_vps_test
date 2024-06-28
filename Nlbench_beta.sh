@@ -119,7 +119,7 @@ show_welcome() {
     echo "7. 单线程测试"
     echo "8. 回程路由（调试中）"
     echo ""
-    echo -e "${RED}按任意键开始测试...${NC}"
+    echo -e "${RED}按任意键进入测试选项...${NC}"
     read -n 1 -s
     clear
 }
@@ -259,7 +259,7 @@ perform_test() {
 
 # 运行所有测试
 run_all_tests() {
-    echo "请选择测试模式："
+    echo -e "${RED}请选择测试模式：${NC}"
     echo "1. 全部测试"
     echo "2. 选择性测试（输入数字，用英文逗号分隔，如：1,2,3）"
     read -r test_choice
