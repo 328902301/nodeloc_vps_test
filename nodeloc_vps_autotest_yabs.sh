@@ -107,10 +107,10 @@ run_and_capture() {
     echo "$command_output"
 }
 
-# 去除Yabs板块ANSI转义码
+# 去除Yabs板块ANSI转义码并过滤特定输出
 yabs_process_output() {
     local input="$1"
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | grep -v -E 'Preparing|Generating|Running|Performing'
 }
 
 # 运行所有测试
