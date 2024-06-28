@@ -33,11 +33,6 @@ install_dependencies() {
     local dependencies=(
         "curl"
         "wget"
-        "xclip"
-        "iperf3"
-        "mtr"
-        "traceroute"
-        "speedtest-cli"
     )
     
     for dep in "${dependencies[@]}"; do
