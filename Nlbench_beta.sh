@@ -129,10 +129,15 @@ declare -a test_results
 
 # 在每个命令执行后保存结果
 run_and_capture() {
-    local command_output
-    command_output=$(eval "$1" 2>&1)
+    local command_output=$(eval "$1" 2>&1)
     test_results+=("$command_output")
     echo "$command_output"
+}
+
+# 去除Yabs板块ANSI转义码
+yabs_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
 }
 
 # 去除融合怪板块ANSI转义码并截取
@@ -179,13 +184,11 @@ speedtest_multi_process_output() {
     echo "去除 ANSI 转义码后的输出: $no_ansi" >&2
 
     # Step 2: 过滤掉包含 "测试进行中" 的行
-    local no_progress
-    no_progress=$(echo "$no_ansi" | grep -v "^ *测试进行中")
+    local no_progress=$(echo "$no_ansi" | grep -v "^ *测试进行中")
     echo "过滤掉包含 '测试进行中' 的行后的输出: $no_progress" >&2
 
     # Step 3: 截取所需的测试结果
-    local speedtest_multi_process_output_result
-    speedtest_multi_process_output_result=$(echo "$no_progress" | awk '/大陆三网\+教育网 IPv4 多线程测速/{f=1} f; /北京时间/{f=0}')
+    local speedtest_multi_process_output_result=$(echo "$no_progress" | awk '/大陆三网\+教育网 IPv4 多线程测速/{f=1} f; /北京时间/{f=0}')
     echo "$speedtest_multi_process_output_result"
 }
 
@@ -203,8 +206,7 @@ speedtest_single_process_output() {
     echo "过滤掉包含 '测试进行中' 的行后的输出: $no_progress" >&2
 
     # Step 3: 截取所需的测试结果
-    local speedtest_single_process_output_result
-    speedtest_single_process_output_result=$(echo "$no_progress" | awk '/大陆三网\+教育网 IPv4 单线程测速/{f=1} f; /北京时间/{f=0}')
+    local speedtest_single_process_output_result=$(echo "$no_progress" | awk '/大陆三网\+教育网 IPv4 单线程测速/{f=1} f; /北京时间/{f=0}')
     echo "$speedtest_single_process_output_result"
 }
 
@@ -300,37 +302,34 @@ run_all_tests() {
 # 格式化结果为 Markdown
 format_results() {
 
+# 处理yabs测试结果
+local processed_yabs_result=$(response_yabs_output "$yabs_result")
+
 # 处理融合怪结果
-local processed_fusion_result
-processed_fusion_result=$(fusion_process_output "$fusion_result")
+local processed_fusion_result=$(fusion_process_output "$fusion_result")
 
 # 处理IP质量结果
-local processed_ip_result
-processed_ip_result=$(ip_process_output "$ip_quality_result")
+local processed_ip_result=$(ip_process_output "$ip_quality_result")
 
 # 处理流媒体解锁结果
-local processed_streaming_result
-processed_streaming_result=$(streaming_process_output "$streaming_result")
+local processed_streaming_result=$(streaming_process_output "$streaming_result")
 
 # 处理响应测试结果
-local processed_response_result
-processed_response_result=$(response_process_output "$response_result")
+local processed_response_result=$(response_process_output "$response_result")
 
 # 处理三网测速结果
-local processed_speedtest_multi_result
-local processed_speedtest_single_result
-processed_speedtest_multi_result=$(speedtest_multi_process_output "$speedtest_multi_result")
-processed_speedtest_single_result=$(speedtest_single_process_output "$speedtest_single_result")
+local processed_speedtest_multi_result=$(speedtest_multi_process_output "$speedtest_multi_result")
+local processed_speedtest_single_result=$(speedtest_single_process_output "$speedtest_single_result")
 
 # 处理回程路由结果
-local processed_autotrace_result
-processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
+local processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
 
 # Tabs分栏输出结果，用于复制到Nodeloc论坛
+
 result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
-$yabs_result
+$processed_yabs_result
 \`\`\`
 [/tab]
 [tab=\"融合怪\"]
