@@ -117,7 +117,7 @@ show_welcome() {
     echo "5. 响应测试"
     echo "6. 多线程测试"
     echo "7. 单线程测试"
-    echo "8. 回程路由（调试中）"
+    echo "8. 回程路由"
     echo ""
     echo -e "${RED}按任意键进入测试选项...${NC}"
     read -n 1 -s
