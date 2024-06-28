@@ -109,38 +109,60 @@ run_and_capture() {
     echo "$command_output"
 }
 
-# 去除三网测速板块ANSI转义码并截取
 process_speedtest_output() {
     local input="$1"
     local keyword="$2"
+    
+    echo "Debug: Processing for keyword: $keyword" >&2
     
     # 去除 ANSI 转义码
     local no_ansi
     no_ansi=$(echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
     
+    echo "Debug: Input after ANSI removal (first 500 chars):" >&2
+    echo "${no_ansi:0:500}" >&2
+    
     # 计算关键字出现的次数
     local count
     count=$(echo "$no_ansi" | grep -Fc "$keyword")
     
+    echo "Debug: Keyword count: $count" >&2
+    
     # 提取所需的测试结果并过滤进度条
-    echo "$no_ansi" | awk -v count="$count" -v key="$keyword" '
+    local result
+    result=$(echo "$no_ansi" | awk -v count="$count" -v key="$keyword" '
+        BEGIN { found = 0 }
         $0 == key {
+            print "Debug: Found keyword, remaining count: " count > "/dev/stderr"
             if (--count == 0) {
-                f=1; next
+                found = 1
+                print "Debug: Starting to capture output" > "/dev/stderr"
+                next
             }
         }
-        f && !/测试进行中/ && NF; 
-        /系统时间：/ {exit}
-    '
+        found && !/测试进行中/ && NF { 
+            print "Debug: Capturing line: " $0 > "/dev/stderr"
+            print 
+        }
+        /系统时间：/ {
+            print "Debug: Reached end marker" > "/dev/stderr"
+            exit
+        }
+    ')
+    
+    echo "Debug: Result (first 500 chars):" >&2
+    echo "${result:0:500}" >&2
+    
+    echo "$result"
 }
 
-# 提取三网测速板块（多线程）
 speedtest_multi_process_output() {
+    echo "Debug: Calling multi-thread process" >&2
     process_speedtest_output "$1" "大陆三网+教育网 IPv4 多线程测速"
 }
 
-# 提取三网测速板块（单线程）
 speedtest_single_process_output() {
+    echo "Debug: Calling single-thread process" >&2
     process_speedtest_output "$1" "大陆三网+教育网 IPv4 单线程测速"
 }
 
