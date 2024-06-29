@@ -100,35 +100,22 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 在每个命令执行后保存结果
+# 只捕获 YABS 测试的最终结果
 run_and_capture() {
-    local command_output=$(eval "$1" 2>&1)
-    test_results+=("$command_output")
-    echo "$command_output"
+    # 运行 YABS 测试并将输出重定向到临时文件
+    eval "$1" > /tmp/yabs_output 2>&1
+    
+    # 从临时文件中提取最终结果
+    sed -n '/^# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #/,/^YABS completed/p' /tmp/yabs_output
+    
+    # 删除临时文件
+    rm /tmp/yabs_output
 }
 
 # 去除Yabs板块ANSI转义码
 yabs_process_output() {
-    sed -E 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g' | awk '
-    BEGIN { print_flag = 0; network_flag = 0 }
-    /^# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #/ { print_flag = 1 }
-    /^YABS completed/ { print_flag = 0 }
-    /^Preparing system for disk tests/ { print_flag = 0 }
-    /^fio Disk Speed Tests/ { print_flag = 1 }
-    /^iperf3 Network Speed Tests/ { network_flag = 1 }
-    /Geekbench test failed/ { print; exit }
-    print_flag == 1 { 
-        if (network_flag == 1 && $0 ~ /^Performing IPv4 iperf3/) {
-            next
-        }
-        if (network_flag == 1 && NF == 5) {
-            print
-        } else if (network_flag == 0) {
-            print
-        }
-    }
-    /^Geekbench 6 Benchmark Test:/, /^YABS completed/ { print }
-    '
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
 }
 
 # 运行所有测试
