@@ -100,16 +100,19 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 捕获 YABS 测试的最终输出
+# 捕获 YABS 测试的输出并同时显示在终端
 run_and_capture() {
-    # 运行 YABS 测试，将输出保存到临时文件
-    wget -qO- yabs.sh | bash > /tmp/yabs_output 2>&1
+    # 创建一个临时文件来存储完整输出
+    local temp_file=$(mktemp)
     
-    # YABS 测试完成后，读取并输出临时文件的内容
-    cat /tmp/yabs_output
+    # 运行 YABS 测试，同时将输出显示在终端和保存到临时文件
+    wget -qO- yabs.sh | bash | tee "$temp_file"
+    
+    # 读取完整结果，但排除最后一行（"按回车键返回主菜单..."）
+    sed '$d' "$temp_file"
     
     # 删除临时文件
-    rm /tmp/yabs_output
+    rm "$temp_file"
 }
 
 # 去除YABS输出中的ANSI转义码
