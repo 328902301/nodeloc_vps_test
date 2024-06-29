@@ -100,19 +100,19 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 捕获 YABS 测试的终端输出
+# 捕获 YABS 测试的最终输出
 run_and_capture() {
-    # 使用 script 命令捕获终端输出
-    script -q -c "wget -qO- yabs.sh | bash" /dev/null > /tmp/yabs_output
+    # 运行 YABS 测试，将输出保存到临时文件
+    wget -qO- yabs.sh | bash > /tmp/yabs_output 2>&1
     
-    # 从捕获的输出中提取最后一部分（可能需要调整）
-    tail -n 100 /tmp/yabs_output
+    # YABS 测试完成后，读取并输出临时文件的内容
+    cat /tmp/yabs_output
     
     # 删除临时文件
     rm /tmp/yabs_output
 }
 
-# 去除Yabs板块ANSI转义码
+# 去除YABS输出中的ANSI转义码
 yabs_process_output() {
     local input="$1"
     echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
