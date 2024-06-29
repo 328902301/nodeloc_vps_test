@@ -100,13 +100,13 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 只捕获 YABS 测试的最终结果
+# 捕获 YABS 测试的终端输出
 run_and_capture() {
-    # 运行 YABS 测试并将输出重定向到临时文件
-    eval "$1" > /tmp/yabs_output 2>&1
+    # 使用 script 命令捕获终端输出
+    script -q -c "wget -qO- yabs.sh | bash" /dev/null > /tmp/yabs_output
     
-    # 从临时文件中提取最终结果
-    sed -n '/^# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #/,/^YABS completed/p' /tmp/yabs_output
+    # 从捕获的输出中提取最后一部分（可能需要调整）
+    tail -n 100 /tmp/yabs_output
     
     # 删除临时文件
     rm /tmp/yabs_output
@@ -121,10 +121,9 @@ yabs_process_output() {
 # 运行所有测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
-
-    # YABS
+    
     echo -e "运行${YELLOW}YABS...${NC}"
-    yabs_result=$(run_and_capture "wget -qO- yabs.sh | bash")
+    yabs_result=$(run_and_capture)
 
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
