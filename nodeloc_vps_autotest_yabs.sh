@@ -105,8 +105,8 @@ run_and_capture() {
     # 创建一个临时文件来存储完整输出
     local temp_file=$(mktemp)
     
-    # 运行 YABS 测试，同时将输出显示在终端和保存到临时文件
-    wget -qO- yabs.sh | bash | tee "$temp_file"
+    # 运行 YABS 测试，使用 stdbuf 禁用缓冲，同时将输出显示在终端和保存到临时文件
+    wget -qO- yabs.sh | stdbuf -oL bash | tee "$temp_file"
     
     # 读取完整结果，但排除最后一行（"按回车键返回主菜单..."）
     sed '$d' "$temp_file"
