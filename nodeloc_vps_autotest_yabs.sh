@@ -100,44 +100,32 @@ show_welcome() {
 # 定义一个数组来存储每个命令的输出
 declare -a test_results
 
-# 捕获 YABS 测试的输出并同时显示在终端
-run_and_capture() {
-    # 创建一个临时文件来存储完整输出
-    local temp_file=$(mktemp)
-    
-    # 运行 YABS 测试，使用 stdbuf 禁用缓冲，同时将输出显示在终端和保存到临时文件
-    wget -qO- yabs.sh | stdbuf -oL bash | tee "$temp_file"
-    
-    # 读取完整结果，但排除最后一行（"按回车键返回主菜单..."）
-    sed '$d' "$temp_file"
-    
-    # 删除临时文件
-    rm "$temp_file"
-}
-
-# 去除YABS输出中的ANSI转义码
-yabs_process_output() {
-    local input="$1"
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
-}
-
 # 运行所有测试
 run_all_tests() {
     echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
     
     echo -e "运行${YELLOW}YABS...${NC}"
-    yabs_result=$(run_and_capture)
-
+    
+    # 使用 script 命令运行 YABS 并捕获输出
+    script -q -c "wget -qO- yabs.sh | bash" /dev/null | tee /tmp/yabs_output
+    
+    # 从输出中移除最后一行（通常是 "按回车键返回主菜单..."）
+    sed '$d' /tmp/yabs_output > /tmp/yabs_final_output
+    
+    # 读取处理后的输出
+    yabs_result=$(cat /tmp/yabs_final_output)
+    
+    # 删除临时文件
+    rm /tmp/yabs_output /tmp/yabs_final_output
+    
     # 格式化结果
-    echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
     format_results
 }
 
 # 格式化结果为 Markdown
 format_results() {
 
-# 处理yabs测试结果
-local processed_yabs_result=$(yabs_process_output "$yabs_result")
+local processed_yabs_result=$(echo "$yabs_result" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
 
 result="[tabs]
 [tab=\"YABS\"]
