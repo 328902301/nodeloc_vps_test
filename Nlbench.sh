@@ -176,7 +176,7 @@ response_process_output() {
 }
 
 # 去除三网测速板块板块ANSI转义码并截取
-process_speedtest_output() {
+speedtest_process_output() {
     local input="$1"
     # 使用更全面的 sed 命令去除所有 ANSI 转义码
     echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
@@ -248,8 +248,8 @@ local processed_streaming_result=$(streaming_process_output "$streaming_result")
 local processed_response_result=$(response_process_output "$response_result")
 
 # 处理三网测速结果
-local processed_speedtest_multi_result=$(process_speedtest_output "$speedtest_multi_result")
-local processed_speedtest_single_result=$(process_speedtest_output "$speedtest_single_result")
+local processed_speedtest_multi_result=$(speedtest_process_output "$speedtest_multi_result")
+local processed_speedtest_single_result=$(speedtest_process_output "$speedtest_single_result")
 
 # 处理回程路由结果
 local processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
