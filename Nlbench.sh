@@ -186,7 +186,7 @@ process_speedtest_output() {
 autotrace_process_output() {
     local input="$1"
     # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1\/9 Traceroute to 中国/{f=1} f; /\[信息\] 已删除 Nexttrace 文件/{f=0}'
 }
 
 # 运行所有测试
@@ -248,8 +248,8 @@ local processed_streaming_result=$(streaming_process_output "$streaming_result")
 local processed_response_result=$(response_process_output "$response_result")
 
 # 处理三网测速结果
-local processed_speedtest_multi_result=$(speedtest_multi_process_output "$speedtest_multi_result")
-local processed_speedtest_single_result=$(speedtest_single_process_output "$speedtest_single_result")
+local processed_speedtest_multi_result=$(process_speedtest_output "$speedtest_multi_result")
+local processed_speedtest_single_result=$(process_speedtest_output "$speedtest_single_result")
 
 # 处理回程路由结果
 local processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
