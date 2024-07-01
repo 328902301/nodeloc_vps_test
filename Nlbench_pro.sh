@@ -117,51 +117,64 @@ update_system() {
     return 0
 }
 
-#!/bin/bash
-
-# ... (前面的代码保持不变)
-
 # 执行单个脚本并输出结果到文件
 run_script() {
     local script_number=$1
     local output_file=$2
     local temp_file=$(mktemp)
     case $script_number in
+        # YABS
         1)
+            echo -e "运行${YELLOW}YABS...${NC}"
             wget -qO- yabs.sh | bash > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_yabs"
             ;;
+        # 融合怪
         2)
+            echo -e "运行${YELLOW}融合怪...${NC}"
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_fusion"
             ;;
+        # IP质量
         3)
+            echo -e "运行${YELLOW}IP质量测试...${NC}"
             bash <(curl -Ls IP.Check.Place) > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_ip_quality"
             ;;
+        # 流媒体解锁
         4)
+            echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
             local region=$(detect_region)
             bash <(curl -L -s media.ispvps.com) <<< "$region" > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_streaming"
             ;;
+        # 响应测试
         5)
+            echo -e "运行${YELLOW}响应测试...${NC}"
             bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_response"
             ;;
+        # 多线程测速
         6)
+            echo -e "运行${YELLOW}多线程测速...${NC}"
             bash <(curl -sL bash.icu/speedtest) <<< "1" > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_multi_thread"
             ;;
+        # 单线程测速
         7)
+            echo -e "运行${YELLOW}单线程测速...${NC}"
             bash <(curl -sL bash.icu/speedtest) <<< "2" > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_single_thread"
             ;;
+        # 回程路由
         8)
+            echo -e "运行${YELLOW}回程路由测试...${NC}"
             wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_route"
             ;;
     esac
     rm "$temp_file"
+    echo -e "${GREEN}测试完成。${NC}"
 }
 
 # 生成最终的 Markdown 输出
