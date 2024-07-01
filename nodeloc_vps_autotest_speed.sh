@@ -110,7 +110,7 @@ run_and_capture() {
 }
 
 # 去除三网测速板块板块ANSI转义码并截取
-process_speedtest_output() {
+speedtest_process_output() {
     local input="$1"
     
     # 去除 ANSI 转义码并提取所需的测试结果
@@ -120,11 +120,6 @@ process_speedtest_output() {
         print_flag && !/测试进行中/ { print }
         /------------------------ 测试结束 ------------------------/ { print_flag = 0 }
     '
-}
-
-speedtest_process_output() {
-    echo "Debug: Calling speedtest process" >&2
-    process_speedtest_output "$1" "多功能 自更新 测速脚本"
 }
 
 # 运行所有测试
@@ -146,8 +141,8 @@ run_all_tests() {
 format_results() {
 
 # 处理三网测速结果
-local processed_speedtest_multi_result=$(process_speedtest_output "$speedtest_multi_result")
-# local processed_speedtest_single_result=$(process_speedtest_output "$speedtest_single_result")
+local processed_speedtest_multi_result=$(speedtest_process_output "$speedtest_multi_result")
+local processed_speedtest_single_result=$(speedtest_process_output "$speedtest_single_result")
 
 result="[tabs]
 [tab=\"多线程测速\"]
@@ -157,7 +152,7 @@ $processed_speedtest_multi_result
 [/tab]
 [tab=\"单线程测速\"]
 \`\`\`
-
+$processed_speedtest_single_result
 \`\`\`
 [/tab]
 [/tabs]"
