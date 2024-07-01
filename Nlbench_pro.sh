@@ -140,7 +140,8 @@ run_script() {
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_ip_quality"
             ;;
         4)
-            bash <(curl -L -s media.ispvps.com) > "$temp_file" 2>&1
+            local region=$(detect_region)
+            bash <(curl -L -s media.ispvps.com) <<< "$region" > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_streaming"
             ;;
         5)
@@ -148,15 +149,15 @@ run_script() {
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_response"
             ;;
         6)
-            bash <(curl -sL bash.icu/speedtest) > "$temp_file" 2>&1
+            bash <(curl -sL bash.icu/speedtest) <<< "1" > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_multi_thread"
             ;;
         7)
-            bash <(curl -sL bash.icu/speedtest) > "$temp_file" 2>&1
+            bash <(curl -sL bash.icu/speedtest) <<< "2" > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_single_thread"
             ;;
         8)
-            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh > "$temp_file" 2>&1
+            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" > "$temp_file" 2>&1
             sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_route"
             ;;
     esac
