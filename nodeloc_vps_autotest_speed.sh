@@ -140,7 +140,7 @@ process_speedtest_output() {
                 print "Debug: Starting to capture output" > "/dev/stderr"
             }
         }
-        found && !/测试进行中/ && NF { 
+        found && !/测试进行中/ { 
             print "Debug: Capturing line: " $0 > "/dev/stderr"
             print 
         }
@@ -180,8 +180,8 @@ run_all_tests() {
 format_results() {
 
 # 处理三网测速结果
-local processed_speedtest_multi_result=$(speedtest_process_output "$speedtest_multi_result")
-#   local processed_speedtest_single_result=$(speedtest_process_output "$speedtest_single_result")
+local processed_speedtest_multi_result=$(process_speedtest_output "$speedtest_multi_result")
+#   local processed_speedtest_single_result=$(process_speedtest_output "$speedtest_single_result")
 
 result="[tabs]
 [tab=\"多线程测速\"]
