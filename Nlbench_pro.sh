@@ -290,6 +290,14 @@ run_all_scripts() {
 run_selected_scripts() {
     local base_output_file="vps_test_results_$(date +%Y%m%d_%H%M%S)"
     echo "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3）："
+    echo "1. Yabs"
+    echo "2. 融合怪"
+    echo "3. IP质量"
+    echo "4. 流媒体解锁"
+    echo "5. 响应测试"
+    echo "6. 多线程测试"
+    echo "7. 单线程测试"
+    echo "8. 回程路由"
     read -r script_numbers
     IFS=',' read -ra selected_scripts <<< "$script_numbers"
     echo "开始执行选定的测试脚本..."
@@ -323,6 +331,43 @@ main_menu() {
             echo "无效选择，请重新输入。"
             ;;
     esac
+}
+
+# 输出欢迎信息
+show_welcome() {
+    echo ""
+    echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
+    echo ""
+    echo "Nodeloc_VPS_自动脚本测试 $VERSION"
+    echo "GitHub地址: https://github.com/everett7623/nodeloc_vps_test"
+    echo "VPS选购: https://www.nodeloc.com/vps"
+    echo ""
+    echo -e "${YELLOW}#     #  #####  ####  ###### #       ####   ####    #    # ####   ####${NC}"
+    echo -e "${YELLOW}##    # #     # #   # #      #      #    # #    #   #    # #   # #     #${NC}"
+    echo -e "${YELLOW}# #   # #     # #   # #####  #      #    # #        #    # ####   ####${NC}"
+    echo -e "${YELLOW}#  #  # #     # #   # #      #      #    # #        #    # #          #${NC}"
+    echo -e "${YELLOW}#   # # #     # #   # #      #      #    # #    #   #    # #     #    #${NC}"
+    echo -e "${YELLOW}#    ##  #####  ####  ###### ######  ####   ####     ####  #      ####${NC}"
+    echo ""
+    echo "支持Ubuntu/Debian"
+    echo ""
+    echo -e "今日运行次数: ${RED}$daily_count${NC} 次，累计运行次数: ${RED}$total_count${NC} 次"
+    echo ""
+    echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
+    echo ""
+    echo "一键脚本将测试以下项目，可以自动全部测试，或者自定义选择测试项目："
+    echo "1. Yabs"
+    echo "2. 融合怪"
+    echo "3. IP质量"
+    echo "4. 流媒体解锁"
+    echo "5. 响应测试"
+    echo "6. 多线程测试"
+    echo "7. 单线程测试"
+    echo "8. 回程路由"
+    echo ""
+    echo -e "${RED}按任意键进入测试选项...${NC}"
+    read -n 1 -s
+    clear
 }
 
 # 主函数
