@@ -112,48 +112,14 @@ run_and_capture() {
 # 去除三网测速板块板块ANSI转义码并截取
 process_speedtest_output() {
     local input="$1"
-    local keyword="$2"
     
-    echo "Debug: Processing for keyword: $keyword" >&2
-    
-    # 去除 ANSI 转义码
-    local no_ansi
-    no_ansi=$(echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
-    
-    echo "Debug: Input after ANSI removal (first 500 chars):" >&2
-    echo "${no_ansi:0:500}" >&2
-    
-    # 计算关键字出现的次数
-    local count
-    count=$(echo "$no_ansi" | grep -Fc "$keyword")
-    
-    echo "Debug: Keyword count: $count" >&2
-    
-    # 提取所需的测试结果并过滤进度条
-    local result
-    result=$(echo "$no_ansi" | awk -v count="$count" -v key="$keyword" '
-        BEGIN { found = 0 }
-        $0 ~ key {
-            print "Debug: Found keyword, remaining count: " count > "/dev/stderr"
-            if (--count == 0) {
-                found = 1
-                print "Debug: Starting to capture output" > "/dev/stderr"
-            }
-        }
-        found && !/测试进行中/ { 
-            print "Debug: Capturing line: " $0 > "/dev/stderr"
-            print 
-        }
-        /------------------------ 多功能 自更新 测速脚本 ------------------------/ && count == 0 {
-            print "Debug: Reached end marker" > "/dev/stderr"
-            exit
-        }
-    ')
-    
-    echo "Debug: Result (first 500 chars):" >&2
-    echo "${result:0:500}" >&2
-    
-    echo "$result"
+    # 去除 ANSI 转义码并提取所需的测试结果
+    echo "$input" | sed 's/\x1B\[[0-9;]*[JKmsu]//g' | awk '
+        BEGIN { print_flag = 0 }
+        /------------------------ 多功能 自更新 测速脚本 ------------------------/ { print_flag = 1 }
+        print_flag && !/测试进行中/ { print }
+        /------------------------ 测试结束 ------------------------/ { print_flag = 0 }
+    '
 }
 
 speedtest_process_output() {
@@ -168,8 +134,8 @@ run_all_tests() {
     # 三网测速
     echo -e "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
     echo -e "目前默认选择${YELLOW}大陆三网+教育网 IPv4（多线程/单线程）测试...${NC}"
-    speedtest_multi_result=$(run_and_capture "echo '1' | bash <(curl -sL bash.icu/speedtest)")
-#   speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
+    speedtest_multi_result=$(echo '1' | bash <(curl -sL bash.icu/speedtest))
+#    speedtest_single_result=$(echo '2' | bash <(curl -sL bash.icu/speedtest))
 
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
@@ -181,7 +147,7 @@ format_results() {
 
 # 处理三网测速结果
 local processed_speedtest_multi_result=$(process_speedtest_output "$speedtest_multi_result")
-#   local processed_speedtest_single_result=$(process_speedtest_output "$speedtest_single_result")
+# local processed_speedtest_single_result=$(process_speedtest_output "$speedtest_single_result")
 
 result="[tabs]
 [tab=\"多线程测速\"]
@@ -206,7 +172,7 @@ main() {
     show_welcome
     run_all_tests
     echo -e "${YELLOW}所有测试完成，可到results.md复制到Nodeloc使用。${NC}"
-    read -n 1 -s
+    read -n 1 -s -r -p "按任意键退出..."
     echo "最终测试结果如下:" >&2
     cat results.md >&2
 }
