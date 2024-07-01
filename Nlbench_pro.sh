@@ -289,7 +289,7 @@ run_all_scripts() {
 # 执行选定的脚本
 run_selected_scripts() {
     local base_output_file="vps_test_results_$(date +%Y%m%d_%H%M%S)"
-    echo "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3）："
+    echo "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3）：$script_numbers"
     echo "1. Yabs"
     echo "2. 融合怪"
     echo "3. IP质量"
