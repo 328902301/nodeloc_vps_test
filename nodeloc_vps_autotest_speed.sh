@@ -128,9 +128,9 @@ run_all_tests() {
 
     # 三网测速
     echo -e "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
-    echo -e "目前默认选择${YELLOW}大陆三网+教育网 IPv4（多线程/单线程）测试...${NC}"
+    echo -e "默认选择1${YELLOW}大陆三网+教育网 IPv4（多线程/单线程）测试...${NC}"
     speedtest_multi_result=$(echo '1' | bash <(curl -sL bash.icu/speedtest))
-#    speedtest_single_result=$(echo '2' | bash <(curl -sL bash.icu/speedtest))
+    speedtest_single_result=$(echo '2' | bash <(curl -sL bash.icu/speedtest))
 
     # 格式化结果
     echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
