@@ -274,6 +274,9 @@ generate_markdown_output() {
     echo "[/tabs]" >> "$final_output_file"
 
     echo "所有测试完成，结果已保存在 $final_output_file 中。"
+    
+    echo "$final_output_file" > vps_test_results_$(date +%Y%m%d_%H%M%S).md
+    echo -e "${YELLOW}结果已保存到 vps_test_results_$(date +%Y%m%d_%H%M%S).md 文件中。${NC}"
 }
 
 # 执行全部脚本
