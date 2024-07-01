@@ -112,8 +112,7 @@ run_and_capture() {
 autotrace_process_output() {
     local input="$1"
     # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1\/9 Traceroute/{f=1} f; /\[信息\] 已删除 Nexttrace 文件/{f=0}'
-}
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1\/9 Traceroute to 中国/{f=1} f; /\[信息\] 已删除 Nexttrace 文件/{f=0}'
 
 # 运行所有测试
 run_all_tests() {
@@ -132,8 +131,7 @@ run_all_tests() {
 format_results() {
 
 # 处理回程路由结果
-local processed_autotrace_result
-processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
+local processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
 
 result="[tabs]
 [tab=\"回程路由\"]
