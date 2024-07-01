@@ -178,60 +178,15 @@ response_process_output() {
 # 去除三网测速板块板块ANSI转义码并截取
 process_speedtest_output() {
     local input="$1"
-    local keyword="$2"
-    
-    echo "Debug: Processing for keyword: $keyword" >&2
-    
-    # 去除 ANSI 转义码
-    local no_ansi
-    no_ansi=$(echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
-    
-    echo "Debug: Input after ANSI removal (first 500 chars):" >&2
-    echo "${no_ansi:0:500}" >&2
-    
-    # 计算关键字出现的次数
-    local count
-    count=$(echo "$no_ansi" | grep -Fc "$keyword")
-    
-    echo "Debug: Keyword count: $count" >&2
-    
-    # 提取所需的测试结果并过滤进度条
-    local result
-    result=$(echo "$no_ansi" | awk -v count="$count" -v key="$keyword" '
-        BEGIN { found = 0 }
-        $0 ~ key {
-            print "Debug: Found keyword, remaining count: " count > "/dev/stderr"
-            if (--count == 0) {
-                found = 1
-                print "Debug: Starting to capture output" > "/dev/stderr"
-            }
-        }
-        found && !/测试进行中/ && NF { 
-            print "Debug: Capturing line: " $0 > "/dev/stderr"
-            print 
-        }
-        /------------------------ 多功能 自更新 测速脚本 ------------------------/ && count == 0 {
-            print "Debug: Reached end marker" > "/dev/stderr"
-            exit
-        }
-    ')
-    
-    echo "Debug: Result (first 500 chars):" >&2
-    echo "${result:0:500}" >&2
-    
-    echo "$result"
-}
-
-speedtest_process_output() {
-    echo "Debug: Calling speedtest process" >&2
-    process_speedtest_output "$1" "多功能 自更新 测速脚本"
+    # 使用更全面的 sed 命令去除所有 ANSI 转义码
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
 }
 
 # 去除回程路由板块板块ANSI转义码并截取
 autotrace_process_output() {
     local input="$1"
     # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1/9 Traceroute/{f=1} f; /[信息] 已删除 Nexttrace 文件/{f=0}'
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
 }
 
 # 运行所有测试
