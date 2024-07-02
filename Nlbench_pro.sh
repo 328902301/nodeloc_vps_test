@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="2.2.0"
+VERSION="2.3.0"
 
 # 定义颜色
 RED='\033[0;31m'
@@ -199,54 +199,71 @@ generate_markdown() {
         echo "- IPv6: $ipv6_address"
         echo ""
         echo "[tabs]"
-        echo "[tab=\"YABS\"]"
-        echo "\`\`\`"
-        cat yabs_result.txt | escape_markdown
-        echo "\`\`\`"
-        echo "[/tab]"
         
-        echo "[tab=\"融合怪\"]"
-        echo "\`\`\`"
-        cat fusion_result.txt | escape_markdown
-        echo "\`\`\`"
-        echo "[/tab]"
+        [ -f yabs_result.txt ] && {
+            echo "[tab=\"YABS\"]"
+            echo "\`\`\`"
+            cat yabs_result.txt | escape_markdown
+            echo "\`\`\`"
+            echo "[/tab]"
+        }
         
-        echo "[tab=\"IP质量\"]"
-        echo "\`\`\`"
-        echo "########################################################################"
-        cat ip_quality_result.txt | escape_markdown
-        echo "\`\`\`"
-        echo "[/tab]"
+        [ -f fusion_result.txt ] && {
+            echo "[tab=\"融合怪\"]"
+            echo "\`\`\`"
+            cat fusion_result.txt | escape_markdown
+            echo "\`\`\`"
+            echo "[/tab]"
+        }
         
-        echo "[tab=\"流媒体\"]"
-        echo "\`\`\`"
-        cat streaming_result.txt | escape_markdown
-        echo "\`\`\`"
-        echo "[/tab]"
+        [ -f ip_quality_result.txt ] && {
+            echo "[tab=\"IP质量\"]"
+            echo "\`\`\`"
+            echo "########################################################################"
+            cat ip_quality_result.txt | escape_markdown
+            echo "\`\`\`"
+            echo "[/tab]"
+        }
         
-        echo "[tab=\"响应\"]"
-        echo "\`\`\`"
-        cat response_result.txt | escape_markdown
-        echo "\`\`\`"
-        echo "[/tab]"
+        [ -f streaming_result.txt ] && {
+            echo "[tab=\"流媒体\"]"
+            echo "\`\`\`"
+            cat streaming_result.txt | escape_markdown
+            echo "\`\`\`"
+            echo "[/tab]"
+        }
         
-        echo "[tab=\"多线程测速\"]"
-        echo "\`\`\`"
-        cat speedtest_multi_result.txt | escape_markdown
-        echo "\`\`\`"
-        echo "[/tab]"
+        [ -f response_result.txt ] && {
+            echo "[tab=\"响应\"]"
+            echo "\`\`\`"
+            cat response_result.txt | escape_markdown
+            echo "\`\`\`"
+            echo "[/tab]"
+        }
         
-        echo "[tab=\"单线程测速\"]"
-        echo "\`\`\`"
-        cat speedtest_single_result.txt | escape_markdown
-        echo "\`\`\`"
-        echo "[/tab]"
+        [ -f speedtest_multi_result.txt ] && {
+            echo "[tab=\"多线程测速\"]"
+            echo "\`\`\`"
+            cat speedtest_multi_result.txt | escape_markdown
+            echo "\`\`\`"
+            echo "[/tab]"
+        }
         
-        echo "[tab=\"回程路由\"]"
-        echo "\`\`\`"
-        cat traceroute_result.txt | escape_markdown
-        echo "\`\`\`"
-        echo "[/tab]"
+        [ -f speedtest_single_result.txt ] && {
+            echo "[tab=\"单线程测速\"]"
+            echo "\`\`\`"
+            cat speedtest_single_result.txt | escape_markdown
+            echo "\`\`\`"
+            echo "[/tab]"
+        }
+        
+        [ -f traceroute_result.txt ] && {
+            echo "[tab=\"回程路由\"]"
+            echo "\`\`\`"
+            cat traceroute_result.txt | escape_markdown
+            echo "\`\`\`"
+            echo "[/tab]"
+        }
         
         echo "[/tabs]"
     } > "$output_file"
@@ -277,36 +294,55 @@ main() {
                 run_streaming
                 run_response
                 run_speedtest_multi
-                run_speedtest_single
                 run_traceroute
+                generate_markdown
                 break
                 ;;
             2)
-                echo "请输入要测试的脚本编号（用逗号分隔，如1,2,3）:"
-                echo "1. Yabs"
-                echo "2. 融合怪"
-                echo "3. IP质量"
-                echo "4. 流媒体解锁"
-                echo "5. 响应测试"
-                echo "6. 多线程测试"
-                echo "7. 单线程测试"
-                echo "8. 回程路由"
-                read -p "输入选择: " scripts
-                IFS=',' read -ra ADDR <<< "$scripts"
-                for i in "${ADDR[@]}"; do
-                    case $i in
-                        1) run_yabs ;;
-                        2) run_fusion ;;
-                        3) run_ip_quality ;;
-                        4) run_streaming ;;
-                        5) run_response ;;
-                        6) run_speedtest_multi ;;
-                        7) run_speedtest_single ;;
-                        8) run_traceroute ;;
-                        *) echo "无效的选项: $i" ;;
-                    esac
+                while true; do
+                    echo "请输入要测试的脚本编号（用逗号分隔，如1,2,3）:"
+                    echo "1. Yabs"
+                    echo "2. 融合怪"
+                    echo "3. IP质量"
+                    echo "4. 流媒体解锁"
+                    echo "5. 响应测试"
+                    echo "6. 多线程测试"
+                    echo "7. 单线程测试"
+                    echo "8. 回程路由"
+                    echo "0. 返回主菜单"
+                    read -p "输入选择: " scripts
+
+                    if [ "$scripts" = "0" ]; then
+                        break
+                    fi
+
+                    IFS=',' read -ra ADDR <<< "$scripts"
+                    for i in "${ADDR[@]}"; do
+                        case $i in
+                            1) run_yabs ;;
+                            2) run_fusion ;;
+                            3) run_ip_quality ;;
+                            4) run_streaming ;;
+                            5) run_response ;;
+                            6) run_speedtest_multi ;;
+                            7) run_speedtest_single ;;
+                            8) run_traceroute ;;
+                            *) echo "无效的选项: $i" ;;
+                        esac
+                    done
+
+                    generate_markdown
+
+                    # 清理临时文件
+                    rm -f yabs_result.txt fusion_result.txt ip_quality_result.txt streaming_result.txt response_result.txt speedtest_multi_result.txt speedtest_single_result.txt traceroute_result.txt
+
+                    echo "本次选择的测试已完成并生成报告。"
+                    echo "是否继续选择其他测试？(y/n)"
+                    read -p "输入选择: " continue_choice
+                    if [ "$continue_choice" != "y" ] && [ "$continue_choice" != "Y" ]; then
+                        break
+                    fi
                 done
-                break
                 ;;
             0)
                 echo "感谢使用，再见！"
@@ -318,11 +354,8 @@ main() {
         esac
     done
 
-    # 生成 Markdown 文件
-    generate_markdown
-
-    # 清理临时文件
-    rm -f yabs_result.txt fusion_result.txt ip_quality_result.txt streaming_result.txt response_result.txt speedtest_multi_result.txt speedtest_single_result.txt traceroute_result.txt
-
-    echo "测试完成！结果已保存到 nodeloc_vps_test_$(date +%Y%m%d_%H%M%S).md"
+    echo "所有测试完成！"
 }
+
+# 执行主函数
+main
