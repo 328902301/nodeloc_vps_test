@@ -317,6 +317,7 @@ main() {
         esac
     done
 
+    # 生成 Markdown 文件
     generate_markdown
 
     # 清理临时文件
@@ -324,6 +325,3 @@ main() {
 
     echo "测试完成！结果已保存到 nodeloc_vps_test_$(date +%Y%m%d_%H%M%S).md"
 }
-
-# 执行主函数
-main
