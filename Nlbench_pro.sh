@@ -294,7 +294,7 @@ main() {
                 IFS=',' read -ra ADDR <<< "$scripts"
                 for i in "${ADDR[@]}"; do
                     case $i in
-                        1) run_yabs
+                        1) run_yabs ;;
                         2) run_fusion ;;
                         3) run_ip_quality ;;
                         4) run_streaming ;;
