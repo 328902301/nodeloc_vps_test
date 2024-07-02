@@ -123,7 +123,7 @@ show_welcome() {
 
 # Markdown 转义函数
 escape_markdown() {
-    sed 's/```/\\`\\`\\`/g' | sed 's/\[/\\[/g' | sed 's/\]/\\]/g' | sed 's/\*/\\*/g' | sed 's/_/\\_/g'
+    sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
 }
 
 # 执行YABS测试
