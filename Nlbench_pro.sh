@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="1.0.1"
+VERSION="1.0.2"
 
 # 定义颜色
 RED='\033[0;31m'
@@ -10,14 +10,16 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # 检查 root 权限并获取 sudo 权限
-if [ "$(id -u)" != "0" ]; then
-    echo "此脚本需要 root 权限运行。"
-    if ! sudo -v; then
-        echo "无法获取 sudo 权限，退出脚本。"
-        exit 1
+check_root() {
+    if [ "$(id -u)" != "0" ]; then
+        echo "此脚本需要 root 权限运行。"
+        if ! sudo -v; then
+            echo "无法获取 sudo 权限，退出脚本。"
+            exit 1
+        fi
+        echo "已获取 sudo 权限。"
     fi
-    echo "已获取 sudo 权限。"
-fi
+}
 
 # 检查并安装依赖
 install_dependencies() {
@@ -33,6 +35,7 @@ install_dependencies() {
     local dependencies=(
         "curl"
         "wget"
+        "iperf3"
     )
     
     for dep in "${dependencies[@]}"; do
@@ -197,10 +200,14 @@ generate_output() {
     echo
     echo "[tab=\"iperf3\"]"
     echo "\`\`\`"
+    iperf3 -c iperf.online -P 8 -t 10
     echo "\`\`\`"
     echo "[/tab]"
     echo
     echo "[tab=\"Ping.pe\"]"
+    echo "\`\`\`"
+    curl -s https://ping.pe/$ipv4_address | grep -E 'AS|Country|City'
+    echo "\`\`\`"
     echo "[/tab]"
     echo
     echo "[tab=\"哪吒 ICMP\"]"
@@ -220,8 +227,7 @@ main() {
     ip_address
 
     # 创建输出文件
-    output_file="nodeloc_vps_test_$(date +%Y%m%d%H%M%S).md"
-    echo "[tabs]" > "$output_file"
+    output_file="nodeloc_vps_test_$(date +%Y%m%d%H%M%S)"
 
     # 显示欢迎信息
     clear
@@ -258,17 +264,14 @@ main() {
         echo "3. IP质量"
         echo "4. 流媒体解锁"
         echo "5. 响应测试"
-        echo "6. 三网测速"
-        echo "7. 回程路由"
+        echo "6. 三网测速（多线程）"
+        echo "7. 三网测速（单线程）"
+        echo "8. 回程路由"
         echo "请耐心等待，测试可能需要一些时间..."
         
-        run_yabs
-        run_fusion_monster
-        run_ip_quality
-        run_media_unlock
-        run_response_test
-        run_speed_test
-        run_traceroute
+        for i in {1..8}; do
+            run_test $i "$output_file"
+        done
     elif [ "$mode_choice" == "2" ]; then
         echo "输入要测试的脚本编号（用逗号分隔，如 1,2,3）："
         echo "1. Yabs"
@@ -276,8 +279,9 @@ main() {
         echo "3. IP质量"
         echo "4. 流媒体解锁"
         echo "5. 响应测试"
-        echo "6. 三网测速"
-        echo "7. 回程路由"
+        echo "6. 三网测速（多线程）"
+        echo "7. 三网测速（单线程）"
+        echo "8. 回程路由"
         read -p "输入选择: " script_choices
 
         echo "您选择了以下测试："
@@ -289,39 +293,35 @@ main() {
                 3) echo "- IP质量" ;;
                 4) echo "- 流媒体解锁" ;;
                 5) echo "- 响应测试" ;;
-                6) echo "- 三网测速" ;;
-                7) echo "- 回程路由" ;;
+                6) echo "- 三网测速（多线程）" ;;
+                7) echo "- 三网测速（单线程）" ;;
+                8) echo "- 回程路由" ;;
                 *) echo "- 无效选择: $i" ;;
             esac
         done
         echo "请耐心等待，测试可能需要一些时间..."
 
         for i in "${ADDR[@]}"; do
-            case $i in
-                1) run_yabs ;;
-                2) run_fusion_monster ;;
-                3) run_ip_quality ;;
-                4) run_media_unlock ;;
-                5) run_response_test ;;
-                6) run_speed_test ;;
-                7) run_traceroute ;;
-                *) echo "跳过无效选择: $i" ;;
-            esac
+            if [[ $i =~ ^[1-8]$ ]]; then
+                run_test $i "$output_file"
+            else
+                echo "跳过无效选择: $i"
+            fi
         done
     else
         echo "无效选择，退出程序。"
         exit 1
     fi
 
-    # 添加缺失的标签
-    for tab in "YABS" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "回程路由" "去程路由" "iperf3" "Ping.pe" "哪吒 ICMP" "其他"; do
-        if ! grep -q "\[tab=\"$tab\"\]" "$output_file"; then
-            echo -e "\n[tab=\"$tab\"]\n\n[/tab]" >> "$output_file"
-        fi
-    done
+    # 生成最终输出
+    generate_output "$output_file" > "${output_file}.md"
 
-    echo "[/tabs]" >> "$output_file"
-    echo "测试完成，结果已保存到 $output_file"
+    # 清理临时文件
+    rm -f "${output_file}_"*
+
+    echo "测试完成，结果已保存到 ${output_file}.md"
     echo "您可以使用文本编辑器打开该文件查看详细结果。"
 }
+
+# 运行主函数
 main
