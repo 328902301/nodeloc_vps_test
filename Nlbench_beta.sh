@@ -345,12 +345,13 @@ main() {
         esac
     done
 
-    generate_markdown
+    output_file="vps_test_results_$(date +%Y%m%d_%H%M%S).md"
+    generate_markdown "$output_file"
     
     # 清理临时文件
     rm -f yabs_result.txt fusion_result.txt ip_quality_result.txt streaming_result.txt response_result.txt speedtest_multi_result.txt speedtest_single_result.txt traceroute_result.txt
 
-    echo "测试完成！结果已保存到 Markdown 文件中。"
+    echo "测试完成！结果已保存到 $output_file"
 }
 
 # 执行主函数
