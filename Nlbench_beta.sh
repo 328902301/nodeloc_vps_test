@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="2.1.0"
+VERSION="2.2.0"
 
 # 定义颜色
 RED='\033[0;31m'
@@ -39,6 +39,15 @@ install_dependencies() {
     done
     
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
+}
+
+# 获取IP地址
+get_ip_address() {
+    ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
+    [ -z "$ipv4_address" ] && ipv4_address=$(ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
+
+    ipv6_address=$(curl -s --max-time 5 ipv6.ip.sb)
+    [ -z "$ipv6_address" ] && ipv6_address=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-f:]+' | grep -v '^::1' | grep -v '^fe80' | head -n1)
 }
 
 # 检测VPS地理位置
@@ -97,19 +106,6 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo "一键脚本将测试以下项目，可以自动全部测试，或者自定义选择测试项目："
-    echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. 回程路由"
-    echo ""
-    echo -e "${RED}按任意键进入测试选项...${NC}"
-    read -n 1 -s
-    clear
 }
 
 # Markdown 转义函数
@@ -121,15 +117,14 @@ escape_markdown() {
 run_yabs() {
     echo "执行YABS测试..."
     yabs_result=$(wget -qO- yabs.sh | bash)
-    echo "$yabs_result" > yabs_result.txt
+    echo "$yabs_result" | escape_markdown > yabs_result.txt
 }
 
 # 执行融合怪测试
 run_fusion() {
     echo "执行融合怪测试..."
     fusion_result=$(curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh)
-    fusion_result=$(echo "$fusion_result" | awk '/A Bench Script/{f=1} f; /短链/{f=0}')
-    echo "$fusion_result" > fusion_result.txt
+    echo "$fusion_result" | awk '/A Bench Script/{f=1} f; /短链/{f=0}' | escape_markdown > fusion_result.txt
 }
 
 # 执行IP质量测试
@@ -142,9 +137,9 @@ run_ip_quality() {
     local end_line=$(echo "$ip_quality_result" | grep -n '按回车键返回主菜单' | head -n 1 | cut -d ':' -f 1)
     
     if [ -n "$start_line" ] && [ -n "$end_line" ]; then
-        ip_quality_result=$(tail -n +"$start_line" <<< "$ip_quality_result" | head -n $(($end_line - $start_line)) | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
+        ip_quality_result=$(tail -n +"$start_line" <<< "$ip_quality_result" | head -n $(($end_line - $start_line)) | escape_markdown)
     elif [ -n "$start_line" ]; then
-        ip_quality_result=$(tail -n +"$start_line" <<< "$ip_quality_result" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g')
+        ip_quality_result=$(tail -n +"$start_line" <<< "$ip_quality_result" | escape_markdown)
     fi
     
     echo "$ip_quality_result" > ip_quality_result.txt
@@ -155,44 +150,40 @@ run_streaming() {
     echo "执行流媒体解锁测试..."
     region=$(detect_region)
     streaming_result=$(bash <(curl -L -s media.ispvps.com) $region)
-    streaming_result=$(echo "$streaming_result" | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}')
-    echo "$streaming_result" > streaming_result.txt
+    echo "$streaming_result" | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}' | escape_markdown > streaming_result.txt
 }
 
 # 执行响应测试
 run_response() {
     echo "执行响应测试..."
     response_result=$(bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh))
-    echo "$response_result" > response_result.txt
+    echo "$response_result" | escape_markdown > response_result.txt
 }
 
 # 执行三网测速（多线程）
 run_speedtest_multi() {
     echo "执行三网测速（多线程）..."
     speedtest_multi_result=$(bash <(curl -sL bash.icu/speedtest) 1)
-    speedtest_multi_result=$(echo "$speedtest_multi_result" | sed -e '1,/序号\:/d' -e '/测试进行中/d' -e '/^\s*$/d')
-    echo "$speedtest_multi_result" > speedtest_multi_result.txt
+    echo "$speedtest_multi_result" | sed -e '1,/序号\:/d' -e '/测试进行中/d' -e '/^\s*$/d' | escape_markdown > speedtest_multi_result.txt
 }
 
 # 执行三网测速（单线程）
 run_speedtest_single() {
     echo "执行三网测速（单线程）..."
     speedtest_single_result=$(bash <(curl -sL bash.icu/speedtest) 2)
-    speedtest_single_result=$(echo "$speedtest_single_result" | sed -e '1,/序号\:/d' -e '/测试进行中/d' -e '/^\s*$/d')
-    echo "$speedtest_single_result" > speedtest_single_result.txt
+    echo "$speedtest_single_result" | sed -e '1,/序号\:/d' -e '/测试进行中/d' -e '/^\s*$/d' | escape_markdown > speedtest_single_result.txt
 }
 
 # 执行回程路由测试
 run_traceroute() {
     echo "执行回程路由测试..."
     traceroute_result=$(wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh)
-    traceroute_result=$(echo "$traceroute_result" | sed -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d')
-    echo "$traceroute_result" > traceroute_result.txt
+    echo "$traceroute_result" | sed -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' | escape_markdown > traceroute_result.txt
 }
 
 # 生成Markdown文件
 generate_markdown() {
-    local output_file="vps_test_results_$(date +%Y%m%d_%H%M%S).md"
+    local output_file="nodeloc_vps_test_$(date +%Y%m%d_%H%M%S).md"
     {
         echo "# VPS 测试结果"
         echo "测试时间：$(date)"
@@ -204,50 +195,50 @@ generate_markdown() {
         echo "[tabs]"
         echo "[tab=\"YABS\"]"
         echo "\`\`\`"
-        cat yabs_result.txt | escape_markdown
+        cat yabs_result.txt
         echo "\`\`\`"
         echo "[/tab]"
         
         echo "[tab=\"融合怪\"]"
         echo "\`\`\`"
-        cat fusion_result.txt | escape_markdown
+        cat fusion_result.txt
         echo "\`\`\`"
         echo "[/tab]"
         
         echo "[tab=\"IP质量\"]"
         echo "\`\`\`"
         echo "########################################################################"
-        cat ip_quality_result.txt | escape_markdown
+        cat ip_quality_result.txt
         echo "\`\`\`"
         echo "[/tab]"
         
         echo "[tab=\"流媒体\"]"
         echo "\`\`\`"
-        cat streaming_result.txt | escape_markdown
+        cat streaming_result.txt
         echo "\`\`\`"
         echo "[/tab]"
         
         echo "[tab=\"响应\"]"
         echo "\`\`\`"
-        cat response_result.txt | escape_markdown
+        cat response_result.txt
         echo "\`\`\`"
         echo "[/tab]"
         
         echo "[tab=\"多线程测速\"]"
         echo "\`\`\`"
-        cat speedtest_multi_result.txt | escape_markdown
+        cat speedtest_multi_result.txt
         echo "\`\`\`"
         echo "[/tab]"
         
         echo "[tab=\"单线程测速\"]"
         echo "\`\`\`"
-        cat speedtest_single_result.txt | escape_markdown
+        cat speedtest_single_result.txt
         echo "\`\`\`"
         echo "[/tab]"
         
         echo "[tab=\"回程路由\"]"
         echo "\`\`\`"
-        cat traceroute_result.txt | escape_markdown
+        cat traceroute_result.txt
         echo "\`\`\`"
         echo "[/tab]"
         
@@ -338,13 +329,12 @@ main() {
         esac
     done
 
-    output_file="vps_test_results_$(date +%Y%m%d_%H%M%S).md"
-    generate_markdown "$output_file"
-    
+    generate_markdown
+
     # 清理临时文件
     rm -f yabs_result.txt fusion_result.txt ip_quality_result.txt streaming_result.txt response_result.txt speedtest_multi_result.txt speedtest_single_result.txt traceroute_result.txt
 
-    echo "测试完成！结果已保存到 $output_file"
+    echo "测试完成！结果已保存到 nodeloc_vps_test_$(date +%Y%m%d_%H%M%S).md"
 }
 
 # 执行主函数
