@@ -99,6 +99,58 @@ sum_run_times() {
     fi
 }
 
+# 去除Yabs板块ANSI转义码
+yabs_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+}
+
+# 去除融合怪板块ANSI转义码并截取
+fusion_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/A Bench Script/{f=1} f; /短链/{f=0}'
+}
+
+# 去除IP质量板块ANSI转义码并截取
+ip_process_output() {
+    local input="$1"
+    local start_line=$(echo "$input" | grep -n '正在检测黑名单数据库' | tail -n 1 | cut -d ':' -f 1)
+    start_line=$((start_line + 1))  # 移动到下一行
+    local end_line=$(echo "$input" | grep -n '按回车键返回主菜单' | head -n 1 | cut -d ':' -f 1)
+    
+    if [ -n "$start_line" ] && [ -n "$end_line" ]; then
+        tail -n +"$start_line" <<< "$input" | head -n $(($end_line - $start_line)) | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+    elif [ -n "$start_line" ]; then
+        tail -n +"$start_line" <<< "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+    else
+        echo "未找到合适的日志内容。"
+    fi
+}
+
+# 去除流媒体板块ANSI转义码并截取
+streaming_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}'
+}
+
+# 去除响应板块ANSI转义码
+response_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+}
+
+# 去除三网测速板块ANSI转义码并截取
+speedtest_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
+}
+
+# 去除回程路由板块ANSI转义码并截取
+autotrace_process_output() {
+    local input="$1"
+    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1\/9 Traceroute to 中国/{f=1} f; /\[信息\] 已删除 Nexttrace 文件/{f=0}'
+}
+
 # 执行测试脚本并保存结果
 run_test() {
     local script=$1
@@ -107,37 +159,45 @@ run_test() {
 
     case $script in
         1)
+            echo "执行 Yabs 测试..."
             wget -qO- yabs.sh | bash > "$temp_file" 2>&1
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_yabs"
+            yabs_process_output "$(cat "$temp_file")" > "${output_file}_yabs"
             ;;
         2)
+            echo "执行融合怪测试..."
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh > "$temp_file" 2>&1
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_ecs"
+            fusion_process_output "$(cat "$temp_file")" > "${output_file}_ecs"
             ;;
         3)
+            echo "执行 IP 质量测试..."
             bash <(curl -Ls IP.Check.Place) > "$temp_file" 2>&1
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_ip_quality"
+            ip_process_output "$(cat "$temp_file")" > "${output_file}_ip_quality"
             ;;
         4)
+            echo "执行流媒体解锁测试..."
             region=$(detect_region)
             bash <(curl -L -s media.ispvps.com) <<< "$region" > "$temp_file" 2>&1
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_streaming"
+            streaming_process_output "$(cat "$temp_file")" > "${output_file}_streaming"
             ;;
         5)
+            echo "执行响应测试..."
             bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) > "$temp_file" 2>&1
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_response"
+            response_process_output "$(cat "$temp_file")" > "${output_file}_response"
             ;;
         6)
+            echo "执行三网测速（多线程）..."
             bash <(curl -sL bash.icu/speedtest) <<< "1" > "$temp_file" 2>&1
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_multi_thread"
+            speedtest_process_output "$(cat "$temp_file")" > "${output_file}_multi_thread"
             ;;
         7)
+            echo "执行三网测速（单线程）..."
             bash <(curl -sL bash.icu/speedtest) <<< "2" > "$temp_file" 2>&1
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_single_thread"
+            speedtest_process_output "$(cat "$temp_file")" > "${output_file}_single_thread"
             ;;
         8)
+            echo "执行回程路由测试..."
             wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" > "$temp_file" 2>&1
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_route"
+            autotrace_process_output "$(cat "$temp_file")" > "${output_file}_route"
             ;;
     esac
 
@@ -146,32 +206,19 @@ run_test() {
 
 # 格式化结果为 Markdown
 format_results() {
-    local output_file=$1
 
-    # 处理yabs测试结果
-    local processed_yabs_result=$(cat "${output_file}_yabs")
+local output_file=$1
+local processed_yabs_result=$(yabs_process_output "$(cat "${output_file}_yabs")")
+local processed_fusion_result=$(fusion_process_output "$(cat "${output_file}_ecs")")
+local processed_ip_result=$(ip_process_output "$(cat "${output_file}_ip_quality")")
+local processed_streaming_result=$(streaming_process_output "$(cat "${output_file}_streaming")")
+local processed_response_result=$(response_process_output "$(cat "${output_file}_response")")
+local processed_speedtest_multi_result=$(speedtest_process_output "$(cat "${output_file}_multi_thread")")
+local processed_speedtest_single_result=$(speedtest_process_output "$(cat "${output_file}_single_thread")")
+local processed_autotrace_result=$(autotrace_process_output "$(cat "${output_file}_route")")
 
-    # 处理融合怪结果
-    local processed_fusion_result=$(cat "${output_file}_ecs")
-
-    # 处理IP质量结果
-    local processed_ip_result=$(cat "${output_file}_ip_quality")
-
-    # 处理流媒体解锁结果
-    local processed_streaming_result=$(cat "${output_file}_streaming")
-
-    # 处理响应测试结果
-    local processed_response_result=$(cat "${output_file}_response")
-
-    # 处理三网测速结果
-    local processed_speedtest_multi_result=$(cat "${output_file}_multi_thread")
-    local processed_speedtest_single_result=$(cat "${output_file}_single_thread")
-
-    # 处理回程路由结果
-    local processed_autotrace_result=$(cat "${output_file}_route")
-
-    # Tabs分栏输出结果，用于复制到Nodeloc论坛
-    result="[tabs]
+# Tabs分栏输出结果，用于复制到Nodeloc论坛
+result="[tabs]
 [tab=\"YABS\"]
 \`\`\`
 $processed_yabs_result
