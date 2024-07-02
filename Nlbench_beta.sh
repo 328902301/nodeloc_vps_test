@@ -225,7 +225,10 @@ generate_markdown() {
         echo "[/tab]"
         
         echo "[tab=\"IP质量\"]"
+        echo "\`\`\`"
+        echo "########################################################################"
         cat ip_quality_result.txt | escape_markdown
+        echo "\`\`\`"
         echo "[/tab]"
         
         echo "[tab=\"流媒体\"]"
