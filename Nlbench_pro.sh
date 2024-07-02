@@ -277,6 +277,7 @@ main() {
                 run_streaming
                 run_response
                 run_speedtest_multi
+                run_speedtest_single
                 run_traceroute
                 break
                 ;;
