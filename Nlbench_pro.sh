@@ -144,79 +144,98 @@ run_test() {
     rm "$temp_file"
 }
 
-# 生成输出结果
-generate_output() {
+# 格式化结果为 Markdown
+format_results() {
     local output_file=$1
-    echo "[tabs]"
-    echo
-    echo "[tab=\"YABS\"]"
-    echo "\`\`\`"
-    cat "${output_file}_yabs"
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"融合怪\"]"
-    echo "\`\`\`"
-    cat "${output_file}_ecs"
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"IP质量\"]"
-    cat "${output_file}_ip_quality"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"流媒体\"]"
-    echo "\`\`\`"
-    cat "${output_file}_streaming"
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"响应\"]"
-    echo "\`\`\`"
-    cat "${output_file}_response"
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"多线程测速\"]"
-    echo "\`\`\`"
-    cat "${output_file}_multi_thread"
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"单线程测速\"]"
-    echo "\`\`\`"
-    cat "${output_file}_single_thread"
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"回程路由\"]"
-    echo "\`\`\`"
-    cat "${output_file}_route"
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"去程路由\"]"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"iperf3\"]"
-    echo "\`\`\`"
-    iperf3 -c iperf.online -P 8 -t 10
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"Ping.pe\"]"
-    echo "\`\`\`"
-    curl -s https://ping.pe/$ipv4_address | grep -E 'AS|Country|City'
-    echo "\`\`\`"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"哪吒 ICMP\"]"
-    echo "[/tab]"
-    echo
-    echo "[tab=\"其他\"]"
-    echo "[/tab]"
-    echo
-    echo "[/tabs]"
+
+    # 处理yabs测试结果
+    local processed_yabs_result=$(cat "${output_file}_yabs")
+
+    # 处理融合怪结果
+    local processed_fusion_result=$(cat "${output_file}_ecs")
+
+    # 处理IP质量结果
+    local processed_ip_result=$(cat "${output_file}_ip_quality")
+
+    # 处理流媒体解锁结果
+    local processed_streaming_result=$(cat "${output_file}_streaming")
+
+    # 处理响应测试结果
+    local processed_response_result=$(cat "${output_file}_response")
+
+    # 处理三网测速结果
+    local processed_speedtest_multi_result=$(cat "${output_file}_multi_thread")
+    local processed_speedtest_single_result=$(cat "${output_file}_single_thread")
+
+    # 处理回程路由结果
+    local processed_autotrace_result=$(cat "${output_file}_route")
+
+    # Tabs分栏输出结果，用于复制到Nodeloc论坛
+    result="[tabs]
+[tab=\"YABS\"]
+\`\`\`
+$processed_yabs_result
+\`\`\`
+[/tab]
+[tab=\"融合怪\"]
+\`\`\`
+$processed_fusion_result
+\`\`\`
+[/tab]
+[tab=\"IP质量\"]
+\`\`\`
+########################################################################
+$processed_ip_result
+\`\`\`
+[/tab]
+[tab=\"流媒体\"]
+\`\`\`
+$processed_streaming_result
+\`\`\`
+[/tab]
+[tab=\"响应\"]
+\`\`\`
+$processed_response_result
+\`\`\`
+[/tab]
+[tab=\"多线程测速\"]
+\`\`\`
+$processed_speedtest_multi_result
+\`\`\`
+[/tab]
+[tab=\"单线程测速\"]
+\`\`\`
+$processed_speedtest_single_result
+\`\`\`
+[/tab]
+[tab=\"回程路由\"]
+\`\`\`
+$processed_autotrace_result
+\`\`\`
+[/tab]
+[tab=\"去程路由\"]
+
+[/tab]
+[tab=\"iperf3\"]
+\`\`\`
+$(iperf3 -c iperf.online -P 8 -t 10)
+\`\`\`
+[/tab]
+[tab=\"Ping.pe\"]
+\`\`\`
+$(curl -s https://ping.pe/$ipv4_address | grep -E 'AS|Country|City')
+\`\`\`
+[/tab]
+[tab=\"哪吒 ICMP\"]
+
+[/tab]
+[tab=\"其他\"]
+
+[/tab]
+[/tabs]"
+
+    echo "$result" > "${output_file}.md"
+    echo -e "${YELLOW}结果已保存到 ${output_file}.md 文件中。${NC}"
 }
 
 # 主函数
@@ -314,7 +333,7 @@ main() {
     fi
 
     # 生成最终输出
-    generate_output "$output_file" > "${output_file}.md"
+    format_results "$output_file"
 
     # 清理临时文件
     rm -f "${output_file}_"*
