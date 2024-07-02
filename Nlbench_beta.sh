@@ -41,15 +41,6 @@ install_dependencies() {
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
 }
 
-# 获取IP地址
-get_ip_address() {
-    ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
-    [ -z "$ipv4_address" ] && ipv4_address=$(ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
-
-    ipv6_address=$(curl -s --max-time 5 ipv6.ip.sb)
-    [ -z "$ipv6_address" ] && ipv6_address=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-f:]+' | grep -v '^::1' | grep -v '^fe80' | head -n1)
-}
-
 # 检测VPS地理位置
 detect_region() {
     local country
@@ -211,7 +202,6 @@ generate_markdown() {
         echo "- IPv6: $ipv6_address"
         echo ""
         echo "[tabs]"
-        
         echo "[tab=\"YABS\"]"
         echo "\`\`\`"
         cat yabs_result.txt | escape_markdown
