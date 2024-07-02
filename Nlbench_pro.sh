@@ -214,13 +214,17 @@ generate_output() {
 
 # 主函数
 main() {
+    check_root
     install_dependencies
-    ip_address
     sum_run_times
+    ip_address
 
-    # 输出欢迎信息
+    # 创建输出文件
+    output_file="nodeloc_vps_test_$(date +%Y%m%d%H%M%S).md"
+    echo "[tabs]" > "$output_file"
+
+    # 显示欢迎信息
     clear
-    echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
     echo "Nodeloc_VPS_自动脚本测试 $VERSION"
@@ -228,9 +232,9 @@ main() {
     echo "VPS选购: https://www.nodeloc.com/vps"
     echo ""
     echo -e "${YELLOW}#     #  #####  ####  ###### #       ####   ####    #    # ####   ####${NC}"
-    echo -e "${YELLOW}##    # #     # #   # #      #      #    # #    #   #    # #   # #     #${NC}"
+    echo -e "${YELLOW}##    # #     # #   # #      #      #    # #    #   #    # #   # #    #${NC}"
     echo -e "${YELLOW}# #   # #     # #   # #####  #      #    # #        #    # ####   ####${NC}"
-    echo -e "${YELLOW}#  #  # #     # #   # #      #      #    # #        #    # #          #${NC}"
+    echo -e "${YELLOW}#  #  # #     # #   # #      #      #    # #        #    # #         #${NC}"
     echo -e "${YELLOW}#   # # #     # #   # #      #      #    # #    #   #    # #     #    #${NC}"
     echo -e "${YELLOW}#    ##  #####  ####  ###### ######  ####   ####     ####  #      ####${NC}"
     echo ""
@@ -240,41 +244,84 @@ main() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo "一键脚本将测试以下项目："
-    echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. 回程路由（调试中）"
-    echo ""
 
-    echo "选择测试模式："
+    # 用户选择
+    echo "请选择测试模式："
     echo "1. 测试全部脚本"
     echo "2. 选择特定脚本测试"
-    read -p "请输入选择 (1/2): " mode
+    read -p "输入选择 (1 或 2): " mode_choice
 
-    local output_file="/tmp/test_results"
+    if [ "$mode_choice" == "1" ]; then
+        echo "您选择了测试全部脚本。测试将按以下顺序进行："
+        echo "1. Yabs"
+        echo "2. 融合怪"
+        echo "3. IP质量"
+        echo "4. 流媒体解锁"
+        echo "5. 响应测试"
+        echo "6. 三网测速"
+        echo "7. 回程路由"
+        echo "请耐心等待，测试可能需要一些时间..."
+        
+        run_yabs
+        run_fusion_monster
+        run_ip_quality
+        run_media_unlock
+        run_response_test
+        run_speed_test
+        run_traceroute
+    elif [ "$mode_choice" == "2" ]; then
+        echo "输入要测试的脚本编号（用逗号分隔，如 1,2,3）："
+        echo "1. Yabs"
+        echo "2. 融合怪"
+        echo "3. IP质量"
+        echo "4. 流媒体解锁"
+        echo "5. 响应测试"
+        echo "6. 三网测速"
+        echo "7. 回程路由"
+        read -p "输入选择: " script_choices
 
-    if [ "$mode" = "1" ]; then
-        for i in {1..8}; do
-            run_test $i "$output_file"
-        done
-    elif [ "$mode" = "2" ]; then
-        read -p "请输入要测试的脚本编号（用逗号分隔，如 1,2,3）: " scripts
-        IFS=',' read -ra ADDR <<< "$scripts"
+        echo "您选择了以下测试："
+        IFS=',' read -ra ADDR <<< "$script_choices"
         for i in "${ADDR[@]}"; do
-            run_test $i "$output_file"
+            case $i in
+                1) echo "- Yabs" ;;
+                2) echo "- 融合怪" ;;
+                3) echo "- IP质量" ;;
+                4) echo "- 流媒体解锁" ;;
+                5) echo "- 响应测试" ;;
+                6) echo "- 三网测速" ;;
+                7) echo "- 回程路由" ;;
+                *) echo "- 无效选择: $i" ;;
+            esac
+        done
+        echo "请耐心等待，测试可能需要一些时间..."
+
+        for i in "${ADDR[@]}"; do
+            case $i in
+                1) run_yabs ;;
+                2) run_fusion_monster ;;
+                3) run_ip_quality ;;
+                4) run_media_unlock ;;
+                5) run_response_test ;;
+                6) run_speed_test ;;
+                7) run_traceroute ;;
+                *) echo "跳过无效选择: $i" ;;
+            esac
         done
     else
-        echo "无效的选择，退出脚本。"
+        echo "无效选择，退出程序。"
         exit 1
     fi
 
-    generate_output "$output_file"
-    rm ${output_file}*
-}
+    # 添加缺失的标签
+    for tab in "YABS" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "回程路由" "去程路由" "iperf3" "Ping.pe" "哪吒 ICMP" "其他"; do
+        if ! grep -q "\[tab=\"$tab\"\]" "$output_file"; then
+            echo -e "\n[tab=\"$tab\"]\n\n[/tab]" >> "$output_file"
+        fi
+    done
 
+    echo "[/tabs]" >> "$output_file"
+    echo "测试完成，结果已保存到 $output_file"
+    echo "您可以使用文本编辑器打开该文件查看详细结果。"
+}
 main
