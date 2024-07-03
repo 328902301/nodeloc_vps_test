@@ -39,3 +39,6 @@ curl -fsSL https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/N
 7. [测速脚本](https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh)——[陈豪](https://github.com/Chennhaoo/)
 
 特别感谢以上作者提供的脚本
+
+### 问题与反馈
+如果您在使用过程中遇到问题，或者有功能建议，欢迎通过 [GitHub Issues](https://github.com/everett7623/nodeloc_vps_test/issues) 提交反馈。
