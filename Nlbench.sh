@@ -119,7 +119,6 @@ update_system() {
 
 # 执行单个脚本并输出结果到文件
 run_script() {
-    clear
     local script_number=$1
     local output_file=$2
     local temp_file=$(mktemp)
@@ -138,7 +137,9 @@ run_script() {
         2)
             echo -e "运行${YELLOW}融合怪...${NC}"
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 | tee "$temp_file"
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g,1,/\.\.\.\.\.\./d' "$temp_file" > "${output_file}_fusion"
+            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '1,/\.\.\.\.\.\./d' "$temp_file"
+            sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
+            "cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
         3)
@@ -168,7 +169,7 @@ run_script() {
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
-            cp "$temp_file" "${output_file}_single_thread"
+            cp "$temp_file" "${output_file}_multi_thread"
             ;;
         # 单线程测速
         7)
