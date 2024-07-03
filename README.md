@@ -4,7 +4,7 @@
 
 **版本：** 2024-07-03 v1.1
 
-**Github地址：**https://github.com/everett7623/nodeloc_vps_test
+**Github地址：** https://github.com/everett7623/nodeloc_vps_test
 
 ### 使用方法
 ```
