@@ -139,7 +139,7 @@ run_script() {
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 | tee "$temp_file"
             sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '1,/\.\.\.\.\.\./d' "$temp_file"
             sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
-            "cp "$temp_file" "${output_file}_fusion"
+            cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
         3)
