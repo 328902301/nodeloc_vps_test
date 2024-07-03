@@ -119,6 +119,7 @@ update_system() {
 
 # 执行单个脚本并输出结果到文件
 run_script() {
+    clear
     local script_number=$1
     local output_file=$2
     local temp_file=$(mktemp)
