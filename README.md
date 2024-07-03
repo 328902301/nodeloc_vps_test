@@ -4,7 +4,7 @@
 
 **版本：** 2024-07-03 v1.0.2
 
-**Github地址：**https://github.com/everett7623/nodeloc_vps_test
+**Github地址：** https://github.com/everett7623/nodeloc_vps_test
 
 ### 使用方法
 确保用户为ROOT，主机网络通畅，复制下面任意命令运行
