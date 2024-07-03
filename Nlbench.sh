@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="1.0.0"
+VERSION="1.0.2"
 
 # 定义颜色
 RED='\033[0;31m'
@@ -50,6 +50,19 @@ install_dependencies() {
     clear
 }
 
+# 获取IP地址
+ip_address() {
+    ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
+    if [ -z "$ipv4_address" ]; then
+        ipv4_address=$(ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
+    fi
+
+    ipv6_address=$(curl -s --max-time 5 ipv6.ip.sb)
+    if [ -z "$ipv6_address" ]; then
+        ipv6_address=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-f:]+' | grep -v '^::1' | grep -v '^fe80' | head -n1)
+    fi
+}
+
 # 检测VPS地理位置
 detect_region() {
     local country
@@ -87,6 +100,266 @@ sum_run_times() {
 # 调用函数获取统计数据
 sum_run_times
 
+# 更新系统
+update_system() {
+    if command -v apt &>/dev/null; then
+        apt-get update && apt-get upgrade -y
+    elif command -v dnf &>/dev/null; then
+        dnf check-update && dnf upgrade -y
+    elif command -v yum &>/dev/null; then
+        yum check-update && yum upgrade -y
+    elif command -v apk &>/dev/null; then
+        apk update && apk upgrade
+    else
+        echo -e "${RED}不支持的Linux发行版${NC}"
+        return 1
+    fi
+    return 0
+}
+
+# 执行单个脚本并输出结果到文件
+run_script() {
+    local script_number=$1
+    local output_file=$2
+    local temp_file=$(mktemp)
+    case $script_number in
+        # YABS
+        1)
+            echo -e "运行${YELLOW}YABS...${NC}"
+            wget -qO- yabs.sh | bash | tee "$temp_file"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i 's/\.\.\./\.\.\.\n/g' "$temp_file"
+            sed -i '/\.\.\./d' "$temp_file"
+            sed -i '/^\s*$/d'   "$temp_file"
+            cp "$temp_file" "${output_file}_yabs"
+            ;;
+        # 融合怪
+        2)
+            echo -e "运行${YELLOW}融合怪...${NC}"
+            curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 | tee "$temp_file"
+            sed 's/\x1B\[[0-9;]*[JKmsu]//g,1,/\.\.\.\.\.\./d' "$temp_file" > "${output_file}_fusion"
+            ;;
+        # IP质量
+        3)
+            echo -e "运行${YELLOW}IP质量测试...${NC}"
+            
+            bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
+            sed  's/\x1B\[[0-9;]*[JKmsu]//g; /\.\.\.\.\.\.\.\.\.\./d'  "$temp_file"  > "${output_file}_ip_quality"
+            ;;
+        # 流媒体解锁
+        4)
+            echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
+            local region=$(detect_region)
+            bash <(curl -L -s media.ispvps.com) <<< "$region" |tee "$temp_file" 
+            sed 's/\x1B\[[0-9;]*[JKmsu]//g; 1,/脚本适配/d' "$temp_file" > "${output_file}_streaming"
+            ;;
+        # 响应测试
+        5)
+            echo -e "运行${YELLOW}响应测试...${NC}"
+            bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) |tee "$temp_file"
+            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_response"
+            ;;
+        # 多线程测速
+        6)
+            echo -e "运行${YELLOW}多线程测速...${NC}"
+            bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
+            sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i -r '1,/序号\:/d' "$temp_file"
+            sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
+            sed -i -r '/测试进行中/d' "$temp_file"
+            cp "$temp_file" "${output_file}_single_thread"
+            ;;
+        # 单线程测速
+        7)
+            echo -e "运行${YELLOW}单线程测速...${NC}"
+            bash <(curl -sL bash.icu/speedtest) <<< "2" |tee "$temp_file"
+            sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i -r '1,/序号\:/d' "$temp_file"
+            sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
+            sed -i -r '/测试进行中/d' "$temp_file"
+            cp "$temp_file" "${output_file}_single_thread"
+            ;;
+        # 回程路由
+        8)
+            echo -e "运行${YELLOW}回程路由测试...${NC}"
+            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" |tee "$temp_file"
+            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e ' /测试项/,+9d'  -e '/信息/d'  -e '/^\s*$/d' "$temp_file" > "${output_file}_route"
+            ;;
+    esac
+    rm "$temp_file"
+    echo -e "${GREEN}测试完成。${NC}"
+}
+
+# 生成最终的 Markdown 输出
+generate_markdown_output() {
+    local base_output_file=$1
+    local final_output_file="${base_output_file}.md"
+
+    echo "[tabs]" > "$final_output_file"
+
+    echo "[tab=\"YABS\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    if [ -f "${base_output_file}_yabs" ]; then
+        cat "${base_output_file}_yabs" >> "$final_output_file"
+        rm "${base_output_file}_yabs"
+    fi
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"融合怪\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    if [ -f "${base_output_file}_fusion" ]; then
+        cat "${base_output_file}_fusion" >> "$final_output_file"
+        rm "${base_output_file}_fusion"
+    fi
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"IP质量\"]" >> "$final_output_file"
+    if [ -f "${base_output_file}_ip_quality" ]; then
+        cat "${base_output_file}_ip_quality" >> "$final_output_file"
+        rm "${base_output_file}_ip_quality"
+    fi
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"流媒体\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    if [ -f "${base_output_file}_streaming" ]; then
+        cat "${base_output_file}_streaming" >> "$final_output_file"
+        rm "${base_output_file}_streaming"
+    fi
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"响应\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    if [ -f "${base_output_file}_response" ]; then
+        cat "${base_output_file}_response" >> "$final_output_file"
+        rm "${base_output_file}_response"
+    fi
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"多线程测速\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    if [ -f "${base_output_file}_multi_thread" ]; then
+        cat "${base_output_file}_multi_thread" >> "$final_output_file"
+        rm "${base_output_file}_multi_thread"
+    fi
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"单线程测速\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    if [ -f "${base_output_file}_single_thread" ]; then
+        cat "${base_output_file}_single_thread" >> "$final_output_file"
+        rm "${base_output_file}_single_thread"
+    fi
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"回程路由\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    if [ -f "${base_output_file}_route" ]; then
+        cat "${base_output_file}_route" >> "$final_output_file"
+        rm "${base_output_file}_route"
+    fi
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"去程路由\"]" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"iperf3\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"Ping.pe\"]" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"哪吒 ICMP\"]" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[tab=\"其他\"]" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
+    echo "[/tabs]" >> "$final_output_file"
+
+    echo "所有测试完成，结果已保存在 $final_output_file 中。"
+    read -p "按回车键继续..."
+    clear
+}
+
+# 执行全部脚本
+run_all_scripts() {
+    local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
+    echo "开始执行全部测试脚本..."
+    for i in {1..8}; do
+        run_script $i "$base_output_file"
+    done
+    generate_markdown_output "$base_output_file"
+    clear
+}
+
+# 执行选定的脚本
+run_selected_scripts() {
+    clear
+    local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
+    echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
+    echo "1. Yabs"
+    echo "2. 融合怪"
+    echo "3. IP质量"
+    echo "4. 流媒体解锁"
+    echo "5. 响应测试"
+    echo "6. 多线程测试"
+    echo "7. 单线程测试"
+    echo "8. 回程路由"
+    echo "0. 返回"
+    read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3):" script_numbers
+    IFS=',' read -ra selected_scripts <<< "$script_numbers"
+    echo "开始执行选定的测试脚本..."
+    if [ $script_numbers == "0" ]
+    then
+        clear
+        show_welcome
+    else
+        for number in "${selected_scripts[@]}"; do
+            clear
+            run_script "$number" "$base_output_file"
+        done
+        generate_markdown_output "$base_output_file"
+    fi
+}
+
+# 主菜单
+main_menu() {
+    echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
+    echo -e "${YELLOW}1. 执行所有测试脚本${NC}"
+    echo -e "${YELLOW}2. 选择特定测试脚本${NC}"
+    echo -e "${YELLOW}0. 退出${NC}"
+    read -p "请选择操作 [0-2]: " choice
+
+    case $choice in
+        1)
+            run_all_scripts
+            ;;
+        2)
+            run_selected_scripts
+            ;;
+        0)
+            echo -e "${RED}感谢使用NodeLoc聚合测试脚本，已退出脚本，期待你的下次使用！${NC}"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}无效选择，请重新输入。${NC}"
+            sleep 3s
+            clear
+            show_welcome
+            ;;
+    esac
+}
+
 # 输出欢迎信息
 show_welcome() {
     echo ""
@@ -109,226 +382,22 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo "一键脚本将测试以下项目："
-    echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. 回程路由（调试中）"
-    echo ""
-    echo -e "${RED}按任意键开始测试...${NC}"
-    read -n 1 -s
-    clear
-}
-
-# 定义一个数组来存储每个命令的输出
-declare -a test_results
-
-# 在每个命令执行后保存结果
-run_and_capture() {
-    local command_output=$(eval "$1" 2>&1)
-    test_results+=("$command_output")
-    echo "$command_output"
-}
-
-# 去除Yabs板块ANSI转义码
-yabs_process_output() {
-    local input="$1"
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
-}
-
-# 去除融合怪板块ANSI转义码并截取
-fusion_process_output() {
-    local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/A Bench Script/{f=1} f; /短链/{f=0}'
-}
-
-# 去除IP质量板块ANSI转义码并截取
-ip_process_output() {
-    local input="$1"
-    local start_line=$(echo "$input" | grep -n '正在检测黑名单数据库' | tail -n 1 | cut -d ':' -f 1)
-    start_line=$((start_line + 1))  # 移动到下一行
-    local end_line=$(echo "$input" | grep -n '按回车键返回主菜单' | head -n 1 | cut -d ':' -f 1)
-    
-    if [ -n "$start_line" ] && [ -n "$end_line" ]; then
-        tail -n +"$start_line" <<< "$input" | head -n $(($end_line - $start_line)) | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
-    elif [ -n "$start_line" ]; then
-        tail -n +"$start_line" <<< "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
-    else
-        echo "未找到合适的日志内容。"
-    fi
-}
-
-# 去除流媒体板块ANSI转义码并截取
-streaming_process_output() {
-    local input="$1"
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/项目地址/{f=1} f; /检测脚本当天运行次数/{f=0}'
-}
-
-# 去除响应板块ANSI转义码
-response_process_output() {
-    local input="$1"
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
-}
-
-# 去除三网测速板块板块ANSI转义码并截取
-speedtest_process_output() {
-    local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g'
-}
-
-# 去除回程路由板块板块ANSI转义码并截取
-autotrace_process_output() {
-    local input="$1"
-    # 使用更全面的 sed 命令去除所有 ANSI 转义码
-    echo "$input" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' | awk '/No:1\/9 Traceroute to 中国/{f=1} f; /\[信息\] 已删除 Nexttrace 文件/{f=0}'
-}
-
-# 运行所有测试
-run_all_tests() {
-    echo -e "${RED}开始测试，测试时间较长，请耐心等待...${NC}"
-
-    # YABS
-    echo -e "运行${YELLOW}YABS...${NC}"
-    yabs_result=$(run_and_capture "wget -qO- yabs.sh | bash")
-
-    # 融合怪
-    echo -e "运行${YELLOW}融合怪...${NC}"
-    fusion_result=$(run_and_capture "curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && echo '1' | bash ecs.sh")
-
-    # IP质量
-    echo -e "运行${YELLOW}IP质量测试...${NC}"
-    ip_quality_result=$(run_and_capture "bash <(curl -Ls IP.Check.Place)")
-
-    # 流媒体解锁
-    echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
-    local region=$(detect_region)
-    streaming_result=$(run_and_capture "echo '$region' | bash <(curl -L -s media.ispvps.com)")
-
-    # 响应测试
-    echo -e "运行${YELLOW}响应测试...${NC}"
-    response_result=$(run_and_capture "bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh)")
-
-    # 三网测速
-    echo -e "运行${YELLOW}三网测速（多线程/单线程）...${NC}"
-    echo -e "目前默认选择${YELLOW}大陆三网+教育网 IPv4（多线程/单线程）测试...${NC}"
-    speedtest_multi_result=$(run_and_capture "echo '1' | bash <(curl -sL bash.icu/speedtest)")
-    speedtest_single_result=$(run_and_capture "echo '2' | bash <(curl -sL bash.icu/speedtest)")
-
-    # AutoTrace三网回程路由
-    echo -e "运行${YELLOW}AutoTrace三网回程路由...${NC}"
-    autotrace_result=$(run_and_capture "wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && echo '1' | bash AutoTrace.sh")
-
-    # 格式化结果
-    echo -e "${YELLOW}此报告由Nodeloc_VPS_自动脚本测试生成...${NC}"
-    format_results
-}
-
-# 格式化结果为 Markdown
-format_results() {
-
-# 处理yabs测试结果
-local processed_yabs_result=$(yabs_process_output "$yabs_result")
-
-# 处理融合怪结果
-local processed_fusion_result=$(fusion_process_output "$fusion_result")
-
-# 处理IP质量结果
-local processed_ip_result=$(ip_process_output "$ip_quality_result")
-
-# 处理流媒体解锁结果
-local processed_streaming_result=$(streaming_process_output "$streaming_result")
-
-# 处理响应测试结果
-local processed_response_result=$(response_process_output "$response_result")
-
-# 处理三网测速结果
-local processed_speedtest_multi_result=$(speedtest_process_output "$speedtest_multi_result")
-local processed_speedtest_single_result=$(speedtest_process_output "$speedtest_single_result")
-
-# 处理回程路由结果
-local processed_autotrace_result=$(autotrace_process_output "$autotrace_result")
-
-# Tabs分栏输出结果，用于复制到Nodeloc论坛
-result="[tabs]
-[tab=\"YABS\"]
-\`\`\`
-$processed_yabs_result
-\`\`\`
-[/tab]
-[tab=\"融合怪\"]
-\`\`\`
-$processed_fusion_result
-\`\`\`
-[/tab]
-[tab=\"IP质量\"]
-\`\`\`
-########################################################################
-$processed_ip_result
-\`\`\`
-[/tab]
-[tab=\"流媒体\"]
-\`\`\`
-$processed_streaming_result
-\`\`\`
-[/tab]
-[tab=\"响应\"]
-\`\`\`
-$processed_response_result
-\`\`\`
-[/tab]
-[tab=\"多线程测速\"]
-\`\`\`
-$processed_speedtest_multi_result
-\`\`\`
-[/tab]
-[tab=\"单线程测速\"]
-\`\`\`
-$processed_speedtest_single_result
-\`\`\`
-[/tab]
-[tab=\"回程路由\"]
-\`\`\`
-$processed_autotrace_result
-\`\`\`
-[/tab]
-[tab=\"去程路由\"]
-
-[/tab]
-[tab=\"iperf3\"]
-\`\`\`
-
-\`\`\`
-[/tab]
-[tab=\"Ping.pe\"]
-
-[/tab]
-[tab=\"哪吒 ICMP\"]
-
-[/tab]
-[tab=\"其他\"]
-
-[/tab]
-[/tabs]"
-
-    echo "$result" > results.md
-    echo -e "${YELLOW}结果已保存到 results.md 文件中。${NC}"
 }
 
 # 主函数
 main() {
+    # 检查并安装依赖
     install_dependencies
-    show_welcome
-    run_all_tests
-    echo -e "${YELLOW}所有测试完成，可到results.md复制到Nodeloc使用。${NC}"
-    read -n 1 -s
-    echo "最终测试结果如下:" >&2
-    cat results.md >&2
+
+    # 获取统计数据
+    sum_run_times
+
+    # 主循环
+    while true; do
+        show_welcome
+        main_menu
+    done
 }
 
+# 运行主函数
 main
