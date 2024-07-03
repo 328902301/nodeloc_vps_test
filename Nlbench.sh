@@ -338,6 +338,7 @@ run_selected_scripts() {
 main_menu() {
     echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
     echo -e "${YELLOW}1. 执行所有测试脚本${NC}"
+    echo -e "${GREEN}测试项目包含：${NC}Yabs，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，回程路由。"
     echo -e "${YELLOW}2. 选择特定测试脚本${NC}"
     echo -e "${YELLOW}0. 退出${NC}"
     read -p "请选择操作 [0-2]: " choice
