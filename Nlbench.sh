@@ -96,7 +96,7 @@ run_iperf3_test() {
     if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION -P $PARALLEL_STREAMS; then
     echo -e "${YELLOW}iperf3 测试完成${NC}"
     else
-        echo -e "${RED}iperf3 测试失败${NC}"
+    echo -e "${RED}iperf3 测试失败${NC}"
     fi
 }
 
