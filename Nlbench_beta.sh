@@ -445,6 +445,7 @@ main() {
 
     # 主循环
     while true; do
+        clear
         show_welcome
         main_menu
     done
