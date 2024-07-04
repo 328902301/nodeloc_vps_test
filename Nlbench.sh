@@ -84,37 +84,24 @@ detect_region() {
     esac
 }
 
+# 辅助 VPS 信息
+AUXILIARY_VPS="205.185.119.208"
+IPERF_PORT=5201
+TEST_DURATION=10
+PARALLEL_STREAMS=3
+
 run_iperf3_test() {
-    declare -A regions=(
-        ["Europe"]="ping.online.net ping6.online.net iperf3.moji.fr iperf.par2.as49434.net paris.testdebit.info iperf.eenet.ee iperf.volia.net"
-        ["Asia"]="speedtest.uztelecom.uz iperf.it-north.net iperf.biznetnetworks.com"
-        ["Oceania"]="speedtest-iperf-akl.vetta.online"
-        ["Americas"]="iperf.scottlinux.com iperf.he.net"
-    )
+    echo -e "${YELLOW}开始 iperf3 测试...${NC}"
 
-    echo "开始iperf3测试..."
+    echo -e "${GREEN}测试到辅助 VPS 的连接${NC}"
+    echo "连接到辅助 VPS: $AUXILIARY_VPS"
+    if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION -P $PARALLEL_STREAMS; then
+        echo -e "${GREEN}测试完成${NC}"
+    else
+        echo -e "${RED}测试失败${NC}"
+    fi
 
-    for region in "${!regions[@]}"; do
-        echo "测试 $region 地区..."
-        servers=(${regions[$region]})
-        for server in "${servers[@]}"; do
-            echo "  检查服务器: $server"
-            if timeout 5 iperf3 -c "$server" -t 1 -P 1 >/dev/null 2>&1; then
-                echo "  服务器可用，开始测试..."
-                if timeout 15 iperf3 -c "$server" -t 10 -P 3; then
-                    echo "  测试完成"
-                else
-                    echo "  测试失败或超时"
-                fi
-                echo "----------------------------------------"
-                break  # 找到可用服务器后，跳出当前地区的循环
-            else
-                echo "  服务器忙或不可用，尝试下一个"
-            fi
-        done
-    done
-
-    echo "iperf3测试完成"
+    echo -e "${YELLOW}iperf3 测试完成${NC}"
 }
 
 # 统计使用次数
