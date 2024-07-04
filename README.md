@@ -33,7 +33,7 @@ wget -O Nlbench.sh https://raw.githubusercontent.com/everett7623/nodeloc_vps_tes
 4. [流媒体测试脚本](https://media.ispvps.com)——[xykt](https://github.com/xykt/)
 5. [响应测试脚本](https://nodebench.mereith.com/scripts/curltime.sh)——[nodebench](https://nodebench.mereith.com)
 6. [测速脚本](https://bash.icu/speedtest)——[i-abc](https://github.com/i-abc)
-7. [测速脚本](https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh)——[陈豪](https://github.com/Chennhaoo/)
+7. [回程测试脚本](https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh)——[陈豪](https://github.com/Chennhaoo/)
 
 特别感谢以上作者提供的脚本
 
