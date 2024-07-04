@@ -369,11 +369,11 @@ run_selected_scripts() {
     echo "0. 返回"
     
     while true; do
-        read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3):" script_numbers
-        if [[ "$script_numbers" =~ ^[1-9](,[1-9])*$ ]]; then
+        read -p "请输入要执行的脚本编号（用英文逗号分隔，例如：1,2,3):" script_numbers
+        if [[ "$script_numbers" =~ ^[0-9](,[0-9])*$ ]]; then
             break
         else
-            echo -e "${RED}无效输入，请输入1-9之间的数字，用逗号分隔。${NC}"
+            echo -e "${RED}无效输入，请输入0-9之间的数字，用英文逗号分隔。${NC}"
         fi
     done
 
