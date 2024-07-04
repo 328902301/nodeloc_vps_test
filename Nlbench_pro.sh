@@ -127,15 +127,19 @@ run_script() {
         1)
             echo -e "运行${YELLOW}YABS...${NC}"
             wget -qO- yabs.sh | bash | tee "$temp_file"
-            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e 's/\.\.\./\.\.\.\n/g' "$temp_file" 
-            sed -e  '/\.\.\./d' -e '/^\s*$/d' "$temp_file" 
-            "$temp_file" > "${output_file}_yabs"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i 's/\.\.\./\.\.\.\n/g' "$temp_file"
+            sed -i '/\.\.\./d' "$temp_file"
+            sed -i '/^\s*$/d'   "$temp_file"
+            cp "$temp_file" "${output_file}_yabs"
             ;;
         # 融合怪
         2)
             echo -e "运行${YELLOW}融合怪...${NC}"
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 | tee "$temp_file"
-            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g,1,/A Bench Script/d' "$temp_file" > "${output_file}_fusion"
+            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '1,/\.\.\.\.\.\./d' "$temp_file"
+            sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
+            cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
         3)
@@ -161,13 +165,21 @@ run_script() {
         6)
             echo -e "运行${YELLOW}多线程测速...${NC}"
             bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
-            sed -r -e 's/\x1B\[[0-9;]*[JKmsu]//g'  -e 's/测试进行中//g;s/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)//g' -e '/^\s*$/d'  "$temp_file" > "${output_file}_multi_thread"
+            sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i -r '1,/序号\:/d' "$temp_file"
+            sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
+            sed -i -r '/测试进行中/d' "$temp_file"
+            cp "$temp_file" "${output_file}_multi_thread"
             ;;
         # 单线程测速
         7)
             echo -e "运行${YELLOW}单线程测速...${NC}"
             bash <(curl -sL bash.icu/speedtest) <<< "2" |tee "$temp_file"
-            sed -r -e 's/\x1B\[[0-9;]*[JKmsu]//g'  -e 's/测试进行中//g;s/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)//g' -e '/^\s*$/d'  "$temp_file" > "${output_file}_single_thread"
+            sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i -r '1,/序号\:/d' "$temp_file"
+            sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
+            sed -i -r '/测试进行中/d' "$temp_file"
+            cp "$temp_file" "${output_file}_single_thread"
             ;;
         # 回程路由
         8)
@@ -278,11 +290,12 @@ generate_markdown_output() {
 
     echo "所有测试完成，结果已保存在 $final_output_file 中。"
     read -p "按回车键继续..."
+    clear
 }
 
 # 执行全部脚本
 run_all_scripts() {
-    local base_output_file="vps_test_results_$(date +%Y%m%d_%H%M%S)"
+    local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo "开始执行全部测试脚本..."
     for i in {1..8}; do
         run_script $i "$base_output_file"
@@ -294,7 +307,7 @@ run_all_scripts() {
 # 执行选定的脚本
 run_selected_scripts() {
     clear
-    local base_output_file="vps_test_results_$(date +%Y%m%d_%H%M%S)"
+    local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
     echo "1. Yabs"
     echo "2. 融合怪"
@@ -305,7 +318,7 @@ run_selected_scripts() {
     echo "7. 单线程测试"
     echo "8. 回程路由"
     echo "0. 返回"
-    read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3)： " script_numbers
+    read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3):" script_numbers
     IFS=',' read -ra selected_scripts <<< "$script_numbers"
     echo "开始执行选定的测试脚本..."
     if [ $script_numbers == "0" ]
@@ -314,6 +327,7 @@ run_selected_scripts() {
         show_welcome
     else
         for number in "${selected_scripts[@]}"; do
+            clear
             run_script "$number" "$base_output_file"
         done
         generate_markdown_output "$base_output_file"
@@ -322,8 +336,8 @@ run_selected_scripts() {
 
 # 主菜单
 main_menu() {
-#    clear
     echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
+    echo -e "${GREEN}测试项目：${NC}Yabs，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，回程路由。"
     echo -e "${YELLOW}1. 执行所有测试脚本${NC}"
     echo -e "${YELLOW}2. 选择特定测试脚本${NC}"
     echo -e "${YELLOW}0. 退出${NC}"
@@ -371,19 +385,6 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-#    echo "一键脚本将测试以下项目，可以自动全部测试，或者自定义选择测试项目："
-#    echo "1. Yabs"
-#    echo "2. 融合怪"
-#    echo "3. IP质量"
-#    echo "4. 流媒体解锁"
-#    echo "5. 响应测试"
-#    echo "6. 多线程测试"
-#    echo "7. 单线程测试"
-#    echo "8. 回程路由"
-#    echo ""
-#    echo -e "${RED}按任意键进入测试选项...${NC}"
-#    read -n 1 -s
-#    clear
 }
 
 # 主函数
