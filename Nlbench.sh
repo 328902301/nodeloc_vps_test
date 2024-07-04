@@ -250,10 +250,12 @@ generate_markdown_output() {
     echo "[/tab]" >> "$final_output_file"
 
     echo "[tab=\"IP质量\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
     if [ -f "${base_output_file}_ip_quality" ]; then
         cat "${base_output_file}_ip_quality" >> "$final_output_file"
         rm "${base_output_file}_ip_quality"
     fi
+    echo "\`\`\`" >> "$final_output_file"
     echo "[/tab]" >> "$final_output_file"
 
     echo "[tab=\"流媒体\"]" >> "$final_output_file"
