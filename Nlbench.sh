@@ -33,6 +33,7 @@ install_dependencies() {
     local dependencies=(
         "curl"
         "wget"
+        "iperf3"
     )
     
     for dep in "${dependencies[@]}"; do
