@@ -83,6 +83,23 @@ detect_region() {
     esac
 }
 
+# iperf3测试函数
+run_iperf3_test() {
+    local servers=(
+        "iperf.he.net"
+        "iperf.biznetnetworks.com"
+        "iperf.scottlinux.com"
+        "bouygues.iperf.fr"
+        "ping.online.net"
+    )
+
+    for server in "${servers[@]}"; do
+        echo "测试服务器: $server"
+        iperf3 -c "$server" -t 30 -P 3
+        echo "----------------------------------------"
+    done
+}
+
 # 统计使用次数
 sum_run_times() {
     local COUNT
@@ -189,6 +206,12 @@ run_script() {
             wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" |tee "$temp_file"
             sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e ' /测试项/,+9d'  -e '/信息/d'  -e '/^\s*$/d' "$temp_file" > "${output_file}_route"
             ;;
+        # iperf3测试
+        9)
+            echo -e "运行${YELLOW}iperf3测试...${NC}"
+            run_iperf3_test | tee "$temp_file"
+            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_iperf3"
+            ;;
     esac
     rm "$temp_file"
     echo -e "${GREEN}测试完成。${NC}"
@@ -262,6 +285,15 @@ generate_markdown_output() {
     echo "\`\`\`" >> "$final_output_file"
     echo "[/tab]" >> "$final_output_file"
 
+    echo "[tab=\"iperf3\"]" >> "$final_output_file"
+    echo "\`\`\`" >> "$final_output_file"
+    if [ -f "${base_output_file}_iperf3" ]; then
+    cat "${base_output_file}_iperf3" >> "$final_output_file"
+    rm "${base_output_file}_iperf3"
+    fi
+    echo "\`\`\`" >> "$final_output_file"
+    echo "[/tab]" >> "$final_output_file"
+
     echo "[tab=\"回程路由\"]" >> "$final_output_file"
     echo "\`\`\`" >> "$final_output_file"
     if [ -f "${base_output_file}_route" ]; then
@@ -272,11 +304,6 @@ generate_markdown_output() {
     echo "[/tab]" >> "$final_output_file"
 
     echo "[tab=\"去程路由\"]" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"iperf3\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
     echo "[/tab]" >> "$final_output_file"
 
     echo "[tab=\"Ping.pe\"]" >> "$final_output_file"
@@ -319,6 +346,7 @@ run_selected_scripts() {
     echo "6. 多线程测试"
     echo "7. 单线程测试"
     echo "8. 回程路由"
+    echo "9. iperf3"
     echo "0. 返回"
     read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3):" script_numbers
     IFS=',' read -ra selected_scripts <<< "$script_numbers"
@@ -338,7 +366,7 @@ run_selected_scripts() {
 
 # 主菜单
 main_menu() {
-    echo -e "${GREEN}测试项目：${NC}Yabs，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，回程路由。"
+    echo -e "${GREEN}测试项目：${NC}Yabs，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，iperf3，回程路由。"
     echo -e "${YELLOW}1. 执行所有测试脚本${NC}"
     echo -e "${YELLOW}2. 选择特定测试脚本${NC}"
     echo -e "${YELLOW}0. 退出${NC}"
