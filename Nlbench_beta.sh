@@ -166,6 +166,7 @@ run_script() {
             echo -e "运行${YELLOW}IP质量测试...${NC}"
             bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -n '/########################################################################/,${s/^.*\(########################################################################\)/\1/;p}' "$temp_file"
             sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_ip_quality"
