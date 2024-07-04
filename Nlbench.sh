@@ -87,21 +87,35 @@ detect_region() {
 # iperf3测试函数
 run_iperf3_test() {
     local servers=(
-        "iperf.he.net"
-        "iperf.biznetnetworks.com"
-        "iperf.scottlinux.com"
-        "bouygues.iperf.fr"
+        # Europe
         "ping.online.net"
+        "ping6.online.net"
+        "ping-90ms.online.net"
+        "ping6-90ms.online.net"
+        "iperf3.moji.fr"
+        "iperf.par2.as49434.net"
+        "paris.testdebit.info"
+        "lille.testdebit.info"
+        "lyon.testdebit.info"
+        "aix-marseille.testdebit.info"
+        "bordeaux.testdebit.info"
+        "nl.iperf.014.fr"
+        "ch.iperf.014.fr"
+        "iperf.eenet.ee"
+        "iperf.astra.in.ua"
         "iperf.volia.net"
-        "iperf.quickline.ch"
-        "iperf.hostkey.com"
-        "iperf.serverius.net"
-        "speedtest.wtnet.de"
-        "iperf.factor.sk"
-        "iperf.worldstream.nl"
-        "iperf.zlim.cc"
-        "iperf.lux.viatel.asia"
-        "iperf.as44843.net"
+        
+        # Asia
+        "speedtest.uztelecom.uz"
+        "iperf.it-north.net"
+        "iperf.biznetnetworks.com"
+        
+        # Oceania
+        "speedtest-iperf-akl.vetta.online"
+        
+        # Americas
+        "iperf.scottlinux.com"
+        "iperf.he.net"
     )
 
     for server in "${servers[@]}"; do
