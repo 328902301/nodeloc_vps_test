@@ -170,8 +170,11 @@ run_script() {
         4)
             echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
             local region=$(detect_region)
-            bash <(curl -L -s media.ispvps.com) <<< "$region" |tee "$temp_file" 
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g; 1,/脚本适配/d' "$temp_file" > "${output_file}_streaming"
+            bash <(curl -L -s media.ispvps.com) <<< "$region" | tee "$temp_file"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i '1,/脚本适配/d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"  # 删除空行
+            cp "$temp_file" "${output_file}_streaming"
             ;;
         # 响应测试
         5)
