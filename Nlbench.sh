@@ -164,7 +164,8 @@ run_script() {
             echo -e "运行${YELLOW}IP质量测试...${NC}"
             bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
-            sed -i '/\.\.\.\.\.\.\.\.\.\./d' "$temp_file"
+            sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
+            sed -i -n '/########################################################################/,${s/^.*\(########################################################################\)/\1/;p}' "$temp_file"
             cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
@@ -173,8 +174,9 @@ run_script() {
             local region=$(detect_region)
             bash <(curl -L -s media.ispvps.com) <<< "$region" | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
-            sed -i '1,/脚本适配/d' "$temp_file"
-            sed -i '/^$/d' "$temp_file"  # 删除空行
+            sed -i -n '/流媒体平台及游戏区域限制测试/,$p' "$temp_file"
+            sed -i '1d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_streaming"
             ;;
         # 响应测试
@@ -335,7 +337,7 @@ generate_markdown_output() {
 run_all_scripts() {
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo "开始执行全部测试脚本..."
-    for i in {1..8}; do
+    for i in {1..9}; do
         run_script $i "$base_output_file"
     done
     generate_markdown_output "$base_output_file"
@@ -357,11 +359,19 @@ run_selected_scripts() {
     echo "8. iperf3"
     echo "9. 回程路由"
     echo "0. 返回"
-    read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3):" script_numbers
+    
+    while true; do
+        read -p "请输入要执行的脚本编号（用英文逗号分隔，例如：1,2,3):" script_numbers
+        if [[ "$script_numbers" =~ ^[0-9](,[0-9])*$ ]]; then
+            break
+        else
+            echo -e "${RED}无效输入，请输入0-9之间的数字，用英文逗号分隔。${NC}"
+        fi
+    done
+
     IFS=',' read -ra selected_scripts <<< "$script_numbers"
     echo "开始执行选定的测试脚本..."
-    if [ $script_numbers == "0" ]
-    then
+    if [ "$script_numbers" == "0" ]; then
         clear
         show_welcome
     else
