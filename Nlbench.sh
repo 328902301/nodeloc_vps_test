@@ -350,7 +350,7 @@ run_all_scripts() {
 run_selected_scripts() {
     clear
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
-    echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
+    echo -e "${YELLOW}NodeLoc聚合测试脚本 $VERSION${NC}"
     echo "1. Yabs"
     echo "2. 融合怪"
     echo "3. IP质量"
@@ -418,7 +418,7 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo -e "${GREEN}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
+    echo -e "${GREEN}NodeLoc聚合测试脚本 $VERSION${NC}"
     echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
     echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
