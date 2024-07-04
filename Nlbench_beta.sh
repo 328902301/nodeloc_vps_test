@@ -148,7 +148,6 @@ run_script() {
             sed -i 's/\.\.\./\.\.\.\n/g' "$temp_file"
             sed -i '/\.\.\./d' "$temp_file"
             sed -i '/^\s*$/d'   "$temp_file"
-            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_yabs"
             ;;
         # 融合怪
@@ -158,7 +157,6 @@ run_script() {
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\.\.\.\./\.\.\.\.\.\.\n/g' "$temp_file"
             sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
-            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
@@ -168,7 +166,6 @@ run_script() {
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -n '/########################################################################/,${s/^.*\(########################################################################\)/\1/;p}' "$temp_file"
-            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
@@ -187,7 +184,6 @@ run_script() {
             echo -e "运行${YELLOW}响应测试...${NC}"
             bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
-            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_response"
             ;;
         # 多线程测速
@@ -198,7 +194,6 @@ run_script() {
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
-            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_multi_thread"
             ;;
         # 单线程测速
@@ -209,7 +204,6 @@ run_script() {
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
-            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_single_thread"
             ;;
         # iperf3测试
@@ -218,7 +212,6 @@ run_script() {
             run_iperf3_test | tee "$temp_file"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/\[ ID\] /d' "$temp_file"
-            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_iperf3"
             ;;
        # 回程路由
@@ -226,7 +219,6 @@ run_script() {
             echo -e "运行${YELLOW}回程路由测试...${NC}"
             wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
-            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"
             ;;
     esac
