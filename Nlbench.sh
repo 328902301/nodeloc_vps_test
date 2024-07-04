@@ -92,11 +92,25 @@ run_iperf3_test() {
         "iperf.scottlinux.com"
         "bouygues.iperf.fr"
         "ping.online.net"
+        "iperf.volia.net"
+        "iperf.quickline.ch"
+        "iperf.hostkey.com"
+        "iperf.serverius.net"
+        "speedtest.wtnet.de"
+        "iperf.factor.sk"
+        "iperf.worldstream.nl"
+        "iperf.zlim.cc"
+        "iperf.lux.viatel.asia"
+        "iperf.as44843.net"
     )
 
     for server in "${servers[@]}"; do
         echo "测试服务器: $server"
-        iperf3 -c "$server" -t 30 -P 3
+        if timeout 15 iperf3 -c "$server" -t 30 -P 3 2>/dev/null; then
+            echo "测试完成"
+        else
+            echo "测试失败或超时"
+        fi
         echo "----------------------------------------"
     done
 }
