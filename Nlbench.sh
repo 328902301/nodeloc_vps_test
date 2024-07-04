@@ -162,7 +162,6 @@ run_script() {
         # IP质量
         3)
             echo -e "运行${YELLOW}IP质量测试...${NC}"
-            
             bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
             sed  's/\x1B\[[0-9;]*[JKmsu]//g; /\.\.\.\.\.\.\.\.\.\./d'  "$temp_file"  > "${output_file}_ip_quality"
             ;;
