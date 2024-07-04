@@ -201,17 +201,19 @@ run_script() {
             sed -i -r '/测试进行中/d' "$temp_file"
             cp "$temp_file" "${output_file}_single_thread"
             ;;
-        # 回程路由
-        8)
-            echo -e "运行${YELLOW}回程路由测试...${NC}"
-            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" |tee "$temp_file"
-            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e ' /测试项/,+9d'  -e '/信息/d'  -e '/^\s*$/d' "$temp_file" > "${output_file}_route"
-            ;;
         # iperf3测试
-        9)
+        8)
             echo -e "运行${YELLOW}iperf3测试...${NC}"
             run_iperf3_test | tee "$temp_file"
             sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_iperf3"
+            ;;
+
+        # 回程路由
+        9)
+
+            echo -e "运行${YELLOW}回程路由测试...${NC}"
+            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" |tee "$temp_file"
+            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e ' /测试项/,+9d'  -e '/信息/d'  -e '/^\s*$/d' "$temp_file" > "${output_file}_route"
             ;;
     esac
     rm "$temp_file"
@@ -346,8 +348,8 @@ run_selected_scripts() {
     echo "5. 响应测试"
     echo "6. 多线程测试"
     echo "7. 单线程测试"
-    echo "8. 回程路由"
-    echo "9. iperf3"
+    echo "8. iperf3"
+    echo "9. 回程路由"
     echo "0. 返回"
     read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3):" script_numbers
     IFS=',' read -ra selected_scripts <<< "$script_numbers"
