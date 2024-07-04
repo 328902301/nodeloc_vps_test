@@ -163,7 +163,9 @@ run_script() {
         3)
             echo -e "运行${YELLOW}IP质量测试...${NC}"
             bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
-            sed  's/\x1B\[[0-9;]*[JKmsu]//g; /\.\.\.\.\.\.\.\.\.\./d'  "$temp_file"  > "${output_file}_ip_quality"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i '/\.\.\.\.\.\.\.\.\.\./d' "$temp_file"
+            cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
         4)
@@ -178,8 +180,9 @@ run_script() {
         # 响应测试
         5)
             echo -e "运行${YELLOW}响应测试...${NC}"
-            bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) |tee "$temp_file"
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_response"
+            bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) | tee "$temp_file"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            cp "$temp_file" "${output_file}_response"
             ;;
         # 多线程测速
         6)
@@ -209,12 +212,12 @@ run_script() {
             sed -i -r '1,/\[ ID\] /d' "$temp_file"
             cp "$temp_file" "${output_file}_iperf3"
             ;;
-        # 回程路由
+       # 回程路由
         9)
-
             echo -e "运行${YELLOW}回程路由测试...${NC}"
-            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" |tee "$temp_file"
-            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e ' /测试项/,+9d'  -e '/信息/d'  -e '/^\s*$/d' "$temp_file" > "${output_file}_route"
+            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
+            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
+            cp "$temp_file" "${output_file}_route"
             ;;
     esac
     rm "$temp_file"
