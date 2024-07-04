@@ -345,7 +345,7 @@ generate_markdown_output() {
 run_all_scripts() {
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo "开始执行全部测试脚本..."
-    for i in {1..8}; do
+    for i in {1..9}; do
         run_script $i "$base_output_file"
     done
     generate_markdown_output "$base_output_file"
@@ -367,11 +367,19 @@ run_selected_scripts() {
     echo "8. iperf3"
     echo "9. 回程路由"
     echo "0. 返回"
-    read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3):" script_numbers
+    
+    while true; do
+        read -p "请输入要执行的脚本编号（用逗号分隔，例如：1,2,3):" script_numbers
+        if [[ "$script_numbers" =~ ^[1-9](,[1-9])*$ ]]; then
+            break
+        else
+            echo -e "${RED}无效输入，请输入1-9之间的数字，用逗号分隔。${NC}"
+        fi
+    done
+
     IFS=',' read -ra selected_scripts <<< "$script_numbers"
     echo "开始执行选定的测试脚本..."
-    if [ $script_numbers == "0" ]
-    then
+    if [ "$script_numbers" == "0" ]; then
         clear
         show_welcome
     else
