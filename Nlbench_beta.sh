@@ -84,21 +84,20 @@ detect_region() {
     esac
 }
 
-# iperf3测试函数
-run_iperf3_test() {
-    local servers=(
-        "iperf.he.net"
-        "iperf.biznetnetworks.com"
-        "iperf.scottlinux.com"
-        "bouygues.iperf.fr"
-        "ping.online.net"
-    )
+# 服务器 VPS 信息
+AUXILIARY_VPS="205.185.119.208"
+IPERF_PORT=5201
+TEST_DURATION=30
+PARALLEL_STREAMS=3
 
-    for server in "${servers[@]}"; do
-        echo "测试服务器: $server"
-        iperf3 -c "$server" -t 30 -P 3
-        echo "----------------------------------------"
-    done
+run_iperf3_test() {
+    echo -e "${GREEN}服务端VPS位于美国拉斯维加斯${NC}"
+    echo -e "${GREEN}连接到服务端进行iperf3测试。。。${NC}"
+    if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION -P $PARALLEL_STREAMS; then
+    echo -e "${YELLOW}iperf3 测试完成${NC}"
+    else
+    echo -e "${RED}iperf3 测试失败${NC}"
+    fi
 }
 
 # 统计使用次数
@@ -158,28 +157,32 @@ run_script() {
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\.\.\.\./\.\.\.\.\.\.\n/g' "$temp_file"
             sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
-            sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
         3)
             echo -e "运行${YELLOW}IP质量测试...${NC}"
-            
             bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
-            sed  's/\x1B\[[0-9;]*[JKmsu]//g; /\.\.\.\.\.\.\.\.\.\./d'  "$temp_file"  > "${output_file}_ip_quality"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i '/\.\.\.\.\.\.\.\.\.\./d' "$temp_file"
+            cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
         4)
             echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
             local region=$(detect_region)
-            bash <(curl -L -s media.ispvps.com) <<< "$region" |tee "$temp_file" 
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g; 1,/脚本适配/d' "$temp_file" > "${output_file}_streaming"
+            bash <(curl -L -s media.ispvps.com) <<< "$region" | tee "$temp_file"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i '1,/脚本适配/d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"  # 删除空行
+            cp "$temp_file" "${output_file}_streaming"
             ;;
         # 响应测试
         5)
             echo -e "运行${YELLOW}响应测试...${NC}"
-            bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) |tee "$temp_file"
-            sed 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_response"
+            bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) | tee "$temp_file"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            cp "$temp_file" "${output_file}_response"
             ;;
         # 多线程测速
         6)
@@ -205,15 +208,16 @@ run_script() {
         8)
             echo -e "运行${YELLOW}iperf3测试...${NC}"
             run_iperf3_test | tee "$temp_file"
-            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file" > "${output_file}_iperf3"
+            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i -r '1,/\[ ID\] /d' "$temp_file"
+            cp "$temp_file" "${output_file}_iperf3"
             ;;
-
-        # 回程路由
+       # 回程路由
         9)
-
             echo -e "运行${YELLOW}回程路由测试...${NC}"
-            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" |tee "$temp_file"
-            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e ' /测试项/,+9d'  -e '/信息/d'  -e '/^\s*$/d' "$temp_file" > "${output_file}_route"
+            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
+            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
+            cp "$temp_file" "${output_file}_route"
             ;;
     esac
     rm "$temp_file"
