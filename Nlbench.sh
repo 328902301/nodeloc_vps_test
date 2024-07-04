@@ -91,17 +91,12 @@ TEST_DURATION=30
 PARALLEL_STREAMS=3
 
 run_iperf3_test() {
-    echo -e "${YELLOW}开始 iperf3 测试...${NC}"
-
-    echo -e "${GREEN}测试到辅助 VPS 的连接${NC}"
-    echo "连接到服务端VPS，请耐心等待测试"
+    echo -e "${GREEN}连接到服务端iperf3中。。。${NC}"
     if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION -P $PARALLEL_STREAMS; then
-        echo -e "${GREEN}测试完成${NC}"
-    else
-        echo -e "${RED}测试失败${NC}"
-    fi
-
     echo -e "${YELLOW}iperf3 测试完成${NC}"
+    else
+        echo -e "${RED}iperf3 测试失败${NC}"
+    fi
 }
 
 # 统计使用次数
