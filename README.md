@@ -6,6 +6,8 @@
 
 **Github地址：** https://github.com/everett7623/nodeloc_vps_test
 
+**VPS 选购:** [NodeLoc VPS](https://www.nodeloc.com/vps)
+
 ### 使用方法
 确保用户为ROOT，主机网络通畅，复制下面任意命令运行
 
