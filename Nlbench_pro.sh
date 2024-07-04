@@ -135,7 +135,7 @@ run_script() {
         2)
             echo -e "运行${YELLOW}融合怪...${NC}"
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 | tee "$temp_file"
-            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g,1,/\.\.\.\.\.\./d' "$temp_file" > "${output_file}_fusion"
+            sed -e 's/\x1B\[[0-9;]*[JKmsu]//g,1,/A Bench Script/d' "$temp_file" > "${output_file}_fusion"
             ;;
         # IP质量
         3)
