@@ -138,7 +138,10 @@ run_script() {
             echo -e "运行${YELLOW}融合怪...${NC}"
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 <<< "y" | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
-            sed -n '/^--------------------- A Bench Script By spiritlhl ----------------------/,$p' "$temp_file" > "${output_file}_fusion"
+            sed -i 's/\.\.\.\.\.\./\.\.\.\.\.\.\n/g' "$temp_file"
+            sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
+            sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
+            cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
         3)
