@@ -13,10 +13,7 @@
 ```
 wget -O Nlbench.sh https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh && chmod +x Nlbench.sh && ./Nlbench.sh
 ```
-**CentOS**
-```
-curl -fsSL https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh -o vps_scripts.sh&& chmod +x vps_scripts.sh && ./vps_scripts.sh
-```
+**不支持CentOS**
 
 ### 效果图
 ![image](https://s.rmimg.com/2024/07/03/568e9f492ca50cd0af4cce8b88a6f156.png)
