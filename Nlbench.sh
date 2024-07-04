@@ -205,6 +205,7 @@ run_script() {
             echo -e "运行${YELLOW}iperf3测试...${NC}"
             run_iperf3_test | tee "$temp_file"
             sed -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i -r '1,/\[ ID\] /d' "$temp_file"
             cp "$temp_file" "${output_file}_iperf3"
             ;;
 
