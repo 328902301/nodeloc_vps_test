@@ -338,7 +338,6 @@ run_selected_scripts() {
 
 # 主菜单
 main_menu() {
-    echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
     echo -e "${GREEN}测试项目：${NC}Yabs，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，回程路由。"
     echo -e "${YELLOW}1. 执行所有测试脚本${NC}"
     echo -e "${YELLOW}2. 选择特定测试脚本${NC}"
@@ -370,9 +369,9 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo "Nodeloc_VPS_自动脚本测试 $VERSION"
-    echo "GitHub地址: https://github.com/everett7623/nodeloc_vps_test"
-    echo "VPS选购: https://www.nodeloc.com/vps"
+    echo -e "${GREEN}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
+    echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
+    echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
     echo -e "${YELLOW}#     #  #####  ####  ###### #       ####   ####    #    # ####   ####${NC}"
     echo -e "${YELLOW}##    # #     # #   # #      #      #    # #    #   #    # #   # #     #${NC}"
