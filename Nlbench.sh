@@ -87,14 +87,14 @@ detect_region() {
 # 辅助 VPS 信息
 AUXILIARY_VPS="205.185.119.208"
 IPERF_PORT=5201
-TEST_DURATION=10
+TEST_DURATION=30
 PARALLEL_STREAMS=3
 
 run_iperf3_test() {
     echo -e "${YELLOW}开始 iperf3 测试...${NC}"
 
     echo -e "${GREEN}测试到辅助 VPS 的连接${NC}"
-    echo "连接到辅助 VPS: $AUXILIARY_VPS"
+    echo "连接到服务端VPS，请耐心等待测试"
     if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION -P $PARALLEL_STREAMS; then
         echo -e "${GREEN}测试完成${NC}"
     else
