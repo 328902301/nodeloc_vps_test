@@ -158,7 +158,6 @@ run_script() {
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\.\.\.\./\.\.\.\.\.\.\n/g' "$temp_file"
             sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
-            sed -i -n '/--------------------- A Bench Script By spiritlhl ----------------------/,${s/^.*\(--------------------- A Bench Script By spiritlhl ----------------------\)/\1/;p}' "$temp_file"
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
@@ -168,7 +167,6 @@ run_script() {
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -n '/########################################################################/,${s/^.*\(########################################################################\)/\1/;p}' "$temp_file"
-            sed -i -r '/正在检测/d' "$temp_file"
             cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
@@ -194,10 +192,10 @@ run_script() {
             if [ "$PUBLIC_IP" != ${1#*:[0-9a-fA-F]} ]; then
                 bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
             else
-                bash <(curl -sL bash.icu/speedtest) <<< "3" |tee "$temp_file"
+                bash <(curl -sL bash.icu/speedtest) <<< "16" |tee "$temp_file"
             fi
             echo -e "运行${YELLOW}多线程测速...${NC}"
-            bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
+            
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
@@ -207,12 +205,12 @@ run_script() {
         # 单线程测速
         7)
             if [ "$PUBLIC_IP" != ${1#*:[0-9a-fA-F]} ]; then
-                bash <(curl -sL bash.icu/speedtest) <<< "2" |tee "$temp_file"
+                bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
             else
-                bash <(curl -sL bash.icu/speedtest) <<< "17" |tee "$temp_file"
+                bash <(curl -sL bash.icu/speedtest) <<< "16" |tee "$temp_file"
             fi
-            echo -e "运行${YELLOW}多线程测速...${NC}"
-            bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
+            echo -e "运行${YELLOW}单线程测速...${NC}"
+            
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
@@ -229,12 +227,12 @@ run_script() {
             ;;
        # 回程路由
         9)
+            echo -e "运行${YELLOW}回程路由测试...${NC}"
             if [ "$PUBLIC_IP" != "${1#*:[0-9a-fA-F]}" ]; then
                 wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             else
                 wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "3" | tee "$temp_file"
             fi
-            echo -e "运行${YELLOW}回程路由测试...${NC}"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"
             ;;
@@ -365,7 +363,7 @@ run_all_scripts() {
 run_selected_scripts() {
     clear
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
-    echo -e "${YELLOW}NodeLoc聚合测试脚本 $VERSION${NC}"
+    echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
     echo "1. Yabs"
     echo "2. 融合怪"
     echo "3. IP质量"
@@ -433,7 +431,7 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo -e "${GREEN}NodeLoc聚合测试脚本 $VERSION${NC}"
+    echo -e "${GREEN}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
     echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
     echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
