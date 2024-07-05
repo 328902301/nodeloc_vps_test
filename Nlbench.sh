@@ -35,23 +35,34 @@ update_scripts() {
 
     # 对比版本号
     if [ "$REMOTE_VERSION" != "$CURRENT_VERSION" ]; then
-        echo -e "${BLUE}发现新版本 $REMOTE_VERSION，当前版本 $CURRENT_VERSION${NC}"
-        echo -e "${BLUE}正在更新...${NC}"
+        clear
+        echo "脚本更新日志"
+        echo "-------------------------"   
+        echo "2024-07-05 v1.0.0"
+        echo "初始化版本，包含基础功能和菜单选择，一键测试或者手动多选测试"
+        echo "发现新版本 $REMOTE_VERSION，当前版本 $CURRENT_VERSION"
+        echo "正在更新..."
         
         # 下载新的脚本文件
         if curl -s -o /tmp/Nlbench.sh $SCRIPT_URL; then
-            NEW_VERSION=$(grep '^VERSION=' /tmp/Nlbench.sh | cut -d'"' -f2)
-            sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
-            
-            # 替换脚本文件
-            if mv /tmp/Nlbench.sh "$0"; then
-                chmod +x "$0"
-                echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
-                echo -e "${YELLOW}请等待 3 秒...${NC}"
-                sleep 3
-                exec bash "$0"
+            if [ -f /tmp/Nlbench.sh ]; then
+                NEW_VERSION=$(grep '^VERSION=' /tmp/Nlbench.sh | cut -d'"' -f2)
+                sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
+                
+                # 替换脚本文件
+                if mv /tmp/Nlbench.sh "$0"; then
+                    chmod +x "$0"
+                    echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
+                    echo -e "${YELLOW}请等待 3 秒...${NC}"
+                    sleep 3
+                    exec bash "$0"
+                else
+                    echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
+                    sleep 2
+                    return 1
+                fi
             else
-                echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
+                echo -e "${RED}下载的新脚本文件不存在。请检查下载过程。${NC}"
                 sleep 2
                 return 1
             fi
@@ -65,6 +76,7 @@ update_scripts() {
         sleep 2
     fi
 }
+
 
 # 检查并安装依赖
 install_dependencies() {
