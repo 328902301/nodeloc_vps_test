@@ -49,7 +49,7 @@ update_scripts() {
                 echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
                 echo -e "${YELLOW}请等待 3 秒应用更新...${NC}"
                 sleep 3
-                exec bash "$0"  # 自动重新启动脚本以应用更新
+                exec bash "$0"  # 执行一次重新启动以应用更新
             else
                 echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
                 sleep 2
