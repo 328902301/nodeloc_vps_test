@@ -180,6 +180,7 @@ run_script() {
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\.\.\.\./\.\.\.\.\.\.\n/g' "$temp_file"
             sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
+            sed -i -n '/--------------------- A Bench Script By spiritlhl ----------------------/,${s/^.*\(--------------------- A Bench Script By spiritlhl ----------------------\)/\1/;p}' "$temp_file"
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
