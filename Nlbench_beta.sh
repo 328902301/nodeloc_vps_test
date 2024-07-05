@@ -211,13 +211,14 @@ run_script() {
             else
                 bash <(curl -sL bash.icu/speedtest) <<< "17" |tee "$temp_file"
             fi
- 
-            echo -e "运行${YELLOW}单线程测速...${NC}"
+            echo -e "运行${YELLOW}多线程测速...${NC}"
+            bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
             cp "$temp_file" "${output_file}_single_thread"
+            ;;
         # iperf3测试
         8)
             echo -e "运行${YELLOW}iperf3测试...${NC}"
