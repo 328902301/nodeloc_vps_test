@@ -19,9 +19,8 @@ if [ "$(id -u)" != "0" ]; then
     echo "已获取 sudo 权限。"
 fi
 
-# 更新脚本
 update_scripts() {
-    CURRENT_VERSION="2024-07-05 v1.0.0"  # 最新版本号
+    CURRENT_VERSION="2024-07-05 v1.0.0"  # 当前版本号
     SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
     VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
     
@@ -55,7 +54,7 @@ update_scripts() {
                     echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
                     echo -e "${YELLOW}请等待 3 秒...${NC}"
                     sleep 3
-                    exec bash "$0"
+                    exec bash "$0" --updated
                 else
                     echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
                     sleep 2
@@ -77,6 +76,10 @@ update_scripts() {
     fi
 }
 
+# 检查是否已经更新
+if [ "$1" != "--updated" ]; then
+    update_scripts
+fi
 
 # 检查并安装依赖
 install_dependencies() {
@@ -538,9 +541,6 @@ show_welcome() {
 main() {
     # 检查并安装依赖
     install_dependencies
-
-    # 更新脚本
-    update_scripts
     
     # 获取统计数据
     sum_run_times
