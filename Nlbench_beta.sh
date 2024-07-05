@@ -139,6 +139,7 @@ run_script() {
     local script_number=$1
     local output_file=$2
     local temp_file=$(mktemp)
+    PUBLIC_IP=$(curl -s ip.sb)
     case $script_number in
         # YABS
         1)
@@ -190,6 +191,11 @@ run_script() {
             ;;
         # 多线程测速
         6)
+            if [ "$PUBLIC_IP" != ${1#*:[0-9a-fA-F]} ]; then
+                bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
+            else
+                bash <(curl -sL bash.icu/speedtest) <<< "3" |tee "$temp_file"
+            fi
             echo -e "运行${YELLOW}多线程测速...${NC}"
             bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
@@ -200,14 +206,18 @@ run_script() {
             ;;
         # 单线程测速
         7)
+            if [ "$PUBLIC_IP" != ${1#*:[0-9a-fA-F]} ]; then
+                bash <(curl -sL bash.icu/speedtest) <<< "2" |tee "$temp_file"
+            else
+                bash <(curl -sL bash.icu/speedtest) <<< "17" |tee "$temp_file"
+            fi
+ 
             echo -e "运行${YELLOW}单线程测速...${NC}"
-            bash <(curl -sL bash.icu/speedtest) <<< "2" |tee "$temp_file"
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
             cp "$temp_file" "${output_file}_single_thread"
-            ;;
         # iperf3测试
         8)
             echo -e "运行${YELLOW}iperf3测试...${NC}"
@@ -218,6 +228,11 @@ run_script() {
             ;;
        # 回程路由
         9)
+            if [ "$PUBLIC_IP" != "${1#*:[0-9a-fA-F]}" ]; then
+                wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
+            else
+                wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "3" | tee "$temp_file"
+            fi
             echo -e "运行${YELLOW}回程路由测试...${NC}"
             wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
