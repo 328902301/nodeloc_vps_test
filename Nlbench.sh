@@ -247,6 +247,7 @@ run_script() {
             run_iperf3_test | tee "$temp_file"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/\[ ID\] /d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_iperf3"
             ;;
         # 回程路由
