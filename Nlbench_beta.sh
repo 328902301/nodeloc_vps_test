@@ -50,6 +50,58 @@ install_dependencies() {
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
     clear
 }
+
+# 更新脚本
+update_scripts() {
+    VERSION="2024-07-05 v1.0.0"  # 最新版本号
+    SCRIPT_URL="https://raw.githubusercontent.com/everett7623/main/Nlbench_beta.sh"
+    VERSION_URL="https://raw.githubusercontent.com/everett7623/main/version.sh"
+    
+    REMOTE_VERSION=$(curl -s $VERSION_URL)
+    if [ -z "$REMOTE_VERSION" ]; then
+        echo -e "${RED}无法获取远程版本信息。请检查您的网络连接。${NC}"
+        sleep 2
+        return 1
+    fi
+
+    if [ "$REMOTE_VERSION" != "$VERSION" ]; then
+        echo -e "${BLUE}发现新版本 $REMOTE_VERSION，当前版本 $VERSION${NC}"
+        echo -e "${BLUE}正在更新...${NC}"
+        
+        if curl -s -o /tmp/Nlbench_beta.sh $SCRIPT_URL; then
+            NEW_VERSION=$(grep '^VERSION=' /tmp/Nlbench_beta.sh | cut -d'"' -f2)
+            sed -i "s/^VERSION=.*/VERSION=\"$NEW_VERSION\"/" "$0"
+            
+            if mv /tmp/vps_scripts.sh "$0"; then
+                chmod +x "$0"
+                echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
+                echo -e "${YELLOW}请等待 3 秒...${NC}"
+                sleep 3
+                echo -e "${YELLOW}是否重新启动脚本以应用更新？(Y/n)${NC}"
+                read -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+                    exec bash "$0"
+                else
+                    echo -e "${YELLOW}请手动重启脚本以应用更新。${NC}"
+                    sleep 2
+                fi
+            else
+                echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
+                sleep 2
+                return 1
+            fi
+        else
+            echo -e "${RED}下载新版本失败。请稍后重试。${NC}"
+            sleep 2
+            return 1
+        fi
+    else
+        echo -e "${GREEN}脚本已是最新版本 $VERSION。${NC}"
+        sleep 2
+    fi
+}
+
 # 获取IP地址和ISP信息
 ip_address_and_isp() {
     ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
@@ -479,6 +531,9 @@ show_welcome() {
 main() {
     # 检查并安装依赖
     install_dependencies
+
+    #更新脚本
+    update_scripts
     
     # 获取统计数据
     sum_run_times
