@@ -139,8 +139,6 @@ run_script() {
     local script_number=$1
     local output_file=$2
     local temp_file=$(mktemp)
-    # 调用ip_address函数获取IP地址
-    ip_address
     case $script_number in
         # YABS
         1)
@@ -453,7 +451,10 @@ show_welcome() {
 main() {
     # 检查并安装依赖
     install_dependencies
-
+    
+    # 调用ip_address函数获取IP地址
+    ip_address
+    
     # 获取统计数据
     sum_run_times
 
