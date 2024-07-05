@@ -157,7 +157,7 @@ run_script() {
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 <<< "y" | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\.\.\.\./\.\.\.\.\.\.\n/g' "$temp_file"
-            sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
+            sed -n '/--------------------- A Bench Script By spiritlhl ----------------------/,$p' "$temp_file"
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
@@ -204,18 +204,18 @@ run_script() {
             ;;
         # 单线程测速
         7)
-            if [ "$PUBLIC_IP" != ${1#*:[0-9a-fA-F]} ]; then
-                bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
+            if [ "$PUBLIC_IP" != "${1#*:[0-9a-fA-F]}" ]; then
+                echo -e "运行${YELLOW}单线程测速...${NC}"
+                bash <(curl -sL bash.icu/speedtest) <<< "2" |tee "$temp_file"
+                sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+                sed -i -r '1,/序号\:/d' "$temp_file"
+                sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
+                sed -i -r '/测试进行中/d' "$temp_file"
+                cp "$temp_file" "${output_file}_single_thread"
             else
-                bash <(curl -sL bash.icu/speedtest) <<< "16" |tee "$temp_file"
+                echo "该脚本无IPv6单线程测速"
+                touch "${output_file}_single_thread"
             fi
-            echo -e "运行${YELLOW}单线程测速...${NC}"
-            
-            sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
-            sed -i -r '1,/序号\:/d' "$temp_file"
-            sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
-            sed -i -r '/测试进行中/d' "$temp_file"
-            cp "$temp_file" "${output_file}_single_thread"
             ;;
         # iperf3测试
         8)
