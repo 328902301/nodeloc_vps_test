@@ -208,32 +208,32 @@ run_script() {
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             cp "$temp_file" "${output_file}_response"
             ;;
-# 多线程测速
-6)
-    echo -e "运行${YELLOW}多线程测速...${NC}"
-    if [ "$use_ipv6" = true ]; then
-        echo "使用IPv6测试选项"
-        bash <(curl -sL bash.icu/speedtest) <<< "3" | tee "$temp_file"
-    else
-        echo "使用IPv4测试选项"
-        bash <(curl -sL bash.icu/speedtest) <<< "1" | tee "$temp_file"
-    fi
+        # 多线程测速
+        6)
+            echo -e "运行${YELLOW}多线程测速...${NC}"
+            if [ "$use_ipv6" = true ]; then
+            echo "使用IPv6测试选项"
+            bash <(curl -sL bash.icu/speedtest) <<< "3" | tee "$temp_file"
+            else
+            echo "使用IPv4测试选项"
+             bash <(curl -sL bash.icu/speedtest) <<< "1" | tee "$temp_file"
+            fi
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
             cp "$temp_file" "${output_file}_multi_thread"
             ;;
-# 单线程测速
-7)
-    echo -e "运行${YELLOW}单线程测速...${NC}"
-    if [ "$use_ipv6" = true ]; then
-        echo "使用IPv6测试选项"
-        bash <(curl -sL bash.icu/speedtest) <<< "17" | tee "$temp_file"
-    else
-        echo "使用IPv4测试选项"
-        bash <(curl -sL bash.icu/speedtest) <<< "2" | tee "$temp_file"
-    fi
+        # 单线程测速
+        7)
+            echo -e "运行${YELLOW}单线程测速...${NC}"
+            if [ "$use_ipv6" = true ]; then
+            echo "使用IPv6测试选项"
+            bash <(curl -sL bash.icu/speedtest) <<< "17" | tee "$temp_file"
+            else
+            echo "使用IPv4测试选项"
+            bash <(curl -sL bash.icu/speedtest) <<< "2" | tee "$temp_file"
+            fi
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
@@ -248,16 +248,16 @@ run_script() {
             sed -i -r '1,/\[ ID\] /d' "$temp_file"
             cp "$temp_file" "${output_file}_iperf3"
             ;;
-# 回程路由
-9)
-    echo -e "运行${YELLOW}回程路由测试...${NC}"
-    if [ "$use_ipv6" = true ]; then
-        echo "使用IPv6测试选项"
-        wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "3" | tee "$temp_file"
-    else
-        echo "使用IPv4测试选项"
-        wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
-    fi
+        # 回程路由
+        9)
+            echo -e "运行${YELLOW}回程路由测试...${NC}"
+            if [ "$use_ipv6" = true ]; then
+            echo "使用IPv6测试选项"
+            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "4" | tee "$temp_file"
+            else
+            echo "使用IPv4测试选项"
+            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
+            fi
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"
             ;;
