@@ -19,6 +19,7 @@ if [ "$(id -u)" != "0" ]; then
     echo "已获取 sudo 权限。"
 fi
 
+# 更新脚本
 update_scripts() {
     CURRENT_VERSION="2024-07-05 v1.0.0"  # 最新版本号
     SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
@@ -64,7 +65,6 @@ update_scripts() {
         sleep 2
     fi
 }
-
 
 # 检查并安装依赖
 install_dependencies() {
