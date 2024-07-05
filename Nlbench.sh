@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="2024-07-05 v1.0.0" # 最新版本号
+VERSION="1.0.2"
 
 # 定义颜色
 RED='\033[0;31m'
@@ -17,68 +17,6 @@ if [ "$(id -u)" != "0" ]; then
         exit 1
     fi
     echo "已获取 sudo 权限。"
-fi
-
-update_scripts() {
-    CURRENT_VERSION="2024-07-05 v1.0.0"  # 当前版本号
-    SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
-    VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
-    
-    # 获取远程版本号
-    REMOTE_VERSION=$(curl -s $VERSION_URL)
-    if [ -z "$REMOTE_VERSION" ]; then
-        echo -e "${RED}无法获取远程版本信息。请检查您的网络连接。${NC}"
-        sleep 2
-        return 1
-    fi
-
-    # 对比版本号
-    if [ "$REMOTE_VERSION" != "$CURRENT_VERSION" ]; then
-        clear
-        echo "脚本更新日志"
-        echo "-------------------------"   
-        echo "2024-07-05 v1.0.0"
-        echo "初始化版本，包含基础功能和菜单选择，一键测试或者手动多选测试"
-        echo "发现新版本 $REMOTE_VERSION，当前版本 $CURRENT_VERSION"
-        echo "正在更新..."
-        
-        # 下载新的脚本文件
-        if curl -s -o /tmp/Nlbench.sh $SCRIPT_URL; then
-            if [ -f /tmp/Nlbench.sh ]; then
-                NEW_VERSION=$(grep '^VERSION=' /tmp/Nlbench.sh | cut -d'"' -f2)
-                sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
-                
-                # 替换脚本文件
-                if mv /tmp/Nlbench.sh "$0"; then
-                    chmod +x "$0"
-                    echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
-                    echo -e "${YELLOW}请等待 3 秒...${NC}"
-                    sleep 3
-                    exec bash "$0" --updated
-                else
-                    echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
-                    sleep 2
-                    return 1
-                fi
-            else
-                echo -e "${RED}下载的新脚本文件不存在。请检查下载过程。${NC}"
-                sleep 2
-                return 1
-            fi
-        else
-            echo -e "${RED}下载新版本失败。请稍后重试。${NC}"
-            sleep 2
-            return 1
-        fi
-    else
-        echo -e "${GREEN}脚本已是最新版本 $CURRENT_VERSION。${NC}"
-        sleep 2
-    fi
-}
-
-# 检查是否已经更新
-if [ "$1" != "--updated" ]; then
-    update_scripts
 fi
 
 # 检查并安装依赖
@@ -112,8 +50,9 @@ install_dependencies() {
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
     clear
 }
-# 获取IP地址和ISP信息
-ip_address_and_isp() {
+
+# 获取IP地址
+ip_address() {
     ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
     if [ -z "$ipv4_address" ]; then
         ipv4_address=$(ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
@@ -123,27 +62,6 @@ ip_address_and_isp() {
     if [ -z "$ipv6_address" ]; then
         ipv6_address=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-f:]+' | grep -v '^::1' | grep -v '^fe80' | head -n1)
     fi
-
-    # 获取ISP信息
-    isp_info=$(curl -s ipinfo.io/org)
-
-    # 检查是否为WARP或Cloudflare
-    is_warp=false
-    if echo "$isp_info" | grep -iq "cloudflare\|warp\|1.1.1.1"; then
-        is_warp=true
-    fi
-
-    # 判断使用IPv6还是IPv4
-    use_ipv6=false
-    if [ "$is_warp" = true ] || [ -z "$ipv4_address" ]; then
-        use_ipv6=true
-    fi
-
-    echo "IPv4: $ipv4_address"
-    echo "IPv6: $ipv6_address"
-    echo "ISP: $isp_info"
-    echo "Is WARP: $is_warp"
-    echo "Use IPv6: $use_ipv6"
 }
 
 # 检测VPS地理位置
@@ -221,8 +139,7 @@ run_script() {
     local script_number=$1
     local output_file=$2
     local temp_file=$(mktemp)
-    # 调用ip_address_and_isp函数获取IP地址和ISP信息
-    ip_address_and_isp
+    PUBLIC_IP=$(curl -s ip.sb)
     case $script_number in
         # YABS
         1)
@@ -240,7 +157,7 @@ run_script() {
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 <<< "y" | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\.\.\.\./\.\.\.\.\.\.\n/g' "$temp_file"
-            sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
+            sed -n '/\.\.\.\.\.\./d' "$temp_file"
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
@@ -272,14 +189,13 @@ run_script() {
             ;;
         # 多线程测速
         6)
-            echo -e "运行${YELLOW}多线程测速...${NC}"
-            if [ "$use_ipv6" = true ]; then
-            echo "使用IPv6测试选项"
-            bash <(curl -sL bash.icu/speedtest) <<< "3" | tee "$temp_file"
+            if [ "$PUBLIC_IP" != ${1#*:[0-9a-fA-F]} ]; then
+                bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
             else
-            echo "使用IPv4测试选项"
-             bash <(curl -sL bash.icu/speedtest) <<< "1" | tee "$temp_file"
+                bash <(curl -sL bash.icu/speedtest) <<< "16" |tee "$temp_file"
             fi
+            echo -e "运行${YELLOW}多线程测速...${NC}"
+            
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
@@ -288,19 +204,18 @@ run_script() {
             ;;
         # 单线程测速
         7)
-            echo -e "运行${YELLOW}单线程测速...${NC}"
-            if [ "$use_ipv6" = true ]; then
-            echo "使用IPv6测试选项"
-            bash <(curl -sL bash.icu/speedtest) <<< "17" | tee "$temp_file"
+            if [ "$PUBLIC_IP" != "${1#*:[0-9a-fA-F]}" ]; then
+                echo -e "运行${YELLOW}单线程测速...${NC}"
+                bash <(curl -sL bash.icu/speedtest) <<< "2" |tee "$temp_file"
+                sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+                sed -i -r '1,/序号\:/d' "$temp_file"
+                sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
+                sed -i -r '/测试进行中/d' "$temp_file"
+                cp "$temp_file" "${output_file}_single_thread"
             else
-            echo "使用IPv4测试选项"
-            bash <(curl -sL bash.icu/speedtest) <<< "2" | tee "$temp_file"
+                echo "该脚本无IPv6单线程测速"
+                touch "${output_file}_single_thread"
             fi
-            sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
-            sed -i -r '1,/序号\:/d' "$temp_file"
-            sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
-            sed -i -r '/测试进行中/d' "$temp_file"
-            cp "$temp_file" "${output_file}_single_thread"
             ;;
         # iperf3测试
         8)
@@ -310,15 +225,13 @@ run_script() {
             sed -i -r '1,/\[ ID\] /d' "$temp_file"
             cp "$temp_file" "${output_file}_iperf3"
             ;;
-        # 回程路由
+       # 回程路由
         9)
             echo -e "运行${YELLOW}回程路由测试...${NC}"
-            if [ "$use_ipv6" = true ]; then
-            echo "使用IPv6测试选项"
-            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "4" | tee "$temp_file"
+            if [ "$PUBLIC_IP" != "${1#*:[0-9a-fA-F]}" ]; then
+                wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             else
-            echo "使用IPv4测试选项"
-            wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
+                wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "3" | tee "$temp_file"
             fi
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"
@@ -541,7 +454,7 @@ show_welcome() {
 main() {
     # 检查并安装依赖
     install_dependencies
-    
+
     # 获取统计数据
     sum_run_times
 
