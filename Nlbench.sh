@@ -19,56 +19,6 @@ if [ "$(id -u)" != "0" ]; then
     echo "已获取 sudo 权限。"
 fi
 
-# 更新脚本
-update_scripts() {
-    VERSION="2024-07-05 v1.0.2"  # 当前版本号
-    SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
-    VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
-    
-    # 获取远程版本号
-    REMOTE_VERSION=$(curl -s $VERSION_URL)
-    if [ -z "$REMOTE_VERSION" ]; then
-        echo -e "${RED}无法获取远程版本信息。请检查您的网络连接。${NC}"
-        sleep 2
-        return 1
-    fi
-
-    # 对比版本号
-    if [ "$REMOTE_VERSION" != "$VERSION" ]; then
-        echo -e "${BLUE}发现新版本 $REMOTE_VERSION，当前版本 $VERSION${NC}"
-        echo -e "${BLUE}正在更新...${NC}"
-        
-        # 下载新的脚本文件
-        if curl -s -o /tmp/Nlbench.sh $SCRIPT_URL; then
-            NEW_VERSION=$(grep '^VERSION=' /tmp/Nlbench.sh | cut -d'"' -f2)
-            sed -i "s/^VERSION=.*/VERSION=\"$NEW_VERSION\"/" "$0"
-            
-            # 替换脚本文件
-            if mv /tmp/Nlbench.sh "$0"; then
-                chmod +x "$0"
-                echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
-                echo -e "${YELLOW}请等待 3 秒应用更新...${NC}"
-                sleep 3
-                exec bash "$0"  # 执行一次重新启动以应用更新
-            else
-                echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
-                sleep 2
-                return 1
-            fi
-        else
-            echo -e "${RED}下载新版本失败。请稍后重试。${NC}"
-            sleep 2
-            return 1
-        fi
-    else
-        echo -e "${GREEN}脚本已是最新版本 $VERSION。${NC}"
-        sleep 2
-    fi
-}
-
-# 执行更新脚本
-update_scripts
-
 # 检查并安装依赖
 install_dependencies() {
     echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}"
