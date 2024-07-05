@@ -22,7 +22,7 @@ fi
 # 更新脚本
 update_scripts() {
     CURRENT_VERSION="2024-07-05 v1.0.0"  # 最新版本号
-    SCRIPT_URL="https://raw.githubusercontent.com/everett7623/main/Nlbencha.sh"
+    SCRIPT_URL="https://raw.githubusercontent.com/everett7623/main/Nlbench.sh"
     VERSION_URL="https://raw.githubusercontent.com/everett7623/main/version.sh"
     
     # 获取远程版本号
@@ -39,8 +39,8 @@ update_scripts() {
         echo -e "${BLUE}正在更新...${NC}"
         
         # 下载新的脚本文件
-        if curl -s -o /tmp/Nlbencha.sh $SCRIPT_URL; then
-            NEW_VERSION=$(grep '^VERSION=' /tmp/Nlbencha.sh | cut -d'"' -f2)
+        if curl -s -o /tmp/Nlbench.sh $SCRIPT_URL; then
+            NEW_VERSION=$(grep '^VERSION=' /tmp/Nlbench.sh | cut -d'"' -f2)
             sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
             
             # 替换脚本文件
