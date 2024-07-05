@@ -19,7 +19,6 @@ if [ "$(id -u)" != "0" ]; then
     echo "已获取 sudo 权限。"
 fi
 
-# 更新脚本
 update_scripts() {
     CURRENT_VERSION="2024-07-05 v1.0.0"  # 最新版本号
     SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
@@ -44,7 +43,7 @@ update_scripts() {
             sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
             
             # 替换脚本文件
-            if mv /tmp/Nlbench_beta.sh "$0"; then
+            if mv /tmp/Nlbench.sh "$0"; then
                 chmod +x "$0"
                 echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
                 echo -e "${YELLOW}请等待 3 秒...${NC}"
@@ -65,6 +64,7 @@ update_scripts() {
         sleep 2
     fi
 }
+
 
 # 检查并安装依赖
 install_dependencies() {
