@@ -52,8 +52,15 @@ install_dependencies() {
 }
 
 ip_address_and_isp() {
-    ipv4_address=$(curl -s --max-time 5 -4 ip.sb)
-    ipv6_address=$(curl -s --max-time 5 -6 ip.sb)
+    ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
+    if [ -z "$ipv4_address" ]; then
+        ipv4_address=$(ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
+    fi
+
+    ipv6_address=$(curl -s --max-time 5 ipv6.ip.sb)
+    if [ -z "$ipv6_address" ]; then
+        ipv6_address=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-f:]+' | grep -v '^::1' | grep -v '^fe80' | head -n1)
+    fi
 
     # 获取ISP信息
     isp_info=$(curl -s ipinfo.io/org)
