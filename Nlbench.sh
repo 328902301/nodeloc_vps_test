@@ -209,7 +209,7 @@ run_script() {
             else
                 bash <(curl -sL bash.icu/speedtest) <<< "16" |tee "$temp_file"
             fi
-            echo -e "运行${YELLOW}多线程测速...${NC}"
+            echo -e "运行${YELLOW}单线程测速...${NC}"
             
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
