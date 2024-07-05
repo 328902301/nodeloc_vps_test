@@ -1,7 +1,7 @@
 #!/bin/bash
 
 update_scripts() {
-    CURRENT_VERSION="2024-07-05 v1.0.0"  # 当前版本号
+    CURRENT_VERSION="2024-07-05 v1.0.1"  # 当前版本号
     SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
     VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
     
