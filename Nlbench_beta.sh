@@ -139,7 +139,8 @@ run_script() {
     local script_number=$1
     local output_file=$2
     local temp_file=$(mktemp)
-    PUBLIC_IP=$(curl -s ip.sb)
+    # 调用ip_address函数获取IP地址
+    ip_address
     case $script_number in
         # YABS
         1)
@@ -189,13 +190,12 @@ run_script() {
             ;;
         # 多线程测速
         6)
-            if [ "$PUBLIC_IP" != ${1#*:[0-9a-fA-F]} ]; then
-                bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
-            else
-                bash <(curl -sL bash.icu/speedtest) <<< "16" |tee "$temp_file"
-            fi
             echo -e "运行${YELLOW}多线程测速...${NC}"
-            
+            if [ -n "$ipv4_address" ]; then
+                bash <(curl -sL bash.icu/speedtest) <<< "1" | tee "$temp_file"
+            else
+                bash <(curl -sL bash.icu/speedtest) <<< "3" | tee "$temp_file"
+            fi
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
@@ -204,13 +204,12 @@ run_script() {
             ;;
         # 单线程测速
         7)
-            if [ "$PUBLIC_IP" != ${1#*:[0-9a-fA-F]} ]; then
-                bash <(curl -sL bash.icu/speedtest) <<< "1" |tee "$temp_file"
-            else
-                bash <(curl -sL bash.icu/speedtest) <<< "16" |tee "$temp_file"
-            fi
             echo -e "运行${YELLOW}单线程测速...${NC}"
-            
+            if [ -n "$ipv4_address" ]; then
+                bash <(curl -sL bash.icu/speedtest) <<< "2" | tee "$temp_file"
+            else
+                bash <(curl -sL bash.icu/speedtest) <<< "17" | tee "$temp_file"
+            fi
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
@@ -225,10 +224,10 @@ run_script() {
             sed -i -r '1,/\[ ID\] /d' "$temp_file"
             cp "$temp_file" "${output_file}_iperf3"
             ;;
-       # 回程路由
+        # 回程路由
         9)
             echo -e "运行${YELLOW}回程路由测试...${NC}"
-            if [ "$PUBLIC_IP" != "${1#*:[0-9a-fA-F]}" ]; then
+            if [ -n "$ipv4_address" ]; then
                 wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             else
                 wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "3" | tee "$temp_file"
