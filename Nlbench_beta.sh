@@ -72,6 +72,12 @@ ip_address_and_isp() {
     if echo "$isp $asn" | grep -iq "cloudflare\|warp\|1.1.1.1"; then
         is_warp=true
     fi
+
+    # 判断使用IPv6还是IPv4
+    use_ipv6=false
+    if [ "$is_warp" = true ] || [ -z "$ipv4_address" ]; then
+        use_ipv6=true
+    fi
 }
 
 # 检测VPS地理位置
