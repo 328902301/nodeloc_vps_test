@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="2024-07-05 v1.0.0" # 最新版本号
+VERSION="2024-07-05 v1.0.2" # 最新版本号
 
 # 定义颜色
 RED='\033[0;31m'
@@ -18,53 +18,6 @@ if [ "$(id -u)" != "0" ]; then
     fi
     echo "已获取 sudo 权限。"
 fi
-
-# 更新脚本
-update_scripts() {
-    CURRENT_VERSION="2024-07-05 v1.0.0"  # 最新版本号
-    SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
-    VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
-    
-    # 获取远程版本号
-    REMOTE_VERSION=$(curl -s $VERSION_URL)
-    if [ -z "$REMOTE_VERSION" ]; then
-        echo -e "${RED}无法获取远程版本信息。请检查您的网络连接。${NC}"
-        sleep 2
-        return 1
-    fi
-
-    # 对比版本号
-    if [ "$REMOTE_VERSION" != "$CURRENT_VERSION" ]; then
-        echo -e "${BLUE}发现新版本 $REMOTE_VERSION，当前版本 $CURRENT_VERSION${NC}"
-        echo -e "${BLUE}正在更新...${NC}"
-        
-        # 下载新的脚本文件
-        if curl -s -o /tmp/Nlbench.sh $SCRIPT_URL; then
-            NEW_VERSION=$(grep '^VERSION=' /tmp/Nlbench.sh | cut -d'"' -f2)
-            sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
-            
-            # 替换脚本文件
-            if mv /tmp/Nlbench_beta.sh "$0"; then
-                chmod +x "$0"
-                echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
-                echo -e "${YELLOW}请等待 3 秒...${NC}"
-                sleep 3
-                exec bash "$0"
-            else
-                echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
-                sleep 2
-                return 1
-            fi
-        else
-            echo -e "${RED}下载新版本失败。请稍后重试。${NC}"
-            sleep 2
-            return 1
-        fi
-    else
-        echo -e "${GREEN}脚本已是最新版本 $CURRENT_VERSION。${NC}"
-        sleep 2
-    fi
-}
 
 # 检查并安装依赖
 install_dependencies() {
@@ -97,6 +50,7 @@ install_dependencies() {
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
     clear
 }
+
 # 获取IP地址和ISP信息
 ip_address_and_isp() {
     ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
@@ -503,7 +457,7 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo -e "${GREEN}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
+    echo -e "${GREEN}Nodeloc聚合测试脚本 $VERSION${NC}"
     echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
     echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
@@ -527,9 +481,6 @@ main() {
     # 检查并安装依赖
     install_dependencies
 
-    # 更新脚本
-    update_scripts
-    
     # 获取统计数据
     sum_run_times
 
