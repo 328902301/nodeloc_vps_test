@@ -51,16 +51,26 @@ install_dependencies() {
     clear
 }
 
-# 获取IP地址
-ip_address() {
+# 获取IP地址和ISP信息
+ip_address_and_isp() {
     ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
     if [ -z "$ipv4_address" ]; then
         ipv4_address=$(ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
     fi
-
     ipv6_address=$(curl -s --max-time 5 ipv6.ip.sb)
     if [ -z "$ipv6_address" ]; then
         ipv6_address=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-f:]+' | grep -v '^::1' | grep -v '^fe80' | head -n1)
+    fi
+
+    # 获取ISP信息
+    isp_info=$(curl -s https://ipapi.co/json/)
+    isp=$(echo "$isp_info" | grep -oP '(?<="org":")[^"]*')
+    asn=$(echo "$isp_info" | grep -oP '(?<="asn":")[^"]*')
+
+    # 检查是否为WARP或Cloudflare
+    is_warp=false
+    if echo "$isp $asn" | grep -iq "cloudflare\|warp\|1.1.1.1"; then
+        is_warp=true
     fi
 }
 
@@ -189,10 +199,10 @@ run_script() {
         # 多线程测速
         6)
             echo -e "运行${YELLOW}多线程测速...${NC}"
-            if [ -n "$ipv4_address" ]; then
-                bash <(curl -sL bash.icu/speedtest) <<< "1" | tee "$temp_file"
-            else
+            if [ "$is_warp" = true ] || [ -z "$ipv4_address" ]; then
                 bash <(curl -sL bash.icu/speedtest) <<< "3" | tee "$temp_file"
+            else
+                bash <(curl -sL bash.icu/speedtest) <<< "1" | tee "$temp_file"
             fi
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
@@ -203,10 +213,10 @@ run_script() {
         # 单线程测速
         7)
             echo -e "运行${YELLOW}单线程测速...${NC}"
-            if [ -n "$ipv4_address" ]; then
-                bash <(curl -sL bash.icu/speedtest) <<< "2" | tee "$temp_file"
-            else
+            if [ "$is_warp" = true ] || [ -z "$ipv4_address" ]; then
                 bash <(curl -sL bash.icu/speedtest) <<< "17" | tee "$temp_file"
+            else
+                bash <(curl -sL bash.icu/speedtest) <<< "2" | tee "$temp_file"
             fi
             sed -r -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/序号\:/d' "$temp_file"
@@ -225,10 +235,10 @@ run_script() {
         # 回程路由
         9)
             echo -e "运行${YELLOW}回程路由测试...${NC}"
-            if [ -n "$ipv4_address" ]; then
-                wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
-            else
+            if [ "$is_warp" = true ] || [ -z "$ipv4_address" ]; then
                 wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "3" | tee "$temp_file"
+            else
+                wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             fi
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"
@@ -452,8 +462,8 @@ main() {
     # 检查并安装依赖
     install_dependencies
     
-    # 调用ip_address函数获取IP地址
-    ip_address
+    # 调用ip_address函数获取IP地址和isp
+    ip_address_and_isp
     
     # 获取统计数据
     sum_run_times
