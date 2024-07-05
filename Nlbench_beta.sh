@@ -54,13 +54,7 @@ install_dependencies() {
 # 获取IP地址和ISP信息
 ip_address_and_isp() {
     ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
-    if [ -z "$ipv4_address" ]; then
-        ipv4_address=$(ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
-    fi
     ipv6_address=$(curl -s --max-time 5 ipv6.ip.sb)
-    if [ -z "$ipv6_address" ]; then
-        ipv6_address=$(ip -6 addr show | grep -oP '(?<=inet6\s)[\da-f:]+' | grep -v '^::1' | grep -v '^fe80' | head -n1)
-    fi
 
     # 获取ISP信息
     isp_info=$(curl -s https://ipapi.co/json/)
@@ -78,6 +72,11 @@ ip_address_and_isp() {
     if [ "$is_warp" = true ] || [ -z "$ipv4_address" ]; then
         use_ipv6=true
     fi
+
+    echo "IPv4: $ipv4_address"
+    echo "IPv6: $ipv6_address"
+    echo "Is WARP: $is_warp"
+    echo "Use IPv6: $use_ipv6"
 }
 
 # 检测VPS地理位置
@@ -155,6 +154,8 @@ run_script() {
     local script_number=$1
     local output_file=$2
     local temp_file=$(mktemp)
+    # 调用ip_address_and_isp函数获取IP地址和ISP信息
+    ip_address_and_isp
     case $script_number in
         # YABS
         1)
