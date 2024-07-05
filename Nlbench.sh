@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="1.0.2"
+VERSION="2024-07-05 v1.0.0" # 最新版本号
 
 # 定义颜色
 RED='\033[0;31m'
@@ -21,7 +21,7 @@ fi
 
 # 更新脚本
 update_scripts() {
-    CURRENT_VERSION="2024-07-05 v1.0.0"  # 当前版本号
+    CURRENT_VERSION="2024-07-05 v1.0.0"  # 最新版本号
     SCRIPT_URL="https://raw.githubusercontent.com/everett7623/main/Nlbencha.sh"
     VERSION_URL="https://raw.githubusercontent.com/everett7623/main/version.sh"
     
