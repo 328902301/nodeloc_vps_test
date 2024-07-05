@@ -22,8 +22,8 @@ fi
 # 更新脚本
 update_scripts() {
     CURRENT_VERSION="2024-07-05 v1.0.0"  # 最新版本号
-    SCRIPT_URL="https://raw.githubusercontent.com/everett7623/main/Nlbench.sh"
-    VERSION_URL="https://raw.githubusercontent.com/everett7623/main/version.sh"
+    SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
+    VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
     
     # 获取远程版本号
     REMOTE_VERSION=$(curl -s $VERSION_URL)
