@@ -475,9 +475,6 @@ main() {
     # 检查并安装依赖
     install_dependencies
     
-    # 调用ip_address函数获取IP地址和isp
-    ip_address_and_isp
-    
     # 获取统计数据
     sum_run_times
 
