@@ -52,20 +52,35 @@ install_dependencies() {
 }
 
 # 更新脚本路径
-UPDATE_SCRIPT="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/update.sh"
+UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/update.sh"
+LOCAL_UPDATE_SCRIPT="/tmp/update.sh"
+
+# 下载更新脚本
+curl -s -o "$LOCAL_UPDATE_SCRIPT" "$UPDATE_SCRIPT_URL"
 
 # 运行更新脚本
-bash "$UPDATE_SCRIPT"
-UPDATE_EXIT_CODE=$?
+if [ -f "$LOCAL_UPDATE_SCRIPT" ]; then
+    bash "$LOCAL_UPDATE_SCRIPT"
+    UPDATE_EXIT_CODE=$?
 
-# 检查更新脚本的退出代码
-if [ $UPDATE_EXIT_CODE -eq 0 ]; then
-    echo "脚本已经是最新版本或成功更新。继续执行其他操作..."
-    # 在这里添加其他需要执行的操作
+    # 删除下载的更新脚本
+    rm -f "$LOCAL_UPDATE_SCRIPT"
+
+    # 检查更新脚本的退出代码
+    if [ $UPDATE_EXIT_CODE -eq 0 ]; then
+        echo "脚本已经是最新版本或成功更新。继续执行其他操作..."
+        # 在这里添加其他需要执行的操作
+    else
+        echo "脚本更新失败。继续执行当前版本..."
+        # 在这里添加其他需要执行的操作
+    fi
 else
-    echo "脚本更新失败。继续执行当前版本..."
+    echo "无法下载更新脚本。继续执行当前版本..."
     # 在这里添加其他需要执行的操作
 fi
+
+# 继续执行主脚本的其他内容
+echo "这是主脚本的其他内容。"
 
 # 获取IP地址和ISP信息
 ip_address_and_isp() {
