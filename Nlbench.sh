@@ -66,6 +66,9 @@ update_scripts() {
     fi
 }
 
+# 执行更新脚本
+update_scripts
+
 # 检查并安装依赖
 install_dependencies() {
     echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}"
