@@ -50,7 +50,7 @@ install_dependencies() {
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
     clear
 }
-
+# 获取IP地址和ISP信息
 ip_address_and_isp() {
     ipv4_address=$(curl -s --max-time 5 ipv4.ip.sb)
     if [ -z "$ipv4_address" ]; then
