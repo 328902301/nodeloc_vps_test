@@ -57,7 +57,7 @@ ip_address_and_isp() {
     ipv6_address=$(curl -s --max-time 5 ipv6.ip.sb)
 
     # 获取ISP信息
-    isp_info=$(curl -s https://ipapi.co/json/)
+    isp_info=$(curl -s ipinfo.io/org)
     isp=$(echo "$isp_info" | grep -oP '(?<="org":")[^"]*')
     asn=$(echo "$isp_info" | grep -oP '(?<="asn":")[^"]*')
 
