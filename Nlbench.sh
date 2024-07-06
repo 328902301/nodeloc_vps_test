@@ -109,12 +109,11 @@ detect_region() {
 AUXILIARY_VPS="205.185.119.208"
 IPERF_PORT=5201
 TEST_DURATION=30
-PARALLEL_STREAMS=3
 
 run_iperf3_test() {
     echo -e "${GREEN}服务端VPS位于美国拉斯维加斯${NC}"
     echo -e "${GREEN}连接到服务端进行iperf3测试。。。${NC}"
-    if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION -P $PARALLEL_STREAMS; then
+    if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION; then
     echo -e "${YELLOW}iperf3 测试完成${NC}"
     else
     echo -e "${RED}iperf3 测试失败${NC}"
