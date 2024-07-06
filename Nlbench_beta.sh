@@ -476,7 +476,6 @@ show_welcome() {
     echo ""
 }
 
-
 # 主函数
 main() {
     # 检查并安装依赖
