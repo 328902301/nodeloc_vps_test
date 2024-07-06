@@ -123,7 +123,7 @@ run_iperf3_test() {
 
 # 统计使用次数
 sum_run_times() {
-    local COUNT=$(wget --no-check-certificate -qO- --tries=2 --timeout=2 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Feverett7623%2Fnodeloc_vps_test%2Fmain%2FNlbench.sh" 2>&1 | grep -m1 -oE "[0-9]+[ ]+/[ ]+[0-9]+")
+    local COUNT=$(wget --no-check-certificate -qO- --tries=2 --timeout=2 "https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Feverett7623%2Fnodeloc_vps_test%2Fblob%2Fmain%2FNlbench.sh" 2>&1 | grep -m1 -oE "[0-9]+[ ]+/[ ]+[0-9]+")
     if [[ -n "$COUNT" ]]; then
         daily_count=$(cut -d " " -f1 <<< "$COUNT")
         total_count=$(cut -d " " -f3 <<< "$COUNT")
@@ -179,6 +179,7 @@ run_script() {
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\.\.\.\./\.\.\.\.\.\.\n/g' "$temp_file"
             sed -i '1,/\.\.\.\.\.\./d' "$temp_file"
+            sed -i -n '/--------------------- A Bench Script By spiritlhl ----------------------/,${s/^.*\(--------------------- A Bench Script By spiritlhl ----------------------\)/\1/;p}' "$temp_file"
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
@@ -246,6 +247,7 @@ run_script() {
             run_iperf3_test | tee "$temp_file"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r '1,/\[ ID\] /d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_iperf3"
             ;;
         # 回程路由
@@ -460,12 +462,11 @@ show_welcome() {
     echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
     echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
-    echo -e "${YELLOW}#     #  #####  ####  ###### #       ####   ####    #    # ####   ####${NC}"
-    echo -e "${YELLOW}##    # #     # #   # #      #      #    # #    #   #    # #   # #     #${NC}"
-    echo -e "${YELLOW}# #   # #     # #   # #####  #      #    # #        #    # ####   ####${NC}"
-    echo -e "${YELLOW}#  #  # #     # #   # #      #      #    # #        #    # #          #${NC}"
-    echo -e "${YELLOW}#   # # #     # #   # #      #      #    # #    #   #    # #     #    #${NC}"
-    echo -e "${YELLOW}#    ##  #####  ####  ###### ######  ####   ####     ####  #      ####${NC}"
+    echo -e "${YELLOW} _   _   ___   ____   _____  _      ___    ____  __     __ ____   ____${NC}"
+    echo -e "${YELLOW}| \\ | | / _ \\ |  _ \\ | ____|| |    / _ \\  / ___| \\ \\   / /|  _ \\ / ___|${NC}"
+    echo -e "${YELLOW}|  \\| || | | || | | ||  _|  | |   | | | || |      \\ \\ / / | |_) |\\___ \\${NC}"
+    echo -e "${YELLOW}| |\\  || |_| || |_| || |___ | |___| |_| || |___    \\ V /  |  __/  ___) |${NC}"
+    echo -e "${YELLOW}|_| \\_| \\___/ |____/ |_____||_____|\___/  \\____|    \\_/   |_|    |____/${NC}"
     echo ""
     echo "支持Ubuntu/Debian"
     echo ""
@@ -474,6 +475,7 @@ show_welcome() {
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
 }
+
 
 # 主函数
 main() {
