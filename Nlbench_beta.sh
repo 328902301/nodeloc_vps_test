@@ -281,15 +281,18 @@ generate_markdown_output() {
     local base_output_file=$1
     local final_output_file="${base_output_file}.md"
     local sections=("YABS" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
+    local file_suffixes=("yabs" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
 
     echo "[tabs]" > "$final_output_file"
 
-    for section in "${sections[@]}"; do
-        echo "[tab=\"${section}\"]" >> "$final_output_file"
+    for i in "${!sections[@]}"; do
+        section="${sections[$i]}"
+        suffix="${file_suffixes[$i]}"
+        echo "[tab=\"$section\"]" >> "$final_output_file"
         echo "\`\`\`" >> "$final_output_file"
-        if [ -f "${base_output_file}_${section}" ]; then
-            cat "${base_output_file}_${section}" >> "$final_output_file"
-            rm "${base_output_file}_${section}"
+        if [ -f "${base_output_file}_${suffix}" ]; then
+            cat "${base_output_file}_${suffix}" >> "$final_output_file"
+            rm "${base_output_file}_${suffix}"
         fi
         echo "\`\`\`" >> "$final_output_file"
         echo "[/tab]" >> "$final_output_file"
