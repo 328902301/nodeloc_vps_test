@@ -280,101 +280,27 @@ run_script() {
 generate_markdown_output() {
     local base_output_file=$1
     local final_output_file="${base_output_file}.md"
+    local sections=("yabs" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
 
     echo "[tabs]" > "$final_output_file"
 
-    echo "[tab=\"YABS\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_yabs" ]; then
-        cat "${base_output_file}_yabs" >> "$final_output_file"
-        rm "${base_output_file}_yabs"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
+    for section in "${sections[@]}"; do
+        echo "[tab=\"${section}\"]" >> "$final_output_file"
+        echo "\`\`\`" >> "$final_output_file"
+        if [ -f "${base_output_file}_${section}" ]; then
+            cat "${base_output_file}_${section}" >> "$final_output_file"
+            rm "${base_output_file}_${section}"
+        fi
+        echo "\`\`\`" >> "$final_output_file"
+        echo "[/tab]" >> "$final_output_file"
+    done
 
-    echo "[tab=\"融合怪\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_fusion" ]; then
-        cat "${base_output_file}_fusion" >> "$final_output_file"
-        rm "${base_output_file}_fusion"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"IP质量\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_ip_quality" ]; then
-        cat "${base_output_file}_ip_quality" >> "$final_output_file"
-        rm "${base_output_file}_ip_quality"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"流媒体\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_streaming" ]; then
-        cat "${base_output_file}_streaming" >> "$final_output_file"
-        rm "${base_output_file}_streaming"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"响应\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_response" ]; then
-        cat "${base_output_file}_response" >> "$final_output_file"
-        rm "${base_output_file}_response"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"多线程测速\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_multi_thread" ]; then
-        cat "${base_output_file}_multi_thread" >> "$final_output_file"
-        rm "${base_output_file}_multi_thread"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"单线程测速\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_single_thread" ]; then
-        cat "${base_output_file}_single_thread" >> "$final_output_file"
-        rm "${base_output_file}_single_thread"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"iperf3\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_iperf3" ]; then
-    cat "${base_output_file}_iperf3" >> "$final_output_file"
-    rm "${base_output_file}_iperf3"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"回程路由\"]" >> "$final_output_file"
-    echo "\`\`\`" >> "$final_output_file"
-    if [ -f "${base_output_file}_route" ]; then
-        cat "${base_output_file}_route" >> "$final_output_file"
-        rm "${base_output_file}_route"
-    fi
-    echo "\`\`\`" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"去程路由\"]" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"Ping.pe\"]" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"哪吒 ICMP\"]" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
-
-    echo "[tab=\"其他\"]" >> "$final_output_file"
-    echo "[/tab]" >> "$final_output_file"
+    # Adding remaining empty tabs
+    local empty_tabs=("去程路由" "Ping.pe" "哪吒 ICMP" "其他")
+    for tab in "${empty_tabs[@]}"; do
+        echo "[tab=\"$tab\"]" >> "$final_output_file"
+        echo "[/tab]" >> "$final_output_file"
+    done
 
     echo "[/tabs]" >> "$final_output_file"
 
