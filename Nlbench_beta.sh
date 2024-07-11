@@ -280,7 +280,7 @@ run_script() {
 generate_markdown_output() {
     local base_output_file=$1
     local final_output_file="${base_output_file}.md"
-    local sections=("yabs" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
+    local sections=("YABS" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
 
     echo "[tabs]" > "$final_output_file"
 
