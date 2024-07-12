@@ -187,6 +187,7 @@ run_script() {
             bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
+            sed -i -r '/正在检测/d' "$temp_file"
             sed -i -n '/########################################################################/,${s/^.*\(########################################################################\)/\1/;p}' "$temp_file"
             cp "$temp_file" "${output_file}_ip_quality"
             ;;
