@@ -28,14 +28,26 @@ if [ "$(id -u)" != "0" ]; then
     echo "已获取 sudo 权限。"
 fi
 
-# 检查并安装依赖
+# 检查 root 权限并获取 sudo 权限
+if [ "$(id -u)" != "0" ]; then
+    echo "此脚本需要 root 权限运行。"
+    if ! sudo -v; then
+        echo "无法获取 sudo 权限，退出脚本。"
+        exit 1
+    fi
+    echo "已获取 sudo 权限。"
+fi
+
+# 更新系统并安装依赖
 install_dependencies() {
     echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}"
     
-    # 更新包列表
-    if ! sudo apt-get update; then
-        echo -e "${RED}无法更新包列表。请检查您的网络连接和系统设置。${NC}"
-        exit 1
+    # 更新系统
+    echo -e "${YELLOW}正在更新系统...${NC}"
+    if update_system; then
+        echo -e "${GREEN}系统更新完成。${NC}"
+    else
+        echo -e "${RED}系统更新失败。继续安装依赖项。${NC}"
     fi
     
     # 安装依赖
@@ -48,7 +60,7 @@ install_dependencies() {
     for dep in "${dependencies[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             echo -e "${YELLOW}正在安装 $dep...${NC}"
-            if ! sudo apt-get install -y "$dep"; then
+            if ! install_package "$dep"; then
                 echo -e "${RED}无法安装 $dep。请手动安装此依赖项。${NC}"
             fi
         else
@@ -58,6 +70,41 @@ install_dependencies() {
     
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
     clear
+}
+
+# 更新系统
+update_system() {
+    if command -v apt &>/dev/null; then
+        sudo apt-get update && sudo apt-get upgrade -y
+    elif command -v dnf &>/dev/null; then
+        sudo dnf check-update && sudo dnf upgrade -y
+    elif command -v yum &>/dev/null; then
+        sudo yum check-update && sudo yum upgrade -y
+    elif command -v apk &>/dev/null; then
+        sudo apk update && sudo apk upgrade
+    else
+        echo -e "${RED}不支持的Linux发行版${NC}"
+        return 1
+    fi
+    return 0
+}
+
+# 安装包
+install_package() {
+    local package=$1
+    if command -v apt &>/dev/null; then
+        sudo apt-get install -y "$package"
+    elif command -v dnf &>/dev/null; then
+        sudo dnf install -y "$package"
+    elif command -v yum &>/dev/null; then
+        sudo yum install -y "$package"
+    elif command -v apk &>/dev/null; then
+        sudo apk add "$package"
+    else
+        echo -e "${RED}不支持的Linux发行版${NC}"
+        return 1
+    fi
+    return 0
 }
 
 # 获取IP地址和ISP信息
