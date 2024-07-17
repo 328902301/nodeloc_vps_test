@@ -19,38 +19,110 @@ colors=(
 )
 
 # 检查 root 权限并获取 sudo 权限
-if [ "$(id -u)" != "0" ]; then
-    echo "此脚本需要 root 权限运行。"
-    if ! sudo -v; then
-        echo "无法获取 sudo 权限，退出脚本。"
-        exit 1
+check_root() {
+    if [ "$(id -u)" != "0" ]; then
+        echo "此脚本需要 root 权限运行。"
+        if ! sudo -v; then
+            echo "无法获取 sudo 权限，退出脚本。"
+            exit 1
+        fi
+        echo "已获取 sudo 权限。"
     fi
-    echo "已获取 sudo 权限。"
-fi
+}
+
+# 检测操作系统类型和版本
+detect_os() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        os_type=$ID
+        os_version=$VERSION_ID
+    elif type lsb_release >/dev/null 2>&1; then
+        os_type=$(lsb_release -si)
+        os_version=$(lsb_release -sr)
+    elif [ -f /etc/lsb-release ]; then
+        . /etc/lsb-release
+        os_type=$DISTRIB_ID
+        os_version=$DISTRIB_RELEASE
+    else
+        echo -e "${RED}无法检测操作系统类型和版本。${NC}"
+        return 1
+    fi
+    echo -e "${YELLOW}检测到的系统: $os_type $os_version${NC}"
+}
+
+# 更新系统
+update_system() {
+    detect_os || return 1
+
+    # 根据操作系统类型选择更新命令
+    case "${os_type,,}" in
+        ubuntu|debian|linuxmint|elementary|pop)
+            update_cmd="apt-get update"
+            upgrade_cmd="apt-get upgrade -y"
+            install_cmd="apt-get install -y"
+            ;;
+        fedora|centos|rhel|ol|rocky|almalinux)
+            if [ "${os_version%%.*}" -ge 22 ] || [ "${os_version%%.*}" -ge 8 ]; then
+                update_cmd="dnf check-update"
+                upgrade_cmd="dnf upgrade -y"
+                install_cmd="dnf install -y"
+            else
+                update_cmd="yum check-update"
+                upgrade_cmd="yum upgrade -y"
+                install_cmd="yum install -y"
+            fi
+            ;;
+        opensuse*|sles)
+            update_cmd="zypper refresh"
+            upgrade_cmd="zypper update -y"
+            install_cmd="zypper install -y"
+            ;;
+        arch|manjaro)
+            update_cmd="pacman -Sy"
+            upgrade_cmd="pacman -Su --noconfirm"
+            install_cmd="pacman -S --noconfirm"
+            ;;
+        alpine)
+            update_cmd="apk update"
+            upgrade_cmd="apk upgrade"
+            install_cmd="apk add"
+            ;;
+        *)
+            echo -e "${RED}不支持的 Linux 发行版: $os_type${NC}"
+            return 1
+            ;;
+    esac
+
+    echo -e "${YELLOW}正在更新系统...${NC}"
+    sudo $update_cmd && sudo $upgrade_cmd
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}系统更新失败。${NC}"
+        return 1
+    fi
+    echo -e "${GREEN}系统更新完成。${NC}"
+    
+    # 检查是否需要重启
+    if [ -f /var/run/reboot-required ]; then
+        echo -e "${YELLOW}系统更新需要重启才能完成。请在方便时重启系统。${NC}"
+    fi
+    return 0
+}
 
 # 更新系统并安装依赖
 install_dependencies() {
     echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}"
     
     # 更新系统
-    echo -e "${YELLOW}正在更新系统...${NC}"
-    if update_system; then
-        echo -e "${GREEN}系统更新完成。${NC}"
-    else
-        echo -e "${RED}系统更新失败。继续安装依赖项。${NC}"
-    fi
+    update_system || echo -e "${RED}系统更新失败。继续安装依赖项。${NC}"
     
     # 安装依赖
-    local dependencies=(
-        "curl"
-        "wget"
-        "iperf3"
-    )
+    local dependencies=("curl" "wget" "iperf3")
     
     for dep in "${dependencies[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             echo -e "${YELLOW}正在安装 $dep...${NC}"
-            if ! install_package "$dep"; then
+            if ! sudo $install_cmd "$dep"; then
                 echo -e "${RED}无法安装 $dep。请手动安装此依赖项。${NC}"
             fi
         else
@@ -60,41 +132,6 @@ install_dependencies() {
     
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
     clear
-}
-
-# 更新系统
-update_system() {
-    if command -v apt &>/dev/null; then
-        sudo apt-get update && sudo apt-get upgrade -y
-    elif command -v dnf &>/dev/null; then
-        sudo dnf check-update && sudo dnf upgrade -y
-    elif command -v yum &>/dev/null; then
-        sudo yum check-update && sudo yum upgrade -y
-    elif command -v apk &>/dev/null; then
-        sudo apk update && sudo apk upgrade
-    else
-        echo -e "${RED}不支持的Linux发行版${NC}"
-        return 1
-    fi
-    return 0
-}
-
-# 安装包
-install_package() {
-    local package=$1
-    if command -v apt &>/dev/null; then
-        sudo apt-get install -y "$package"
-    elif command -v dnf &>/dev/null; then
-        sudo dnf install -y "$package"
-    elif command -v yum &>/dev/null; then
-        sudo yum install -y "$package"
-    elif command -v apk &>/dev/null; then
-        sudo apk add "$package"
-    else
-        echo -e "${RED}不支持的Linux发行版${NC}"
-        return 1
-    fi
-    return 0
 }
 
 # 获取IP地址和ISP信息
@@ -453,6 +490,10 @@ show_welcome() {
 
 # 主函数
 main() {
+
+    # 检查是不是root用户
+    check_root
+    
     # 检查并安装依赖
     install_dependencies
 
