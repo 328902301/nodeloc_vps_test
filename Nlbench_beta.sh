@@ -407,7 +407,7 @@ run_selected_scripts() {
     
     while true; do
         read -p "请输入要执行的脚本编号（用英文逗号分隔，例如：1,2,3):" script_numbers
-        if [[ "$script_numbers" =~ ^[0-10](,[0-10])*$ ]]; then
+        if [[ "$script_numbers" =~ ^(0|[1-9])(,(0|[1-9]))*$ ]]; then
             break
         else
             echo -e "${RED}无效输入，请输入0-10之间的数字，用英文逗号分隔。${NC}"
