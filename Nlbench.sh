@@ -21,26 +21,37 @@ colors=(
 # 检查更新
 check_update() {
     echo "正在检查更新..."
-    
-    # 从GitHub获取最新版本号（去除注释和空行后提取最后一个版本号）
-    latest_version=$(curl -s https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh | grep -E "v[0-9]+\.[0-9]+\.[0-9]+" | tail -n 1 | grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+")
-    
+
+    # GitHub文件路径
+    version_file_url="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
+    script_file_url="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh"
+
+    # 检查版本文件是否存在
+    if ! curl --output /dev/null --silent --head --fail "$version_file_url"; then
+        echo "版本文件不存在或URL不正确: $version_file_url"
+        return
+    fi
+
+    # 获取最新版本号（去除注释和空行后提取最后一个版本号）
+    latest_version=$(curl -s "$version_file_url" | grep -E "v[0-9]+\.[0-9]+\.[0-9]+" | tail -n 1 | grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+")
+
     if [ -z "$latest_version" ]; then
         echo "无法获取最新版本信息。"
         return
     fi
-    
+
     # 提取当前版本号
     current_version=$(echo "$CURRENT_VERSION" | grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+")
-    
+
     # 比较版本号
     if [ "$current_version" != "$latest_version" ]; then
         echo "发现新版本: $latest_version"
         echo "当前版本: $current_version"
         echo "正在自动更新..."
-        
+
         # 下载新脚本
-        curl -o "$0.tmp" https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh
+        curl -o "$0.tmp" "$script_file_url"
+        
         # 检查下载内容是否正确
         if grep -q "#!/bin/bash" "$0.tmp"; then
             mv "$0.tmp" "$0"
