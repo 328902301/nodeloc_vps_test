@@ -247,8 +247,7 @@ run_script() {
             sed -i '/^$/d' "$temp_file" 
             sed -i -n '/当前时间：/,${p}' "$temp_file"
             cp "$temp_file" "${output_file}_gb5"
-        ;;
-
+            ;;
         # 融合怪
         3)
             echo -e "运行${YELLOW}融合怪...${NC}"
