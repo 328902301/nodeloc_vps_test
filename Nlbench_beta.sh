@@ -253,7 +253,7 @@ run_script() {
             /# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #/{keep=NR} 
             END{if (keep!=0) print} 
             {if (NR >= keep) print}' "$temp_file" > "${output_file}_gb5"
-
+            ;;
         # 融合怪
         3)
             echo -e "运行${YELLOW}融合怪...${NC}"
