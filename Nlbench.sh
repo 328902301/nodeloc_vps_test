@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-SCRIPTS_VERSION="2024-07-18 v1.0.4" # 最新版本号
+CURRENT_VERSION="2024-07-18 v1.0.4" # 最新版本号
 
 # 定义颜色
 RED='\033[0;31m'
@@ -462,7 +462,7 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo -e "${GREEN}Nodeloc聚合测试脚本 $SCRIPTS_VERSION ${NC}"
+    echo -e "${GREEN}Nodeloc聚合测试脚本 $CURRENT_VERSION ${NC}"
     echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
     echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
