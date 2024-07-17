@@ -219,23 +219,6 @@ sum_run_times() {
 # 调用函数获取统计数据
 sum_run_times
 
-# 更新系统
-update_system() {
-    if command -v apt &>/dev/null; then
-        apt-get update && apt-get upgrade -y
-    elif command -v dnf &>/dev/null; then
-        dnf check-update && dnf upgrade -y
-    elif command -v yum &>/dev/null; then
-        yum check-update && yum upgrade -y
-    elif command -v apk &>/dev/null; then
-        apk update && apk upgrade
-    else
-        echo -e "${RED}不支持的Linux发行版${NC}"
-        return 1
-    fi
-    return 0
-}
-
 # 执行单个脚本并输出结果到文件
 run_script() {
     local script_number=$1
@@ -254,7 +237,7 @@ run_script() {
             sed -i '/^\s*$/d'   "$temp_file"
             cp "$temp_file" "${output_file}_yabs"
             ;;
-        # Geekbench 5
+        # Geekbench5
         2)
             echo -e "运行${YELLOW}Geekbench 5...${NC}"
             bash <(curl -sL gb5.top) | tee "$temp_file"
@@ -362,7 +345,7 @@ run_script() {
 generate_markdown_output() {
     local base_output_file=$1
     local final_output_file="${base_output_file}.md"
-    local sections=("YABS" "Geekbench 5" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
+    local sections=("YABS" "Geekbench5" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
     local file_suffixes=("yabs" "gb5" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
 
     echo "[tabs]" > "$final_output_file"
@@ -411,7 +394,7 @@ run_selected_scripts() {
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
     echo "1. Yabs"
-    echo "2. Geekbench 5"
+    echo "2. Geekbench5"
     echo "3. 融合怪"
     echo "4. IP质量"
     echo "5. 流媒体解锁"
@@ -424,10 +407,10 @@ run_selected_scripts() {
     
     while true; do
         read -p "请输入要执行的脚本编号（用英文逗号分隔，例如：1,2,3):" script_numbers
-        if [[ "$script_numbers" =~ ^[0-9](,[0-9])*$ ]]; then
+        if [[ "$script_numbers" =~ ^[0-10](,[0-10])*$ ]]; then
             break
         else
-            echo -e "${RED}无效输入，请输入0-9之间的数字，用英文逗号分隔。${NC}"
+            echo -e "${RED}无效输入，请输入0-10之间的数字，用英文逗号分隔。${NC}"
         fi
     done
 
