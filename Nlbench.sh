@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-CURRENT_VERSION="2024-07-18 v1.0.4"
+CURRENT_VERSION="2024-07-18 v1.0.5"
 
 # 定义颜色
 RED='\033[0;31m'
