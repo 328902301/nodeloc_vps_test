@@ -239,20 +239,29 @@ run_script() {
             ;;
         # Geekbench5
         2)
-            echo -e "运行${YELLOW}Geekbench 5...${NC}"
-            bash <(curl -sL gb5.top) | tee "$temp_file"
+echo -e "运行${YELLOW}Geekbench 5...${NC}"
+bash <(curl -sL gb5.top) | tee "$temp_file"
 
-            # 过滤和清理输出
-            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"  # 删除ANSI转义字符
-            sed -i 's/\x1B\[.*?[mGKH]//g' "$temp_file"        # 删除更多类型的ANSI转义字符
-            sed -i 's/\r//' "$temp_file"                     # 删除回车符
-            sed -i '/^$/d' "$temp_file"                      # 删除空行
-            
-            # 保留最后一次出现的特定标头信息及其之后的内容
-            awk 'BEGIN{keep=0} 
-            /# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #/{keep=NR} 
-            END{if (keep!=0) print} 
-            {if (NR >= keep) print}' "$temp_file" > "${output_file}_gb5"
+# 过滤和清理输出
+sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"  # 删除ANSI转义字符
+sed -i 's/\x1B\[.*?[mGKH]//g' "$temp_file"        # 删除更多类型的ANSI转义字符
+sed -i 's/\r//' "$temp_file"                     # 删除回车符
+sed -i '/^$/d' "$temp_file"                      # 删除空行
+
+# 保留最后一次出现的特定标头信息及其之后的内容
+awk '
+    BEGIN { keep=0 }
+    /# ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #/ { keep=NR }
+    { lines[NR] = $0 }
+    END {
+        if (keep != 0) {
+            for (i=keep; i<=NR; i++) {
+                print lines[i]
+            }
+        }
+    }
+' "$temp_file" 
+cp "$temp_file" "${output_file}_gb5"
             ;;
         # 融合怪
         3)
