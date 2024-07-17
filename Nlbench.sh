@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-CURRENT_VERSION="2024-07-18 v1.0.4" # 最新版本号
+CURRENT_VERSION="2024-07-18 v1.0.4"
 
 # 定义颜色
 RED='\033[0;31m'
@@ -17,6 +17,65 @@ colors=(
     '\033[38;2;192;255;0m'
     '\033[38;2;255;255;0m'  # 黄色
 )
+
+# 检查更新
+check_update() {
+    echo "正在检查更新..."
+    
+    # 从GitHub获取最新版本号
+    latest_version=$(curl -s https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh)
+    
+    if [ -z "$latest_version" ]; then
+        echo "无法获取最新版本信息。"
+        return
+    fi
+    
+    if [ "$CURRENT_VERSION" != "$latest_version" ]; then
+        echo "发现新版本: $latest_version"
+        echo "当前版本: $CURRENT_VERSION"
+        read -p "是否更新到最新版本? (y/n): " choice
+        case "$choice" in 
+            y|Y )
+                echo "正在更新..."
+                if curl -o "$0.tmp" https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh && mv "$0.tmp" "$0"; then
+                    echo "更新完成。请重新运行脚本。"
+                    exit 0
+                else
+                    echo "更新失败。"
+                    rm -f "$0.tmp"
+                fi
+                ;;
+            * )
+                echo "继续使用当前版本。"
+                ;;
+        esac
+    else
+        echo "当前已是最新版本。"
+    fi
+}
+
+# 显示更新日志
+show_changelog() {
+    clear
+    echo "脚本更新日志"
+    echo "-------------------------"
+    echo "2024-07-05 v1.0.0"
+    echo "初始化版本，包含基础功能和菜单选择，一键测试或者手动多选测试。"
+    echo "-------------------------"
+    echo "2024-07-05 v1.0.1"
+    echo "修复bug，回程路由ipv6测试占不支持。"
+    echo "-------------------------"
+    echo "2024-07-05 v1.0.2"
+    echo "修复若干bug。"
+    echo "-------------------------"
+    echo "2024-07-05 v1.0.3"
+    echo "修复若干bug，精简代码。"
+    echo "-------------------------"
+    echo "2024-07-05 v1.0.4"
+    echo "去除yabs的iperf3和gb6，单独增加gb5测试，优化更新脚本代码"
+    echo "-------------------------"
+    read -p "按任意键返回主菜单..."
+}
 
 # 检查 root 权限并获取 sudo 权限
 check_root() {
@@ -483,6 +542,9 @@ show_welcome() {
 # 主函数
 main() {
 
+    # 检查更新
+    check_update
+    
     # 检查是不是root用户
     check_root
     
