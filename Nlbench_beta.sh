@@ -216,9 +216,6 @@ sum_run_times() {
     fi
 }
 
-# 调用函数获取统计数据
-sum_run_times
-
 # 执行单个脚本并输出结果到文件
 run_script() {
     local script_number=$1
@@ -465,7 +462,7 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo -e "${GREEN}Nodeloc聚合测试脚本 $VERSION${NC}"
+    echo -e "${GREEN}Nodeloc聚合测试脚本 $SCRIPTS_VERSION{NC}"
     echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
     echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
@@ -491,8 +488,8 @@ main() {
     
     # 检查并安装依赖
     install_dependencies
-
-    # 获取统计数据
+    
+    # 调用函数获取统计数据
     sum_run_times
 
     # 主循环
