@@ -254,8 +254,15 @@ run_script() {
             sed -i '/^\s*$/d'   "$temp_file"
             cp "$temp_file" "${output_file}_yabs"
             ;;
-        # 融合怪
+        # Geekbench 5
         2)
+            echo -e "运行${YELLOW}YABS...${NC}"
+            bash <(curl -sL gb5.top) | tee "$temp_file"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            cp "$temp_file" "${output_file}_gb5"
+            ;;
+        # 融合怪
+        3)
             echo -e "运行${YELLOW}融合怪...${NC}"
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 <<< "y" | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
@@ -265,7 +272,7 @@ run_script() {
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
-        3)
+        4)
             echo -e "运行${YELLOW}IP质量测试...${NC}"
             bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
@@ -275,7 +282,7 @@ run_script() {
             cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
-        4)
+        5)
             echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
             local region=$(detect_region)
             bash <(curl -L -s media.ispvps.com) <<< "$region" | tee "$temp_file"
@@ -286,14 +293,14 @@ run_script() {
             cp "$temp_file" "${output_file}_streaming"
             ;;
         # 响应测试
-        5)
+        6)
             echo -e "运行${YELLOW}响应测试...${NC}"
             bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             cp "$temp_file" "${output_file}_response"
             ;;
         # 多线程测速
-        6)
+        7)
             echo -e "运行${YELLOW}多线程测速...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
@@ -309,7 +316,7 @@ run_script() {
             cp "$temp_file" "${output_file}_multi_thread"
             ;;
         # 单线程测速
-        7)
+        8)
             echo -e "运行${YELLOW}单线程测速...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
@@ -325,7 +332,7 @@ run_script() {
             cp "$temp_file" "${output_file}_single_thread"
             ;;
         # iperf3测试
-        8)
+        9)
             echo -e "运行${YELLOW}iperf3测试...${NC}"
             run_iperf3_test | tee "$temp_file"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
@@ -334,7 +341,7 @@ run_script() {
             cp "$temp_file" "${output_file}_iperf3"
             ;;
         # 回程路由
-        9)
+        10)
             echo -e "运行${YELLOW}回程路由测试...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
@@ -355,8 +362,8 @@ run_script() {
 generate_markdown_output() {
     local base_output_file=$1
     local final_output_file="${base_output_file}.md"
-    local sections=("YABS" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
-    local file_suffixes=("yabs" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
+    local sections=("YABS" "Geekbench 5" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
+    local file_suffixes=("yabs" "gb5" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
 
     echo "[tabs]" > "$final_output_file"
 
@@ -391,7 +398,7 @@ generate_markdown_output() {
 run_all_scripts() {
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo "开始执行全部测试脚本..."
-    for i in {1..9}; do
+    for i in {1..10}; do
         run_script $i "$base_output_file"
     done
     generate_markdown_output "$base_output_file"
@@ -404,14 +411,15 @@ run_selected_scripts() {
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
     echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. iperf3"
-    echo "9. 回程路由"
+    echo "2. Geekbench 5"
+    echo "3. 融合怪"
+    echo "4. IP质量"
+    echo "5. 流媒体解锁"
+    echo "6. 响应测试"
+    echo "7. 多线程测试"
+    echo "8. 单线程测试"
+    echo "9. iperf3"
+    echo "10. 回程路由"
     echo "0. 返回"
     
     while true; do
@@ -439,7 +447,7 @@ run_selected_scripts() {
 
 # 主菜单
 main_menu() {
-    echo -e "${GREEN}测试项目：${NC}Yabs，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，iperf3，回程路由。"
+    echo -e "${GREEN}测试项目：${NC}Yabs，geekbench5，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，iperf3，回程路由。"
     echo -e "${YELLOW}1. 执行所有测试脚本${NC}"
     echo -e "${YELLOW}2. 选择特定测试脚本${NC}"
     echo -e "${YELLOW}0. 退出${NC}"
