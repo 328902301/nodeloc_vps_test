@@ -210,7 +210,7 @@ run_script() {
         # YABS
         1)
             echo -e "运行${YELLOW}YABS...${NC}"
-            wget -qO- yabs.sh | bash | tee "$temp_file"
+            curl -sL yabs.sh | bash -s -- -i -5 | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\./\.\.\.\n/g' "$temp_file"
             sed -i '/\.\.\./d' "$temp_file"
