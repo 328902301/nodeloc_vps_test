@@ -37,22 +37,14 @@ check_update() {
     if [ "$current_version" != "$latest_version" ]; then
         echo "发现新版本: $latest_version"
         echo "当前版本: $current_version"
-        read -p "是否更新到最新版本? (y/n): " choice
-        case "$choice" in 
-            y|Y )
-                echo "正在更新..."
-                if curl -o "$0.tmp" https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh && mv "$0.tmp" "$0"; then
-                    echo "更新完成。请重新运行脚本。"
-                    exit 0
-                else
-                    echo "更新失败。"
-                    rm -f "$0.tmp"
-                fi
-                ;;
-            * )
-                echo "继续使用当前版本。"
-                ;;
-        esac
+        echo "正在自动更新..."
+        if curl -o "$0.tmp" https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh && mv "$0.tmp" "$0"; then
+            echo "更新完成。重新启动脚本..."
+            exec "$0" "$@"
+        else
+            echo "更新失败。"
+            rm -f "$0.tmp"
+        fi
     else
         echo "当前已是最新版本。"
     fi
