@@ -39,6 +39,7 @@ check_update() {
         echo "当前版本: $current_version"
         echo "正在自动更新..."
         if curl -o "$0.tmp" https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh && mv "$0.tmp" "$0"; then
+            chmod +x "$0" # 添加执行权限
             echo "更新完成。重新启动脚本..."
             exec "$0" "$@"
         else
