@@ -2,7 +2,7 @@
 
 这是NodeLoc提供给各位用户的主机聚合测评脚本，可一键自动对主机进行Yabs、融合怪、IP质量、流媒体解锁，三网测速，iperf3，回程路由等测评，测评结束后将会保存结果为MarkDown文件，方便快速上传至NodeLoc论坛。
 
-**版本：** 2024-07-05 v1.0.2
+**版本：** 2024-07-18 v1.0.4
 
 **Github地址：** https://github.com/everett7623/nodeloc_vps_test
 
