@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="2024-07-18 v1.0.6" # 最新版本号
+SCRIPTS_VERSION="2024-07-18 v1.0.4" # 最新版本号
 
 # 定义颜色
 RED='\033[0;31m'
@@ -215,9 +215,6 @@ sum_run_times() {
         total_count=0
     fi
 }
-
-# 调用函数获取统计数据
-sum_run_times
 
 # 执行单个脚本并输出结果到文件
 run_script() {
@@ -465,7 +462,7 @@ show_welcome() {
     echo ""
     echo -e "${RED}---------------------------------By'Jensfrank---------------------------------${NC}"
     echo ""
-    echo -e "${GREEN}Nodeloc聚合测试脚本 $VERSION${NC}"
+    echo -e "${GREEN}Nodeloc聚合测试脚本 $SCRIPTS_VERSION ${NC}"
     echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
     echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
@@ -491,8 +488,8 @@ main() {
     
     # 检查并安装依赖
     install_dependencies
-
-    # 获取统计数据
+    
+    # 调用函数获取统计数据
     sum_run_times
 
     # 主循环
