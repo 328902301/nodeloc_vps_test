@@ -256,7 +256,7 @@ run_script() {
             ;;
         # Geekbench 5
         2)
-            echo -e "运行${YELLOW}YABS...${NC}"
+            echo -e "运行${YELLOW}Geekbench 5...${NC}"
             bash <(curl -sL gb5.top) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             cp "$temp_file" "${output_file}_gb5"
