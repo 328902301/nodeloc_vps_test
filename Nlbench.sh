@@ -38,12 +38,18 @@ check_update() {
         echo "发现新版本: $latest_version"
         echo "当前版本: $current_version"
         echo "正在自动更新..."
-        if curl -o "$0.tmp" https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh && mv "$0.tmp" "$0"; then
+        
+        # 下载新脚本
+        curl -o "$0.tmp" https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh
+        # 检查下载内容是否正确
+        if grep -q "#!/bin/bash" "$0.tmp"; then
+            mv "$0.tmp" "$0"
             chmod +x "$0" # 添加执行权限
             echo "更新完成。重新启动脚本..."
             exec "$0" "$@"
         else
-            echo "更新失败。"
+            echo "下载的脚本内容不正确。"
+            cat "$0.tmp" # 输出下载的内容进行调试
             rm -f "$0.tmp"
         fi
     else
