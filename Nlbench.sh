@@ -23,17 +23,20 @@ check_update() {
     echo "正在检查更新..."
     
     # 从GitHub获取最新版本号
-    latest_version=$(curl -s https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh | tr -d '\n\r')
+    latest_version=$(curl -s https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh | grep -m1 "v[0-9]\+\.[0-9]\+\.[0-9]\+" | cut -d' ' -f2)
     
     if [ -z "$latest_version" ]; then
         echo "无法获取最新版本信息。"
         return
     fi
     
+    # 提取当前版本号
+    current_version=$(echo "$CURRENT_VERSION" | grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+")
+    
     # 比较版本号
-    if [ "$CURRENT_VERSION" != "$latest_version" ]; then
+    if [ "$current_version" != "$latest_version" ]; then
         echo "发现新版本: $latest_version"
-        echo "当前版本: $CURRENT_VERSION"
+        echo "当前版本: $current_version"
         read -p "是否更新到最新版本? (y/n): " choice
         case "$choice" in 
             y|Y )
