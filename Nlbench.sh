@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-VERSION="2024-07-05 v1.0.3" # 最新版本号
+VERSION="2024-07-18 v1.0.6" # 最新版本号
 
 # 定义颜色
 RED='\033[0;31m'
@@ -9,39 +9,120 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# 定义渐变颜色数组
+colors=(
+    '\033[38;2;0;255;0m'    # 绿色
+    '\033[38;2;64;255;0m'
+    '\033[38;2;128;255;0m'
+    '\033[38;2;192;255;0m'
+    '\033[38;2;255;255;0m'  # 黄色
+)
+
 # 检查 root 权限并获取 sudo 权限
-if [ "$(id -u)" != "0" ]; then
-    echo "此脚本需要 root 权限运行。"
-    if ! sudo -v; then
-        echo "无法获取 sudo 权限，退出脚本。"
-        exit 1
+check_root() {
+    if [ "$(id -u)" != "0" ]; then
+        echo "此脚本需要 root 权限运行。"
+        if ! sudo -v; then
+            echo "无法获取 sudo 权限，退出脚本。"
+            exit 1
+        fi
+        echo "已获取 sudo 权限。"
     fi
-    echo "已获取 sudo 权限。"
-fi
+}
+
+# 检测操作系统类型和版本
+detect_os() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        os_type=$ID
+        os_version=$VERSION_ID
+    elif type lsb_release >/dev/null 2>&1; then
+        os_type=$(lsb_release -si)
+        os_version=$(lsb_release -sr)
+    elif [ -f /etc/lsb-release ]; then
+        . /etc/lsb-release
+        os_type=$DISTRIB_ID
+        os_version=$DISTRIB_RELEASE
+    else
+        echo -e "${RED}无法检测操作系统类型和版本。${NC}"
+        return 1
+    fi
+    echo -e "${YELLOW}检测到的系统: $os_type $os_version${NC}"
+}
+
+# 更新系统
+update_system() {
+    detect_os || return 1
+
+    # 根据操作系统类型选择更新命令
+    case "${os_type,,}" in
+        ubuntu|debian|linuxmint|elementary|pop)
+            update_cmd="apt-get update"
+            upgrade_cmd="apt-get upgrade -y"
+            install_cmd="apt-get install -y"
+            ;;
+        fedora|centos|rhel|ol|rocky|almalinux)
+            if [ "${os_version%%.*}" -ge 22 ] || [ "${os_version%%.*}" -ge 8 ]; then
+                update_cmd="dnf check-update"
+                upgrade_cmd="dnf upgrade -y"
+                install_cmd="dnf install -y"
+            else
+                update_cmd="yum check-update"
+                upgrade_cmd="yum upgrade -y"
+                install_cmd="yum install -y"
+            fi
+            ;;
+        opensuse*|sles)
+            update_cmd="zypper refresh"
+            upgrade_cmd="zypper update -y"
+            install_cmd="zypper install -y"
+            ;;
+        arch|manjaro)
+            update_cmd="pacman -Sy"
+            upgrade_cmd="pacman -Su --noconfirm"
+            install_cmd="pacman -S --noconfirm"
+            ;;
+        alpine)
+            update_cmd="apk update"
+            upgrade_cmd="apk upgrade"
+            install_cmd="apk add"
+            ;;
+        *)
+            echo -e "${RED}不支持的 Linux 发行版: $os_type${NC}"
+            return 1
+            ;;
+    esac
+
+    echo -e "${YELLOW}正在更新系统...${NC}"
+    sudo $update_cmd && sudo $upgrade_cmd
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}系统更新失败。${NC}"
+        return 1
+    fi
+    echo -e "${GREEN}系统更新完成。${NC}"
+    
+    # 检查是否需要重启
+    if [ -f /var/run/reboot-required ]; then
+        echo -e "${YELLOW}系统更新需要重启才能完成。请在方便时重启系统。${NC}"
+    fi
+    return 0
+}
 
 # 更新系统并安装依赖
 install_dependencies() {
     echo -e "${YELLOW}正在检查并安装必要的依赖项...${NC}"
     
     # 更新系统
-    echo -e "${YELLOW}正在更新系统...${NC}"
-    if update_system; then
-        echo -e "${GREEN}系统更新完成。${NC}"
-    else
-        echo -e "${RED}系统更新失败。继续安装依赖项。${NC}"
-    fi
+    update_system || echo -e "${RED}系统更新失败。继续安装依赖项。${NC}"
     
     # 安装依赖
-    local dependencies=(
-        "curl"
-        "wget"
-        "iperf3"
-    )
+    local dependencies=("curl" "wget" "iperf3")
     
     for dep in "${dependencies[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
             echo -e "${YELLOW}正在安装 $dep...${NC}"
-            if ! install_package "$dep"; then
+            if ! sudo $install_cmd "$dep"; then
                 echo -e "${RED}无法安装 $dep。请手动安装此依赖项。${NC}"
             fi
         else
@@ -51,41 +132,6 @@ install_dependencies() {
     
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
     clear
-}
-
-# 更新系统
-update_system() {
-    if command -v apt &>/dev/null; then
-        sudo apt-get update && sudo apt-get upgrade -y
-    elif command -v dnf &>/dev/null; then
-        sudo dnf check-update && sudo dnf upgrade -y
-    elif command -v yum &>/dev/null; then
-        sudo yum check-update && sudo yum upgrade -y
-    elif command -v apk &>/dev/null; then
-        sudo apk update && sudo apk upgrade
-    else
-        echo -e "${RED}不支持的Linux发行版${NC}"
-        return 1
-    fi
-    return 0
-}
-
-# 安装包
-install_package() {
-    local package=$1
-    if command -v apt &>/dev/null; then
-        sudo apt-get install -y "$package"
-    elif command -v dnf &>/dev/null; then
-        sudo dnf install -y "$package"
-    elif command -v yum &>/dev/null; then
-        sudo yum install -y "$package"
-    elif command -v apk &>/dev/null; then
-        sudo apk add "$package"
-    else
-        echo -e "${RED}不支持的Linux发行版${NC}"
-        return 1
-    fi
-    return 0
 }
 
 # 获取IP地址和ISP信息
@@ -173,23 +219,6 @@ sum_run_times() {
 # 调用函数获取统计数据
 sum_run_times
 
-# 更新系统
-update_system() {
-    if command -v apt &>/dev/null; then
-        apt-get update && apt-get upgrade -y
-    elif command -v dnf &>/dev/null; then
-        dnf check-update && dnf upgrade -y
-    elif command -v yum &>/dev/null; then
-        yum check-update && yum upgrade -y
-    elif command -v apk &>/dev/null; then
-        apk update && apk upgrade
-    else
-        echo -e "${RED}不支持的Linux发行版${NC}"
-        return 1
-    fi
-    return 0
-}
-
 # 执行单个脚本并输出结果到文件
 run_script() {
     local script_number=$1
@@ -201,15 +230,26 @@ run_script() {
         # YABS
         1)
             echo -e "运行${YELLOW}YABS...${NC}"
-            wget -qO- yabs.sh | bash | tee "$temp_file"
+            curl -sL yabs.sh | bash -s -- -i -5 | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\./\.\.\.\n/g' "$temp_file"
             sed -i '/\.\.\./d' "$temp_file"
             sed -i '/^\s*$/d'   "$temp_file"
             cp "$temp_file" "${output_file}_yabs"
             ;;
-        # 融合怪
+        # Geekbench5
         2)
+            echo -e "运行${YELLOW}Geekbench 5...${NC}"
+            bash <(curl -sL gb5.top) | tee "$temp_file"
+            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+            sed -i 's/\x1B\[.*?[mGKH]//g' "$temp_file"
+            sed -i 's/\r//' "$temp_file" 
+            sed -i '/^$/d' "$temp_file" 
+            sed -i -n '/当前时间：/,${p}' "$temp_file"
+            cp "$temp_file" "${output_file}_gb5"
+            ;;
+        # 融合怪
+        3)
             echo -e "运行${YELLOW}融合怪...${NC}"
             curl -L https://gitlab.com/spiritysdx/za/-/raw/main/ecs.sh -o ecs.sh && chmod +x ecs.sh && bash ecs.sh -m 1 <<< "y" | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
@@ -219,7 +259,7 @@ run_script() {
             cp "$temp_file" "${output_file}_fusion"
             ;;
         # IP质量
-        3)
+        4)
             echo -e "运行${YELLOW}IP质量测试...${NC}"
             bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
@@ -229,7 +269,7 @@ run_script() {
             cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
-        4)
+        5)
             echo -e "运行${YELLOW}流媒体解锁测试...${NC}"
             local region=$(detect_region)
             bash <(curl -L -s media.ispvps.com) <<< "$region" | tee "$temp_file"
@@ -240,14 +280,14 @@ run_script() {
             cp "$temp_file" "${output_file}_streaming"
             ;;
         # 响应测试
-        5)
+        6)
             echo -e "运行${YELLOW}响应测试...${NC}"
             bash <(curl -sL https://nodebench.mereith.com/scripts/curltime.sh) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             cp "$temp_file" "${output_file}_response"
             ;;
         # 多线程测速
-        6)
+        7)
             echo -e "运行${YELLOW}多线程测速...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
@@ -263,7 +303,7 @@ run_script() {
             cp "$temp_file" "${output_file}_multi_thread"
             ;;
         # 单线程测速
-        7)
+        8)
             echo -e "运行${YELLOW}单线程测速...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
@@ -279,7 +319,7 @@ run_script() {
             cp "$temp_file" "${output_file}_single_thread"
             ;;
         # iperf3测试
-        8)
+        9)
             echo -e "运行${YELLOW}iperf3测试...${NC}"
             run_iperf3_test | tee "$temp_file"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
@@ -288,7 +328,7 @@ run_script() {
             cp "$temp_file" "${output_file}_iperf3"
             ;;
         # 回程路由
-        9)
+        10)
             echo -e "运行${YELLOW}回程路由测试...${NC}"
             if [ "$use_ipv6" = true ]; then
             echo "使用IPv6测试选项"
@@ -309,8 +349,8 @@ run_script() {
 generate_markdown_output() {
     local base_output_file=$1
     local final_output_file="${base_output_file}.md"
-    local sections=("YABS" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
-    local file_suffixes=("yabs" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
+    local sections=("YABS" "Geekbench5" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
+    local file_suffixes=("yabs" "gb5" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
 
     echo "[tabs]" > "$final_output_file"
 
@@ -345,7 +385,7 @@ generate_markdown_output() {
 run_all_scripts() {
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo "开始执行全部测试脚本..."
-    for i in {1..9}; do
+    for i in {1..10}; do
         run_script $i "$base_output_file"
     done
     generate_markdown_output "$base_output_file"
@@ -358,22 +398,23 @@ run_selected_scripts() {
     local base_output_file="NLvps_results_$(date +%Y%m%d_%H%M%S)"
     echo -e "${YELLOW}Nodeloc VPS 自动测试脚本 $VERSION${NC}"
     echo "1. Yabs"
-    echo "2. 融合怪"
-    echo "3. IP质量"
-    echo "4. 流媒体解锁"
-    echo "5. 响应测试"
-    echo "6. 多线程测试"
-    echo "7. 单线程测试"
-    echo "8. iperf3"
-    echo "9. 回程路由"
+    echo "2. Geekbench5"
+    echo "3. 融合怪"
+    echo "4. IP质量"
+    echo "5. 流媒体解锁"
+    echo "6. 响应测试"
+    echo "7. 多线程测试"
+    echo "8. 单线程测试"
+    echo "9. iperf3"
+    echo "10. 回程路由"
     echo "0. 返回"
     
     while true; do
         read -p "请输入要执行的脚本编号（用英文逗号分隔，例如：1,2,3):" script_numbers
-        if [[ "$script_numbers" =~ ^[0-9](,[0-9])*$ ]]; then
+        if [[ "$script_numbers" =~ ^(0|10|[1-9])(,(0|10|[1-9]))*$ ]]; then
             break
         else
-            echo -e "${RED}无效输入，请输入0-9之间的数字，用英文逗号分隔。${NC}"
+            echo -e "${RED}无效输入，请输入0-10之间的数字，用英文逗号分隔。${NC}"
         fi
     done
 
@@ -393,7 +434,7 @@ run_selected_scripts() {
 
 # 主菜单
 main_menu() {
-    echo -e "${GREEN}测试项目：${NC}Yabs，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，iperf3，回程路由。"
+    echo -e "${GREEN}测试项目：${NC}Yabs，geekbench5，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，iperf3，回程路由。"
     echo -e "${YELLOW}1. 执行所有测试脚本${NC}"
     echo -e "${YELLOW}2. 选择特定测试脚本${NC}"
     echo -e "${YELLOW}0. 退出${NC}"
@@ -428,12 +469,11 @@ show_welcome() {
     echo -e "${GREEN}GitHub地址: https://github.com/everett7623/nodeloc_vps_test${NC}"
     echo -e "${GREEN}VPS选购: https://www.nodeloc.com/vps${NC}"
     echo ""
-    echo -e "${YELLOW}#     #  #####  ####  ###### #       ####   ####    #    # ####   ####${NC}"
-    echo -e "${YELLOW}##    # #     # #   # #      #      #    # #    #   #    # #   # #     #${NC}"
-    echo -e "${YELLOW}# #   # #     # #   # #####  #      #    # #        #    # ####   ####${NC}"
-    echo -e "${YELLOW}#  #  # #     # #   # #      #      #    # #        #    # #          #${NC}"
-    echo -e "${YELLOW}#   # # #     # #   # #      #      #    # #    #   #    # #     #    #${NC}"
-    echo -e "${YELLOW}#    ##  #####  ####  ###### ######  ####   ####     ####  #      ####${NC}"
+    echo -e "${colors[0]}  _   _  ___  ____  _____ _     ___   ____   __     ______  ____  ${NC}"
+    echo -e "${colors[1]} | \ | |/ _ \|  _ \| ____| |   / _ \ / ___|  \ \   / /  _ \/ ___| ${NC}"
+    echo -e "${colors[2]} |  \| | | | | | | |  _| | |  | | | | |       \ \ / /| |_) \___ \ ${NC}"
+    echo -e "${colors[3]} | |\  | |_| | |_| | |___| |__| |_| | |___     \ V / |  __/ ___) |${NC}"
+    echo -e "${colors[4]} |_| \_|\___/|____/|_____|_____\___/ \____|     \_/  |_|   |____/ ${NC}"
     echo ""
     echo "支持Ubuntu/Debian"
     echo ""
@@ -445,6 +485,10 @@ show_welcome() {
 
 # 主函数
 main() {
+
+    # 检查是不是root用户
+    check_root
+    
     # 检查并安装依赖
     install_dependencies
 
