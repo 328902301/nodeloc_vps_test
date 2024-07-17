@@ -18,52 +18,6 @@ colors=(
     '\033[38;2;255;255;0m'  # 黄色
 )
 
-# 检查更新
-check_update() {
-    echo "正在检查更新..."
-
-    # GitHub文件路径
-    script_file_url="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh"
-
-    # 获取当前脚本路径
-    script_path=$(readlink -f "$0")
-
-    # 提取当前版本号（假设脚本中有声明CURRENT_VERSION）
-    current_version=$(grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+" "$script_path")
-
-    # 获取最新版本号
-    latest_version=$(curl -s "$script_file_url" | grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+")
-
-    if [ -z "$latest_version" ]; then
-        echo "无法获取最新版本信息。"
-        return
-    fi
-
-    # 比较版本号
-    if [ "$current_version" != "$latest_version" ]; then
-        echo "发现新版本: $latest_version"
-        echo "当前版本: $current_version"
-        echo "正在自动更新..."
-
-        # 下载新脚本
-        curl -o "$script_path.tmp" "$script_file_url"
-        
-        # 检查下载内容是否正确
-        if grep -q "#!/bin/bash" "$script_path.tmp"; then
-            mv "$script_path.tmp" "$script_path"
-            chmod +x "$script_path" # 添加执行权限
-            echo "更新完成。重新启动脚本..."
-            exec "$script_path" "$@"
-        else
-            echo "下载的脚本内容不正确。"
-            cat "$script_path.tmp" # 输出下载的内容进行调试
-            rm -f "$script_path.tmp"
-        fi
-    else
-        echo "当前已是最新版本。"
-    fi
-}
-
 # 检查 root 权限并获取 sudo 权限
 check_root() {
     if [ "$(id -u)" != "0" ]; then
