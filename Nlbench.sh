@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # 定义版本
-CURRENT_VERSION="2024-07-18 v1.0.4"
+CURRENT_VERSION="2024-07-19 v1.0.6" # 最新版本号
+SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
+VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
 # 定义颜色
 RED='\033[0;31m'
@@ -17,6 +19,45 @@ colors=(
     '\033[38;2;192;255;0m'
     '\033[38;2;255;255;0m'  # 黄色
 )
+
+# 更新脚本
+update_scripts() {
+    REMOTE_VERSION=$(curl -s $VERSION_URL | grep -oP '(?<=#\s)[\d-]+\sv[\d.]+(?=\s-)')
+    if [ -z "$REMOTE_VERSION" ]; then
+        echo -e "${RED}无法获取远程版本信息。请检查您的网络连接。${NC}"
+        return 1
+    fi
+    
+    if [ "$REMOTE_VERSION" != "$CURRENT_VERSION" ]; then
+        echo -e "${BLUE}发现新版本 $REMOTE_VERSION，当前版本 $CURRENT_VERSION${NC}"
+        echo -e "${BLUE}正在更新...${NC}"
+        
+        if curl -s -o /tmp/NLbench.sh $SCRIPT_URL; then
+            NEW_VERSION=$(grep '^CURRENT_VERSION=' /tmp/NLbench.sh | cut -d'"' -f2)
+            if [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
+                sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
+                
+                if mv /tmp/NLbench.sh "$0"; then
+                    chmod +x "$0"
+                    echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
+                    echo -e "${YELLOW}正在重新启动脚本以应用更新...${NC}"
+                    sleep 3
+                    exec bash "$0"
+                else
+                    echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
+                    return 1
+                fi
+            else
+                echo -e "${GREEN}脚本已是最新版本。${NC}"
+            fi
+        else
+            echo -e "${RED}下载新版本失败。请稍后重试。${NC}"
+            return 1
+        fi
+    else
+        echo -e "${GREEN}脚本已是最新版本 $CURRENT_VERSION。${NC}"
+    fi
+}
 
 # 检查 root 权限并获取 sudo 权限
 check_root() {
@@ -483,8 +524,8 @@ show_welcome() {
 # 主函数
 main() {
 
-    # 检查更新
-    check_update
+    # 更新脚本
+    update_scripts
     
     # 检查是不是root用户
     check_root
