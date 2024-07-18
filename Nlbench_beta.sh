@@ -32,12 +32,12 @@ update_scripts() {
         echo -e "${BLUE}发现新版本 $REMOTE_VERSION，当前版本 $CURRENT_VERSION${NC}"
         echo -e "${BLUE}正在更新...${NC}"
         
-        if curl -s -o /tmp/Nlbench.sh $SCRIPT_URL; then
-            NEW_VERSION=$(grep '^CURRENT_VERSION=' /tmp/Nlbench.sh | cut -d'"' -f2)
+        if curl -s -o /tmp/NLbench_beta.sh $SCRIPT_URL; then
+            NEW_VERSION=$(grep '^CURRENT_VERSION=' /tmp/NLbench_beta.sh | cut -d'"' -f2)
             if [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
                 sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
                 
-                if mv /tmp/Nlbench.sh "$0"; then
+                if mv /tmp/NLbench_beta.sh "$0"; then
                     chmod +x "$0"
                     echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
                     echo -e "${YELLOW}正在重新启动脚本以应用更新...${NC}"
