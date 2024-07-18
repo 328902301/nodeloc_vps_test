@@ -2,6 +2,8 @@
 
 # 定义版本
 CURRENT_VERSION="2024-07-18 v1.0.5" # 最新版本号
+SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
+VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
 # 定义颜色
 RED='\033[0;31m'
@@ -18,49 +20,37 @@ colors=(
     '\033[38;2;255;255;0m'  # 黄色
 )
 
-# 检查更新（有一些问题）
-check_update() {
-    echo "正在检查更新..."
-
-    # GitHub文件路径
-    script_file_url="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/NLbench.sh"
-
-    # 获取当前脚本路径
-    script_path=$(readlink -f "$0")
-
-    # 提取当前版本号（假设脚本中有声明CURRENT_VERSION）
-    current_version=$(grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+" "$script_path")
-
-    # 获取最新版本号
-    latest_version=$(curl -s "$script_file_url" | grep -o "v[0-9]\+\.[0-9]\+\.[0-9]\+")
-
-    if [ -z "$latest_version" ]; then
-        echo "无法获取最新版本信息。"
-        return
+# 更新脚本
+update_scripts() {
+    REMOTE_VERSION=$(curl -s $VERSION_URL)
+    if [ -z "$REMOTE_VERSION" ]; then
+        echo -e "${RED}无法获取远程版本信息。请检查您的网络连接。${NC}"
+        return 1
     fi
-
-    # 比较版本号
-    if [ "$current_version" != "$latest_version" ]; then
-        echo "发现新版本: $latest_version"
-        echo "当前版本: $current_version"
-        echo "正在自动更新..."
-
-        # 下载新脚本
-        curl -o "$script_path.tmp" "$script_file_url"
+    if [ "$REMOTE_VERSION" != "$CURRENT_VERSION" ]; then
+        echo -e "${BLUE}发现新版本 $REMOTE_VERSION，当前版本 $CURRENT_VERSION${NC}"
+        echo -e "${BLUE}正在更新...${NC}"
         
-        # 检查下载内容是否正确
-        if grep -q "#!/bin/bash" "$script_path.tmp"; then
-            mv "$script_path.tmp" "$script_path"
-            chmod +x "$script_path" # 添加执行权限
-            echo "更新完成。重新启动脚本..."
-            exec "$script_path" "$@"
+        if curl -s -o /tmp/Nlbench.sh $SCRIPT_URL; then
+            NEW_VERSION=$(grep '^CURRENT_VERSION=' /tmp/Nlbench.sh | cut -d'"' -f2)
+            sed -i "s/^CURRENT_VERSION=.*/CURRENT_VERSION=\"$NEW_VERSION\"/" "$0"
+            
+            if mv /tmp/Nlbench.sh "$0"; then
+                chmod +x "$0"
+                echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
+                echo -e "${YELLOW}正在重新启动脚本以应用更新...${NC}"
+                sleep 3
+                exec bash "$0"
+            else
+                echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
+                return 1
+            fi
         else
-            echo "下载的脚本内容不正确。"
-            cat "$script_path.tmp" # 输出下载的内容进行调试
-            rm -f "$script_path.tmp"
+            echo -e "${RED}下载新版本失败。请稍后重试。${NC}"
+            return 1
         fi
     else
-        echo "当前已是最新版本。"
+        echo -e "${GREEN}脚本已是最新版本 $CURRENT_VERSION。${NC}"
     fi
 }
 
@@ -529,6 +519,9 @@ show_welcome() {
 # 主函数
 main() {
 
+    # 更新脚本
+    update_scripts
+    
     # 检查是不是root用户
     check_root
     
