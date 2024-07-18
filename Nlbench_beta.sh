@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# 定义版本
+CURRENT_VERSION="2024-07-19 v1.0.6" # 最新版本号
+SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench_beta.sh"
+VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
+
 # 定义颜色
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -14,11 +19,6 @@ colors=(
     '\033[38;2;192;255;0m'
     '\033[38;2;255;255;0m'  # 黄色
 )
-
-# 定义版本
-CURRENT_VERSION="2024-07-19 v1.0.6" # 最新版本号
-SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench_beta.sh"
-VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
 # 更新脚本
 update_scripts() {
