@@ -9,6 +9,7 @@ VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;36m'
 NC='\033[0m' # No Color
 
 # 定义渐变颜色数组
@@ -22,14 +23,35 @@ colors=(
 
 # 更新脚本
 update_scripts() {
-    REMOTE_VERSION=$(curl -s $VERSION_URL | grep -oP '(?<=#\s)[\d-]+\sv[\d.]+(?=\s-)')
+    echo -e "${BLUE}┌─────────────────────────────────────────┐${NC}"
+    echo -e "${BLUE}│           NodeLoc VPS 测试脚本          │${NC}"
+    echo -e "${BLUE}│               版本检查                  │${NC}"
+    echo -e "${BLUE}└─────────────────────────────────────────┘${NC}"
+
+    REMOTE_VERSION=$(curl -s $VERSION_URL | tail -n 1 | grep -oP '(?<=#\s)[\d-]+\sv[\d.]+(?=\s-)')
     if [ -z "$REMOTE_VERSION" ]; then
-        echo -e "${RED}无法获取远程版本信息。请检查您的网络连接。${NC}"
+        echo -e "${RED}✖ 无法获取远程版本信息。请检查您的网络连接。${NC}"
         return 1
     fi
-    
+
+    echo -e "${BLUE}┌─────────────────────────────────────────┐${NC}"
+    echo -e "${BLUE}│               版本历史                  │${NC}"
+    echo -e "${BLUE}├─────────────────────────────────────────┤${NC}"
+    echo -e "${YELLOW}  当前版本: ${GREEN}$CURRENT_VERSION${NC}"
+    echo -e "${BLUE}├─────────────────────────────────────────┤${NC}"
+    echo -e "${YELLOW}  版本历史:${NC}"
+    curl -s $VERSION_URL | grep -oP '(?<=#\s)[\d-]+\sv[\d.]+(?=\s-)' | 
+    while read version; do
+        if [ "$version" = "$CURRENT_VERSION" ]; then
+            echo -e "  ${GREEN}▶ $version ${NC}(当前版本)"
+        else
+            echo -e "    $version"
+        fi
+    done
+    echo -e "${BLUE}└─────────────────────────────────────────┘${NC}"
+
     if [ "$REMOTE_VERSION" != "$CURRENT_VERSION" ]; then
-        echo -e "${BLUE}发现新版本 $REMOTE_VERSION，当前版本 $CURRENT_VERSION${NC}"
+        echo -e "\n${YELLOW}发现新版本: ${GREEN}$REMOTE_VERSION${NC}"
         echo -e "${BLUE}正在更新...${NC}"
         
         if curl -s -o /tmp/NLbench.sh $SCRIPT_URL; then
@@ -39,24 +61,31 @@ update_scripts() {
                 
                 if mv /tmp/NLbench.sh "$0"; then
                     chmod +x "$0"
-                    echo -e "${GREEN}脚本更新成功！新版本: $NEW_VERSION${NC}"
+                    echo -e "${GREEN}┌─────────────────────────────────────────┐${NC}"
+                    echo -e "${GREEN}│            脚本更新成功！               │${NC}"
+                    echo -e "${GREEN}└─────────────────────────────────────────┘${NC}"
+                    echo -e "${YELLOW}新版本: ${GREEN}$NEW_VERSION${NC}"
                     echo -e "${YELLOW}正在重新启动脚本以应用更新...${NC}"
                     sleep 3
                     exec bash "$0"
                 else
-                    echo -e "${RED}无法替换脚本文件。请检查权限。${NC}"
+                    echo -e "${RED}✖ 无法替换脚本文件。请检查权限。${NC}"
                     return 1
                 fi
             else
-                echo -e "${GREEN}脚本已是最新版本。${NC}"
+                echo -e "${GREEN}✔ 脚本已是最新版本。${NC}"
             fi
         else
-            echo -e "${RED}下载新版本失败。请稍后重试。${NC}"
+            echo -e "${RED}✖ 下载新版本失败。请稍后重试。${NC}"
             return 1
         fi
     else
-        echo -e "${GREEN}脚本已是最新版本 $CURRENT_VERSION。${NC}"
+        echo -e "\n${GREEN}✔ 脚本已是最新版本。${NC}"
     fi
+    
+    echo -e "${BLUE}┌─────────────────────────────────────────┐${NC}"
+    echo -e "${BLUE}│            更新检查完成                 │${NC}"
+    echo -e "${BLUE}└─────────────────────────────────────────┘${NC}"
 }
 
 # 检查 root 权限并获取 sudo 权限
