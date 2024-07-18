@@ -16,7 +16,7 @@ colors=(
 )
 
 # 定义版本
-CURRENT_VERSION="2024-07-18 v1.0.5" # 最新版本号
+CURRENT_VERSION="2024-07-19 v1.0.6" # 最新版本号
 SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench_beta.sh"
 VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
