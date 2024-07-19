@@ -333,6 +333,7 @@ run_script() {
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/正在检测/d' "$temp_file"
             sed -i -n '/########################################################################/,${s/^.*\(########################################################################\)/\1/;p}' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
@@ -367,6 +368,7 @@ run_script() {
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_multi_thread"
             ;;
         # 单线程测速
@@ -383,6 +385,7 @@ run_script() {
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_single_thread"
             ;;
         # iperf3测试
