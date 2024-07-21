@@ -22,7 +22,6 @@ colors=(
 )
 
 # 更新脚本
-# 更新脚本
 update_scripts() {
     echo -e "${BLUE}┌─────────────────────────────────────────┐${NC}"
     echo -e "${BLUE}│           NodeLoc VPS 测试脚本          │${NC}"
@@ -267,10 +266,11 @@ TEST_DURATION=30
 run_iperf3_test() {
     echo -e "${GREEN}服务端VPS位于美国拉斯维加斯${NC}"
     echo -e "${GREEN}连接到服务端进行iperf3测试。。。${NC}"
-    if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION; then
-    echo -e "${YELLOW}iperf3 测试完成${NC}"
+    timeout ${TEST_DURATION}s iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION
+    if [ $? -eq 0 ]; then
+        echo -e "${YELLOW}iperf3 测试完成${NC}"
     else
-    echo -e "${RED}iperf3 测试失败${NC}"
+        echo -e "${RED}iperf3 测试失败或超时${NC}"
     fi
 }
 
@@ -334,6 +334,7 @@ run_script() {
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/正在检测/d' "$temp_file"
             sed -i -n '/########################################################################/,${s/^.*\(########################################################################\)/\1/;p}' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_ip_quality"
             ;;
         # 流媒体解锁
@@ -368,6 +369,7 @@ run_script() {
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_multi_thread"
             ;;
         # 单线程测速
@@ -384,6 +386,7 @@ run_script() {
             sed -i -r '1,/序号\:/d' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/测试进行中/d' "$temp_file"
+            sed -i '/^$/d' "$temp_file"
             cp "$temp_file" "${output_file}_single_thread"
             ;;
         # iperf3测试
@@ -502,7 +505,8 @@ run_selected_scripts() {
 
 # 主菜单
 main_menu() {
-    echo -e "${GREEN}测试项目：${NC}Yabs，geekbench5，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，单线程测试，iperf3，回程路由。"
+    echo -e "${GREEN}测试项目：${NC}Yabs，Geekbench5，融合怪，IP质量，流媒体解锁，响应测试，多线程测试，"
+    echo "           单线程测试，iperf3，回程路由。"
     echo -e "${YELLOW}1. 执行所有测试脚本${NC}"
     echo -e "${YELLOW}2. 选择特定测试脚本${NC}"
     echo -e "${YELLOW}0. 退出${NC}"
