@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-CURRENT_VERSION="2024-07-19 v1.0.6" # 最新版本号
+CURRENT_VERSION="2024-07-21 v1.0.7" # 最新版本号
 SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
 VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
@@ -266,10 +266,11 @@ TEST_DURATION=30
 run_iperf3_test() {
     echo -e "${GREEN}服务端VPS位于美国拉斯维加斯${NC}"
     echo -e "${GREEN}连接到服务端进行iperf3测试。。。${NC}"
-    if iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION; then
-    echo -e "${YELLOW}iperf3 测试完成${NC}"
+    timeout ${TEST_DURATION}s iperf3 -c $AUXILIARY_VPS -p $IPERF_PORT -t $TEST_DURATION
+    if [ $? -eq 0 ]; then
+        echo -e "${YELLOW}iperf3 测试完成${NC}"
     else
-    echo -e "${RED}iperf3 测试失败${NC}"
+        echo -e "${RED}iperf3 测试失败或超时${NC}"
     fi
 }
 
