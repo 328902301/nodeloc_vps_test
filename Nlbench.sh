@@ -307,14 +307,33 @@ run_script() {
             ;;
         # Geekbench5
         2)
-            echo -e "运行${YELLOW}Geekbench 5...${NC}"
-            bash <(curl -sL gb5.top) | tee "$temp_file"
-            sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
-            sed -i 's/\x1B\[.*?[mGKH]//g' "$temp_file"
-            sed -i 's/\r//' "$temp_file" 
-            sed -i '/^$/d' "$temp_file" 
-            sed -i -n '/当前时间：/,${p}' "$temp_file"
-            cp "$temp_file" "${output_file}_gb5"
+            # 获取系统总内存（包括swap），单位为MB
+            total_memory_mb=$(free -m | awk '/^Mem:/{print $2}')
+            total_swap_mb=$(free -m | awk '/^Swap:/{print $2}')
+            total_memory_swap=$((total_memory_mb + total_swap_mb))
+
+            # 设置Geekbench 5所需的最小内存（MB）
+            min_required_memory=1024
+
+            if [ "$total_memory_swap" -lt "$min_required_memory" ]; then
+                echo "本机内存和Swap总计小于${min_required_memory}MB，不满足GB5测试条件。"
+                echo "系统总内存: ${total_memory_mb}MB"
+                echo "Swap大小: ${total_swap_mb}MB"
+                echo "总计: ${total_memory_swap}MB"
+                echo "将跳过Geekbench 5测试，进行其他测试项目。"
+                sleep 3
+                # 跳过Geekbench 5测试，继续执行其他测试
+                # 可以在这里调用其他测试函数或脚本
+            else
+                echo -e "运行${YELLOW}Geekbench 5...${NC}"
+                bash <(curl -sL gb5.top) | tee "$temp_file"
+                sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
+                sed -i 's/\x1B\[.*?[mGKH]//g' "$temp_file"
+                sed -i 's/\r//' "$temp_file" 
+                sed -i '/^$/d' "$temp_file" 
+                sed -i -n '/当前时间：/,${p}' "$temp_file"
+                cp "$temp_file" "${output_file}_gb5"
+            fi
             ;;
         # 融合怪
         3)
