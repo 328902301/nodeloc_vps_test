@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-CURRENT_VERSION="2024-07-21 v1.0.8" # 最新版本号
+CURRENT_VERSION="2024-07-21 v1.0.9" # 最新版本号
 SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
 VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
@@ -187,7 +187,7 @@ install_dependencies() {
     update_system || echo -e "${RED}系统更新失败。继续安装依赖项。${NC}"
     
     # 安装依赖
-    local dependencies=("curl" "wget" "iperf3")
+    local dependencies=("curl" "wget" "iperf3" "jq" "bc" "netcat" "dnsutils" "iproute2")
     
     for dep in "${dependencies[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
