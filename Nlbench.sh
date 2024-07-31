@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-CURRENT_VERSION="2024-07-21 v1.0.9" # 最新版本号
+CURRENT_VERSION="2024-07-31 v1.1.0" # 最新版本号
 SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
 VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
@@ -298,7 +298,7 @@ run_script() {
         # YABS
         1)
             echo -e "运行${YELLOW}YABS...${NC}"
-            curl -sL yabs.sh | bash -s -- -i -5 -6 | tee "$temp_file"
+            curl -sL yabs.sh | bash -s -- -i -g | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\./\.\.\.\n/g' "$temp_file"
             sed -i '/\.\.\./d' "$temp_file"
