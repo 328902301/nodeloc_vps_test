@@ -187,7 +187,7 @@ install_dependencies() {
     update_system || echo -e "${RED}系统更新失败。继续安装依赖项。${NC}"
     
     # 安装依赖
-    local dependencies=("curl" "wget" "iperf3" "jq" "bc" "netcat" "dnsutils" "iproute2")
+    local dependencies=("curl" "wget" "iperf3")
     
     for dep in "${dependencies[@]}"; do
         if ! command -v "$dep" &> /dev/null; then
