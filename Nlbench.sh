@@ -348,7 +348,7 @@ run_script() {
         # IP质量
         4)
             echo -e "运行${YELLOW}IP质量测试...${NC}"
-            bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
+            echo y | bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/正在检测/d' "$temp_file"
