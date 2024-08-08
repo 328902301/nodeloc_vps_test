@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-CURRENT_VERSION="2024-07-31 v1.1.0" # 最新版本号
+CURRENT_VERSION="2024-08-08 v1.1.1" # 最新版本号
 SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
 VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
@@ -427,7 +427,8 @@ run_script() {
             echo "使用IPv4测试选项"
             wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             fi
-            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
+//            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
+            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/No:1\/9 Traceroute to/,$!d' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"
             ;;
     esac
