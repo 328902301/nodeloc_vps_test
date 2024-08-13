@@ -113,10 +113,17 @@ detect_os() {
         . /etc/lsb-release
         os_type=$DISTRIB_ID
         os_version=$DISTRIB_RELEASE
+    elif [ -f /etc/redhat-release ]; then
+        os_type=$(cat /etc/redhat-release | cut -d ' ' -f 1)
+        os_version=$(cat /etc/redhat-release | sed 's/.*release \([0-9\.]*\).*/\1/')
+    elif [ -f /etc/gentoo-release ]; then
+        os_type="gentoo"
+        os_version=$(cat /etc/gentoo-release | cut -d ' ' -f 5)
     else
-        echo -e "${RED}无法检测操作系统类型和版本。${NC}"
-        return 1
+        os_type=$(uname -s)
+        os_version=$(uname -r)
     fi
+    os_type=$(echo "$os_type" | tr '[:upper:]' '[:lower:]')
     echo -e "${YELLOW}检测到的系统: $os_type $os_version${NC}"
 }
 
@@ -124,15 +131,14 @@ detect_os() {
 update_system() {
     detect_os || return 1
 
-    # 根据操作系统类型选择更新命令
     case "${os_type,,}" in
         ubuntu|debian|linuxmint|elementary|pop)
             update_cmd="apt-get update"
             upgrade_cmd="apt-get upgrade -y"
             install_cmd="apt-get install -y"
             ;;
-        fedora|centos|rhel|ol|rocky|almalinux)
-            if [ "${os_version%%.*}" -ge 22 ] || [ "${os_version%%.*}" -ge 8 ]; then
+        centos|rhel|fedora|rocky|almalinux|openeuler)
+            if command -v dnf &>/dev/null; then
                 update_cmd="dnf check-update"
                 upgrade_cmd="dnf upgrade -y"
                 install_cmd="dnf install -y"
@@ -156,6 +162,16 @@ update_system() {
             update_cmd="apk update"
             upgrade_cmd="apk upgrade"
             install_cmd="apk add"
+            ;;
+        gentoo)
+            update_cmd="emerge --sync"
+            upgrade_cmd="emerge -uDN @world"
+            install_cmd="emerge"
+            ;;
+        cloudlinux)
+            update_cmd="yum check-update"
+            upgrade_cmd="yum upgrade -y"
+            install_cmd="yum install -y"
             ;;
         *)
             echo -e "${RED}不支持的 Linux 发行版: $os_type${NC}"
@@ -189,16 +205,32 @@ install_dependencies() {
     # 安装依赖
     local dependencies=("curl" "wget" "iperf3")
     
-    for dep in "${dependencies[@]}"; do
-        if ! command -v "$dep" &> /dev/null; then
-            echo -e "${YELLOW}正在安装 $dep...${NC}"
-            if ! sudo $install_cmd "$dep"; then
-                echo -e "${RED}无法安装 $dep。请手动安装此依赖项。${NC}"
-            fi
-        else
-            echo -e "${GREEN}$dep 已安装。${NC}"
-        fi
-    done
+    case "${os_type,,}" in
+        gentoo)
+            for dep in "${dependencies[@]}"; do
+                if ! emerge -p $dep &>/dev/null; then
+                    echo -e "${YELLOW}正在安装 $dep...${NC}"
+                    if ! sudo emerge $dep; then
+                        echo -e "${RED}无法安装 $dep。请手动安装此依赖项。${NC}"
+                    fi
+                else
+                    echo -e "${GREEN}$dep 已安装。${NC}"
+                fi
+            done
+            ;;
+        *)
+            for dep in "${dependencies[@]}"; do
+                if ! command -v "$dep" &> /dev/null; then
+                    echo -e "${YELLOW}正在安装 $dep...${NC}"
+                    if ! sudo $install_cmd "$dep"; then
+                        echo -e "${RED}无法安装 $dep。请手动安装此依赖项。${NC}"
+                    fi
+                else
+                    echo -e "${GREEN}$dep 已安装。${NC}"
+                fi
+            done
+            ;;
+    esac
     
     echo -e "${GREEN}依赖项检查和安装完成。${NC}"
     clear
