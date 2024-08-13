@@ -444,7 +444,6 @@ generate_markdown_output() {
 
     echo "[tabs]" > "$final_output_file"
 
-    local tabs_added=0
     for i in "${!sections[@]}"; do
         section="${sections[$i]}"
         suffix="${file_suffixes[$i]}"
@@ -455,16 +454,8 @@ generate_markdown_output() {
             echo "\`\`\`" >> "$final_output_file"
             echo "[/tab]" >> "$final_output_file"
             rm "${base_output_file}_${suffix}"
-            ((tabs_added++))
         fi
     done
-
-    # 如果没有添加任何标签，添加一个空的标签
-    if [ $tabs_added -eq 0 ]; then
-        echo "[tab=\"无测试结果\"]" >> "$final_output_file"
-        echo "没有选择任何测试或所有测试均未产生结果。" >> "$final_output_file"
-        echo "[/tab]" >> "$final_output_file"
-    fi
 
     echo "[/tabs]" >> "$final_output_file"
 
