@@ -445,6 +445,7 @@ generate_markdown_output() {
 
     echo "[tabs]" > "$final_output_file"
 
+    # 输出有内容的标签
     for i in "${!sections[@]}"; do
         section="${sections[$i]}"
         suffix="${file_suffixes[$i]}"
@@ -458,7 +459,7 @@ generate_markdown_output() {
         fi
     done
 
-    # Adding remaining empty tabs
+    # 添加保留的空白标签
     for tab in "${empty_tabs[@]}"; do
         echo "[tab=\"$tab\"]" >> "$final_output_file"
         echo "[/tab]" >> "$final_output_file"
