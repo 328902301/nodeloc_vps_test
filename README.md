@@ -11,7 +11,13 @@
 ### 使用方法
 确保用户为ROOT，主机网络通畅，复制下面任意命令运行
 
-**支持Debian/Ubuntu/Deepin，不支持CentOS**
+**支持CentOS/Debian/Ubuntu/Deepin**
+
+CentOS
+```bash
+yum install wget&&wget -O Nlbench.sh https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh && chmod +x Nlbench.sh && ./Nlbench.sh
+```
+Debian/Ubuntu/Deepin
 ```bash
 wget -O Nlbench.sh https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh && chmod +x Nlbench.sh && ./Nlbench.sh
 ```
