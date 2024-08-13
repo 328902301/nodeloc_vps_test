@@ -203,7 +203,7 @@ install_dependencies() {
     update_system || echo -e "${RED}系统更新失败。继续安装依赖项。${NC}"
     
     # 安装依赖
-    local dependencies=("curl" "wget" "iperf3")
+    local dependencies=("curl" "wget" "iperf3" "bc")
     
     case "${os_type,,}" in
         gentoo)
