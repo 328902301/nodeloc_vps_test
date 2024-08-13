@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 定义版本
-CURRENT_VERSION="2024-08-08 v1.1.1" # 最新版本号
+CURRENT_VERSION="2024-08-08 v1.1.2" # 最新版本号
 SCRIPT_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/Nlbench.sh"
 VERSION_URL="https://raw.githubusercontent.com/everett7623/nodeloc_vps_test/main/version.sh"
 
@@ -427,7 +427,6 @@ run_script() {
             echo "使用IPv4测试选项"
             wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             fi
-//            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/No:1\/9 Traceroute to/,$!d' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"
             ;;
@@ -442,24 +441,24 @@ generate_markdown_output() {
     local final_output_file="${base_output_file}.md"
     local sections=("YABS" "Geekbench5" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
     local file_suffixes=("yabs" "gb5" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
+    local empty_tabs=("去程路由" "Ping.pe" "哪吒 ICMP" "其他")
 
     echo "[tabs]" > "$final_output_file"
 
     for i in "${!sections[@]}"; do
         section="${sections[$i]}"
         suffix="${file_suffixes[$i]}"
-        echo "[tab=\"$section\"]" >> "$final_output_file"
-        echo "\`\`\`" >> "$final_output_file"
         if [ -f "${base_output_file}_${suffix}" ]; then
+            echo "[tab=\"$section\"]" >> "$final_output_file"
+            echo "\`\`\`" >> "$final_output_file"
             cat "${base_output_file}_${suffix}" >> "$final_output_file"
+            echo "\`\`\`" >> "$final_output_file"
+            echo "[/tab]" >> "$final_output_file"
             rm "${base_output_file}_${suffix}"
         fi
-        echo "\`\`\`" >> "$final_output_file"
-        echo "[/tab]" >> "$final_output_file"
     done
 
     # Adding remaining empty tabs
-    local empty_tabs=("去程路由" "Ping.pe" "哪吒 ICMP" "其他")
     for tab in "${empty_tabs[@]}"; do
         echo "[tab=\"$tab\"]" >> "$final_output_file"
         echo "[/tab]" >> "$final_output_file"
