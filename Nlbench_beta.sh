@@ -298,7 +298,7 @@ run_script() {
         # YABS
         1)
             echo -e "运行${YELLOW}YABS...${NC}"
-            curl -sL yabs.sh | bash -s -- -i -5 -6 | tee "$temp_file"
+            curl -sL yabs.sh | bash -s -- -i -5 | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i 's/\.\.\./\.\.\.\n/g' "$temp_file"
             sed -i '/\.\.\./d' "$temp_file"
@@ -348,7 +348,7 @@ run_script() {
         # IP质量
         4)
             echo -e "运行${YELLOW}IP质量测试...${NC}"
-            bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
+            echo y | bash <(curl -Ls IP.Check.Place) | tee "$temp_file"
             sed -i 's/\x1B\[[0-9;]*[JKmsu]//g' "$temp_file"
             sed -i -r 's/(⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏)/\n/g' "$temp_file"
             sed -i -r '/正在检测/d' "$temp_file"
@@ -427,7 +427,7 @@ run_script() {
             echo "使用IPv4测试选项"
             wget -N --no-check-certificate https://raw.githubusercontent.com/Chennhaoo/Shell_Bash/master/AutoTrace.sh && chmod +x AutoTrace.sh && bash AutoTrace.sh <<< "1" | tee "$temp_file"
             fi
-            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
+            sed -i -e 's/\x1B\[[0-9;]*[JKmsu]//g' -e '/No:1\/9 Traceroute to/,$!d' -e '/测试项/,+9d' -e '/信息/d' -e '/^\s*$/d' "$temp_file"
             cp "$temp_file" "${output_file}_route"
             ;;
     esac
