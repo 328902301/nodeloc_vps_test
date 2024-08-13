@@ -473,9 +473,11 @@ generate_markdown_output() {
     local final_output_file="${base_output_file}.md"
     local sections=("YABS" "Geekbench5" "融合怪" "IP质量" "流媒体" "响应" "多线程测速" "单线程测速" "iperf3" "回程路由")
     local file_suffixes=("yabs" "gb5" "fusion" "ip_quality" "streaming" "response" "multi_thread" "single_thread" "iperf3" "route")
+    local empty_tabs=("去程路由" "Ping.pe" "哪吒 ICMP" "其他")
 
     echo "[tabs]" > "$final_output_file"
 
+    # 输出有内容的标签
     for i in "${!sections[@]}"; do
         section="${sections[$i]}"
         suffix="${file_suffixes[$i]}"
@@ -489,12 +491,19 @@ generate_markdown_output() {
         fi
     done
 
+    # 添加保留的空白标签
+    for tab in "${empty_tabs[@]}"; do
+        echo "[tab=\"$tab\"]" >> "$final_output_file"
+        echo "[/tab]" >> "$final_output_file"
+    done
+
     echo "[/tabs]" >> "$final_output_file"
 
     echo "所有测试完成，结果已保存在 $final_output_file 中。"
     read -p "按回车键继续..."
     clear
 }
+
 
 # 执行全部脚本
 run_all_scripts() {
