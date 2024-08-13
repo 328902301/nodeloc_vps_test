@@ -444,25 +444,27 @@ generate_markdown_output() {
 
     echo "[tabs]" > "$final_output_file"
 
+    local tabs_added=0
     for i in "${!sections[@]}"; do
         section="${sections[$i]}"
         suffix="${file_suffixes[$i]}"
-        echo "[tab=\"$section\"]" >> "$final_output_file"
-        echo "\`\`\`" >> "$final_output_file"
         if [ -f "${base_output_file}_${suffix}" ]; then
+            echo "[tab=\"$section\"]" >> "$final_output_file"
+            echo "\`\`\`" >> "$final_output_file"
             cat "${base_output_file}_${suffix}" >> "$final_output_file"
+            echo "\`\`\`" >> "$final_output_file"
+            echo "[/tab]" >> "$final_output_file"
             rm "${base_output_file}_${suffix}"
+            ((tabs_added++))
         fi
-        echo "\`\`\`" >> "$final_output_file"
-        echo "[/tab]" >> "$final_output_file"
     done
 
-    # Adding remaining empty tabs
-    local empty_tabs=("去程路由" "Ping.pe" "哪吒 ICMP" "其他")
-    for tab in "${empty_tabs[@]}"; do
-        echo "[tab=\"$tab\"]" >> "$final_output_file"
+    # 如果没有添加任何标签，添加一个空的标签
+    if [ $tabs_added -eq 0 ]; then
+        echo "[tab=\"无测试结果\"]" >> "$final_output_file"
+        echo "没有选择任何测试或所有测试均未产生结果。" >> "$final_output_file"
         echo "[/tab]" >> "$final_output_file"
-    done
+    fi
 
     echo "[/tabs]" >> "$final_output_file"
 
